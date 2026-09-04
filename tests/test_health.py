@@ -15,6 +15,7 @@ def test_health_check_ok() -> None:
 
 def test_health_check_db_unavailable() -> None:
     from collections.abc import Generator
+
     from sqlalchemy.orm import Session
     def override_get_db() -> Generator[Session, None, None]:
         from sqlalchemy import create_engine
