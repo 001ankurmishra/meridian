@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg16-bookworm
+        env:
+          POSTGRES_USER: meridian_user
+          POSTGRES_PASSWORD: meridian_pass
+          POSTGRES_DB: meridian_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Ruff (Lint)
+        run: uv run ruff check .
+
+      - name: Run Mypy (Type Check)
+        run: uv run mypy src/
+
+      - name: Run Pytest
+        run: uv run pytest tests/
+
+      - name: Run pip-audit (Dependency Scan)
+        run: uv run pip-audit
+        continue-on-error: true # Report only, non-blocking as per Phase 0 Task 0.1 spec
