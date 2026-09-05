@@ -41,7 +41,10 @@ jobs:
           POSTGRES_HOST: localhost
           POSTGRES_USER: meridian_user
           POSTGRES_DB: meridian_db
-        run: ./docker/postgres-init/01-create-app-role.sh
+        run: |
+          ./docker/postgres-init/01-create-app-role.sh
+          echo "Running a second time to verify idempotency:"
+          ./docker/postgres-init/01-create-app-role.sh
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
@@ -68,3 +71,23 @@ jobs:
       - name: Run pip-audit (Dependency Scan)
         run: uv run pip-audit
         continue-on-error: true # Report only, non-blocking as per Phase 0 Task 0.1 spec
+
+  verify-docker-init:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Docker Entrypoint
+        run: |
+          docker compose up -d db
+          
+          # Wait for it to be ready
+          echo "Waiting for PostgreSQL..."
+          until docker compose exec -T db pg_isready -U meridian_user -d meridian_db; do sleep 1; done
+          
+          # Wait a few more seconds for the init scripts to finish running
+          sleep 5
+          
+          # Verify that the meridian_app role was created by the init script
+          docker compose exec -T db psql -U meridian_user -d meridian_db -c "SELECT 1 FROM pg_roles WHERE rolname = 'meridian_app';" | grep 1
