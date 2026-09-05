@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ "main" ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "task-0.2-migrations" ]
 
 jobs:
   test:
@@ -27,10 +27,21 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db
+      APP_DB_USER: meridian_app
+      APP_DB_PASSWORD: meridian_app_pass
+      APP_DATABASE_URL: postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Provision App DB Role
+        env:
+          PGPASSWORD: meridian_pass
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: meridian_user
+          POSTGRES_DB: meridian_db
+        run: ./docker/postgres-init/01-create-app-role.sh
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
