@@ -7,6 +7,7 @@ from meridian.db.session import get_db
 
 app = FastAPI(title="Meridian AML Copilot")
 
+
 @app.get("/health")
 def health_check(response: Response, db: Session = Depends(get_db)) -> dict[str, str]:
     try:
