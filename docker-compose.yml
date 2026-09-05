@@ -15,6 +15,10 @@ services:
       - POSTGRES_USER=meridian_user
       - POSTGRES_PASSWORD=meridian_pass
       - POSTGRES_DB=meridian_db
+      - APP_DB_USER=${APP_DB_USER:-meridian_app}
+      - APP_DB_PASSWORD=${APP_DB_PASSWORD:-meridian_app_pass}
+    volumes:
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:

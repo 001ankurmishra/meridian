@@ -6,6 +6,7 @@ from meridian.main import app
 
 client = TestClient(app)
 
+
 def test_health_check_ok() -> None:
     # This test expects the DB to be up and running via docker-compose
     # or similar setup in CI
@@ -13,10 +14,12 @@ def test_health_check_ok() -> None:
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "database": "connected"}
 
+
 def test_health_check_db_unavailable() -> None:
     from collections.abc import Generator
 
     from sqlalchemy.orm import Session
+
     def override_get_db() -> Generator[Session, None, None]:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
@@ -24,7 +27,7 @@ def test_health_check_db_unavailable() -> None:
         # Point to a definitely unreachable port
         bad_engine = create_engine(
             "postgresql+psycopg://user:pass@localhost:54321/bad_db",
-            connect_args={'connect_timeout': 1}
+            connect_args={"connect_timeout": 1},
         )
         TestingSessionLocal = sessionmaker(
             autocommit=False, autoflush=False, bind=bad_engine
@@ -43,6 +46,7 @@ def test_health_check_db_unavailable() -> None:
     finally:
         # Clear override
         app.dependency_overrides.clear()
+
 
 def test_pgvector_extension_exists() -> None:
     # Verify that the vector extension is available in the database
