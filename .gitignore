@@ -33,3 +33,6 @@ coverage.xml
 # ruff
 .ruff_cache/
 .DS_Store
+
+# Scratch directory
+scratch/

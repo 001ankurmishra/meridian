@@ -13,7 +13,7 @@ fi
 
 echo "Creating application role: $APP_DB_USER"
 
-psql -v ON_ERROR_STOP=1 --host="${POSTGRES_HOST:-localhost}" --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+psql -v ON_ERROR_STOP=1 ${POSTGRES_HOST:+--host="$POSTGRES_HOST"} --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
     DO \$\$
     BEGIN
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$APP_DB_USER') THEN

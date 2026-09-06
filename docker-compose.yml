@@ -17,6 +17,8 @@ services:
       - POSTGRES_DB=meridian_db
       - APP_DB_USER=${APP_DB_USER:-meridian_app}
       - APP_DB_PASSWORD=${APP_DB_PASSWORD:-meridian_app_pass}
+      - LOADER_DB_USER=${LOADER_DB_USER:-meridian_loader}
+      - LOADER_DB_PASSWORD=${LOADER_DB_PASSWORD:-meridian_loader_pass}
     volumes:
       - ./docker/postgres-init:/docker-entrypoint-initdb.d
     ports:

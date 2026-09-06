@@ -1,14 +1,15 @@
 import os
+from typing import Generator
 
 import pytest
 from alembic.config import Config
-from sqlalchemy import create_engine, text
+from sqlalchemy import Engine, create_engine, text
 
 from alembic import command
 
 
 @pytest.fixture(scope="session", autouse=True)
-def run_migrations():
+def run_migrations() -> Generator[None, None, None]:
     """Run Alembic migrations before the test session and tear down after."""
     alembic_cfg = Config("alembic.ini")
 
@@ -24,7 +25,7 @@ def run_migrations():
 
 
 @pytest.fixture
-def superuser_engine():
+def superuser_engine() -> Generator[Engine, None, None]:
     db_url = os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
@@ -35,7 +36,7 @@ def superuser_engine():
 
 
 @pytest.fixture
-def app_role_engine():
+def app_role_engine() -> Generator[Engine, None, None]:
     app_db_url = os.environ.get(
         "APP_DATABASE_URL",
         "postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db",
@@ -45,7 +46,7 @@ def app_role_engine():
     engine.dispose()
 
 
-def test_fk_constraint_negative(superuser_engine):
+def test_fk_constraint_negative(superuser_engine: Engine) -> None:
     """Test that inserting a transaction with a non-existent account fails."""
     with superuser_engine.begin() as conn:
         with pytest.raises(Exception) as excinfo:
@@ -59,7 +60,7 @@ def test_fk_constraint_negative(superuser_engine):
         assert "foreign key constraint" in str(excinfo.value).lower()
 
 
-def test_check_constraint_negative(superuser_engine):
+def test_check_constraint_negative(superuser_engine: Engine) -> None:
     """Test that inserting an invalid status in accounts table fails."""
     with superuser_engine.begin() as conn:
         # First create a customer
@@ -82,7 +83,9 @@ def test_check_constraint_negative(superuser_engine):
         assert "check constraint" in str(excinfo.value).lower()
 
 
-def test_app_role_cannot_update_audit_events(app_role_engine, superuser_engine):
+def test_app_role_cannot_update_audit_events(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
     """
     Test that the application DB role cannot UPDATE or DELETE rows in audit_events.
     """
@@ -100,6 +103,10 @@ def test_app_role_cannot_update_audit_events(app_role_engine, superuser_engine):
     # Now try to update/delete as app_role
     with app_role_engine.connect() as conn:
         # The app role has INSERT and SELECT on audit_events
+
+        # Test SELECT succeeds
+        res = conn.execute(text("SELECT * FROM audit_events")).fetchall()
+        assert len(res) >= 1
 
         # Test INSERT succeeds
         conn.execute(
@@ -135,7 +142,9 @@ def test_app_role_cannot_update_audit_events(app_role_engine, superuser_engine):
         assert "permission denied" in str(excinfo.value).lower()
 
 
-def test_app_role_privileges_read_only(app_role_engine, superuser_engine):
+def test_app_role_privileges_read_only(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
     """
     Test that meridian_app CAN SELECT from:
     customers, accounts, transactions, beneficiaries
@@ -232,7 +241,9 @@ def test_app_role_privileges_read_only(app_role_engine, superuser_engine):
             conn.rollback()
 
 
-def test_app_role_privileges_read_write(app_role_engine, superuser_engine):
+def test_app_role_privileges_read_write(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
     """
     Test that meridian_app CAN perform intended writes on:
     entities, graph_relationships, alerts, cases, investigation_runs, users
@@ -329,12 +340,33 @@ def test_app_role_privileges_read_write(app_role_engine, superuser_engine):
             ),
             {"case_id": case_id},
         )
-
         conn.commit()
 
-        # Test UPDATE on cases
+        # Test SELECT on all 6 tables
+        rw_tables = [
+            "entities", "graph_relationships", "alerts",
+            "cases", "investigation_runs", "users"
+        ]
+        for table in rw_tables:
+            res = conn.execute(text(f"SELECT * FROM {table}")).fetchall()
+            assert len(res) >= 1
+
+        # Test UPDATE on all 6 tables
+        conn.execute(text("UPDATE entities SET created_at = NOW()"))
+        conn.execute(text("UPDATE graph_relationships SET created_at = NOW()"))
+        conn.execute(text("UPDATE alerts SET created_at = NOW()"))
         conn.execute(
             text("UPDATE cases SET status = 'IN_REVIEW' WHERE case_id = :case_id"),
             {"case_id": case_id},
         )
+        conn.execute(text("UPDATE investigation_runs SET created_at = NOW()"))
+        conn.execute(text("UPDATE users SET created_at = NOW()"))
         conn.commit()
+
+        # Test DELETE fails on all 6 tables
+        for table in rw_tables:
+            with pytest.raises(Exception) as excinfo:
+                conn.execute(text(f"DELETE FROM {table}"))
+                conn.commit()
+            assert "permission denied" in str(excinfo.value).lower()
+            conn.rollback()
