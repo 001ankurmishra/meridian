@@ -79,6 +79,9 @@ jobs:
       - name: Run Mypy (Type Check)
         run: uv run mypy src/
 
+      - name: Run Alembic Migrations
+        run: uv run alembic upgrade head
+
       - name: Run Pytest
         run: uv run pytest tests/
 
