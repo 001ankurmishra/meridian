@@ -36,3 +36,6 @@ coverage.xml
 
 # Scratch directory
 scratch/
+
+# Build artifacts
+*.egg-info/
