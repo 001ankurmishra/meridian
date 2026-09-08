@@ -695,39 +695,33 @@ class TestIntegration:
         rahul_id = uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")
         suspicious_tx_id = uuid.uuid5(uuid.NAMESPACE_OID, "rahul_to_tech_sol_tx")
 
-        try:
-            result = create_alert_and_case(
-                engine=app_engine,
-                customer_id=rahul_id,
-                transaction_id=suspicious_tx_id,
-                alert_type="large_transaction",
-                alert_reasons=["large_transaction", "new_beneficiary"],
-            )
+        result = create_alert_and_case(
+            engine=app_engine,
+            customer_id=rahul_id,
+            transaction_id=suspicious_tx_id,
+            alert_type="large_transaction",
+            alert_reasons=["large_transaction", "new_beneficiary"],
+        )
 
-            assert isinstance(result, AlertIntakeResult)
+        assert isinstance(result, AlertIntakeResult)
 
-            with superuser_engine.connect() as conn:
-                # Verify alert
-                alert_row = conn.execute(
-                    text(
-                        "SELECT customer_id, transaction_id FROM alerts "
-                        "WHERE alert_id = :aid"
-                    ),
-                    {"aid": result.alert_id},
-                ).fetchone()
-                assert alert_row is not None
-                assert alert_row[0] == rahul_id
-                assert alert_row[1] == suspicious_tx_id
+        with superuser_engine.connect() as conn:
+            # Verify alert
+            alert_row = conn.execute(
+                text(
+                    "SELECT customer_id, transaction_id FROM alerts "
+                    "WHERE alert_id = :aid"
+                ),
+                {"aid": result.alert_id},
+            ).fetchone()
+            assert alert_row is not None
+            assert alert_row[0] == rahul_id
+            assert alert_row[1] == suspicious_tx_id
 
-                # Verify case links to alert
-                case_row = conn.execute(
-                    text("SELECT alert_id FROM cases WHERE case_id = :cid"),
-                    {"cid": result.case_id},
-                ).fetchone()
-                assert case_row is not None
-                assert case_row[0] == result.alert_id
-        finally:
-            # Clean up ALL loader data to prevent test isolation failures
-            # in test_db_migrations.py which expects an empty database.
-            with superuser_engine.begin() as conn:
-                conn.execute(text("TRUNCATE TABLE customers CASCADE"))
+            # Verify case links to alert
+            case_row = conn.execute(
+                text("SELECT alert_id FROM cases WHERE case_id = :cid"),
+                {"cid": result.case_id},
+            ).fetchone()
+            assert case_row is not None
+            assert case_row[0] == result.alert_id

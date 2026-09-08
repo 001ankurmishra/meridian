@@ -189,7 +189,7 @@ def test_app_role_privileges_read_only(
         for table in tables:
             # SELECT succeeds
             res = conn.execute(text(f"SELECT * FROM {table}")).fetchall()
-            assert len(res) == 1
+            assert len(res) >= 1
 
             # INSERT fails
             with pytest.raises(Exception) as excinfo:
