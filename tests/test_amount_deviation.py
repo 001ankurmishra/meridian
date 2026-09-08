@@ -220,37 +220,52 @@ class TestAmountDeviation:
         self,
         superuser_engine: Engine,
         app_engine: Engine,
-        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Exercise the worked-example data. With its actual timings only
-        the 30/60/90-day transactions qualify — 3, not 6 —
+        """Reproduce the worked-example arithmetic with locally seeded data.
+
+        Six historical outgoing transactions at 30/60/90/120/150/180 days
+        back (₹60,000 each). Only the 30/60/90-day transactions qualify
+        in the 90-day trailing window — 3, not 6 —
         historical_average=60000, deviation_multiple≈16.33.
         """
-        from meridian.loader.main import main
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
 
-        db_url = os.environ.get(
-            "DATABASE_URL",
-            "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-        )
-        loader_url = os.environ.get(
-            "LOADER_DATABASE_URL",
-            "postgresql+psycopg://meridian_loader:meridian_loader_pass@localhost:5432/meridian_db",
-        )
-        monkeypatch.setenv("DATABASE_URL", db_url)
-        monkeypatch.setenv("LOADER_DATABASE_URL", loader_url)
+            # 6 historical outgoing transactions mirroring the worked example
+            qualifying_ids: list[uuid.UUID] = []
+            for days_back in [30, 60, 90, 120, 150, 180]:
+                tid = _seed_transaction(
+                    superuser_engine,
+                    source_account_id=acct_id,
+                    amount=Decimal("60000.00"),
+                    occurred_at=alerted_time - timedelta(days=days_back),
+                )
+                # Only 30/60/90 fall within the 90-day window
+                if days_back <= 90:
+                    qualifying_ids.append(tid)
 
-        main()
+            # Alerted transaction: ₹980,000
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("980000.00"),
+                occurred_at=alerted_time,
+            )
 
-        rahul_tx_id = uuid.uuid5(uuid.NAMESPACE_OID, "rahul_to_tech_sol_tx")
-        result = compute_amount_deviation(app_engine, rahul_tx_id)
+            result = compute_amount_deviation(app_engine, alerted_tid)
 
-        assert isinstance(result, AmountDeviationComputed)
-        assert result.alerted_amount == Decimal("980000.00")
-        assert result.historical_average == Decimal("60000.00")
-        assert result.historical_transaction_count == 3
-        # 980000 / 60000 = 16.333...
-        expected_dev = Decimal("980000.00") / Decimal("60000.00")
-        assert result.deviation_multiple == expected_dev
+            assert isinstance(result, AmountDeviationComputed)
+            assert result.alerted_amount == Decimal("980000.00")
+            assert result.historical_average == Decimal("60000.00")
+            assert result.historical_transaction_count == 3
+            # 980000 / 60000 = 16.333...
+            expected_dev = Decimal("980000.00") / Decimal("60000.00")
+            assert result.deviation_multiple == expected_dev
+            assert set(result.source_transaction_ids) == set(qualifying_ids)
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
 
     def test_insufficient_history_returns_unknown(
         self,
