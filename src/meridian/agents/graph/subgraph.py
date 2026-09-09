@@ -332,13 +332,16 @@ def find_simple_paths(
         g, source_entity_id, target_entity_id, cutoff=max_hops
     ):
         # edge_path is a list of (u, v, key) tuples representing the traversed edges.
+        # NetworkX type stubs do not capture the 3-tuple nature of MultiDiGraph
+        # edge paths, so we cast it explicitly for type checkers.
+        edge_path_typed = cast(list[tuple[uuid.UUID, uuid.UUID, uuid.UUID]], edge_path)
         rel_ids: list[uuid.UUID] = []
         node_ids: list[uuid.UUID] = [source_entity_id]
 
-        for u, v, key in edge_path:
+        for _u, v, key in edge_path_typed:
             # The key is the relationship_id because we set it in _build_digraph
-            rel_ids.append(cast(uuid.UUID, key))
-            node_ids.append(cast(uuid.UUID, v))
+            rel_ids.append(key)
+            node_ids.append(v)
 
         paths.append(
             GraphPath(
