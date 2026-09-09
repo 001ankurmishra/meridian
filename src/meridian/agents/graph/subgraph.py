@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, cast
 
 import networkx as nx  # type: ignore[import-untyped]
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.graph.errors import EntityNotFoundError, InvalidGraphInputError
 
@@ -75,16 +75,16 @@ def _validate_uuid(value: object, label: str) -> uuid.UUID:
     return value
 
 
-def _entity_exists(conn: Any, entity_id: uuid.UUID) -> bool:
+def _entity_exists(conn: Connection, entity_id: uuid.UUID) -> bool:
     """Check whether an entity row exists (SELECT only)."""
-    row = conn.execute(
+    row: Any | None = conn.execute(
         text("SELECT 1 FROM entities WHERE entity_id = :eid"),
         {"eid": entity_id},
     ).fetchone()
     return row is not None
 
 
-def _build_digraph(conn: Any) -> nx.MultiDiGraph:
+def _build_digraph(conn: Connection) -> nx.MultiDiGraph:
     """Load all ``graph_relationships`` rows into a ``networkx.MultiDiGraph``.
 
     Each edge is keyed by ``relationship_id`` and carries
