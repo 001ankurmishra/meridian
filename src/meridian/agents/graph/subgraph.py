@@ -2,7 +2,7 @@
 
 Read-only, deterministic, Fact/Signal-layer operations over the
 ``entities`` and ``graph_relationships`` tables.  Uses an in-memory
-``networkx.DiGraph`` built from the stored edge list; subgraph
+``networkx.MultiDiGraph`` built from the stored edge list; subgraph
 reachability traverses the undirected view (for surrounding context),
 while path-finding uses the directed graph (to honour edge direction).
 """
