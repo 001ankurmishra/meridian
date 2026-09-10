@@ -218,7 +218,7 @@ Deferred until entity-resolution / shared-device signals are implemented (`docs/
 | `document_id` UUID FK → documents | |
 | `chunk_text` text | |
 | `chunk_index` int | position within document |
-| `embedding` vector | pgvector column, dimension per chosen embedding model (**REQUIRES VERIFICATION** once embedding model is selected — record in ADR) |
+| `embedding` vector(384) | pgvector column, dimension 384 (BAAI/bge-small-en-v1.5) per ADR-0004 |
 | `created_at` timestamptz | |
 
 ### 4.16 `risk_signals`

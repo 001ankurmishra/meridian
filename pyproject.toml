@@ -12,6 +12,8 @@ dependencies = [
     "psycopg[binary]>=3.1.18",
     "uvicorn>=0.29.0",
     "networkx>=3.6.1",
+    "sentence-transformers>=6.0.1",
+    "pgvector>=0.5.0",
 ]
 
 [dependency-groups]
@@ -47,3 +49,8 @@ mypy_path = "src"
 [[tool.mypy.overrides]]
 module = "meridian.*"
 disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = ["numpy", "numpy.*"]
+follow_imports = "skip"
+follow_imports_for_stubs = true

@@ -8,42 +8,6 @@ from sqlalchemy import Engine, create_engine, text
 from alembic import command
 
 
-@pytest.fixture(scope="session", autouse=True)
-def run_migrations() -> Generator[None, None, None]:
-    """Run Alembic migrations before the test session and tear down after."""
-    alembic_cfg = Config("alembic.ini")
-
-    # Upgrade to head
-    command.upgrade(alembic_cfg, "head")
-
-    yield
-
-    # Downgrade to base to verify reversibility
-    command.downgrade(alembic_cfg, "base")
-    # Upgrade again so subsequent tests/teardowns are in a valid state
-    command.upgrade(alembic_cfg, "head")
-
-
-@pytest.fixture
-def superuser_engine() -> Generator[Engine, None, None]:
-    db_url = os.environ.get(
-        "DATABASE_URL",
-        "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-    )
-    engine = create_engine(db_url)
-    yield engine
-    engine.dispose()
-
-
-@pytest.fixture
-def app_role_engine() -> Generator[Engine, None, None]:
-    app_db_url = os.environ.get(
-        "APP_DATABASE_URL",
-        "postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db",
-    )
-    engine = create_engine(app_db_url)
-    yield engine
-    engine.dispose()
 
 
 def test_fk_constraint_negative(superuser_engine: Engine) -> None:
