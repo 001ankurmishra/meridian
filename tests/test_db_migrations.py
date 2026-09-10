@@ -1,13 +1,5 @@
-import os
-from typing import Generator
-
 import pytest
-from alembic.config import Config
-from sqlalchemy import Engine, create_engine, text
-
-from alembic import command
-
-
+from sqlalchemy import Engine, text
 
 
 def test_fk_constraint_negative(superuser_engine: Engine) -> None:
