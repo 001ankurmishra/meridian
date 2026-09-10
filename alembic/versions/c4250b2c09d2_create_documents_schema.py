@@ -8,8 +8,10 @@ Create Date: 2026-09-11 00:12:53.986940
 import os
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
+
 try:
     from pgvector.sqlalchemy import Vector
 except ImportError:
