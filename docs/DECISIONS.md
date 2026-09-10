@@ -48,6 +48,7 @@ What this makes easier, harder, or what it forecloses.
 | [ADR-0001](decisions/0001-modular-monolith-vs-microservices.md) | Modular monolith vs. microservices | Accepted |
 | [ADR-0002](decisions/0002-postgresql-vs-separate-graph-database.md) | PostgreSQL (+pgvector, adjacency tables) vs. a separate graph database | Accepted |
 | [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed — provider not yet locked in |
+| [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Proposed |
 
 Future ADRs (evidence model, risk-scoring approach, orchestration-framework revisit, authentication model, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers (e.g., risk-scoring ADR is expected around Phase 2 calibration work).
 

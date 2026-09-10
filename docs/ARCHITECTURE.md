@@ -116,7 +116,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Responsibility:** Retrieve relevant internal AML policy / regulatory guidance passages for the case's alert pattern.
 - **Inputs:** Alert type/pattern description, jurisdiction (where applicable).
 - **Outputs:** Retrieved chunks with source document ID, version, and relevance/confidence score.
-- **Tools:** Hybrid retrieval (BM25 + pgvector) read-only.
+- **Tools:** Hybrid retrieval (PostgreSQL FTS + pgvector cosine distance, fused via Reciprocal Rank Fusion) read-only. Embedding model: BAAI/bge-small-en-v1.5 (per ADR-0004).
 - **Permissions:** Read-only.
 - **Failure behavior:** If retrieval confidence is below threshold, return no policy citation rather than a low-confidence guess (`docs/EVALUATION.md` defines the threshold methodology).
 
