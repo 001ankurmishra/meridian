@@ -44,6 +44,8 @@ Every reported number in `docs/` or a resume/portfolio artifact must state its t
 
 **Retrieval confidence threshold:** the minimum relevance score below which PolicyAgent returns no citation (`docs/AI_SAFETY_AND_GUARDRAILS.md` §3) must be set based on this evaluation, not picked arbitrarily — document the chosen threshold and the precision/recall tradeoff it implies.
 
+The currently implemented threshold value is `confidence_threshold = 0.01` in `src/meridian/agents/policy/policy_agent.py`. Its methodology tier is `PROTOTYPE`. This value is explicitly an unvalidated placeholder; it was not derived from any evaluation, sample, or tuning process. The precision/recall tradeoff this threshold implies is currently unknown and unmeasured. This threshold will eventually be calibrated using the 20–50 labeled alert-pattern → expected-policy-chunk evaluation set described above. Once that evaluation exists and the threshold is properly tuned against it, its tier will be updated to `EXPERIMENTALLY_CALIBRATED`.
+
 ---
 
 ## 5. Agent Evaluation
