@@ -169,6 +169,8 @@ Deferred until entity-resolution / shared-device signals are implemented (`docs/
 | `completed_at` | timestamptz, nullable | |
 | `error` | text, nullable | |
 
+meridian_app has SELECT, INSERT only on this table; UPDATE/DELETE are not granted (append-only, enforced via DB grants).
+
 ### 4.12 `evidence`
 | Column | Type | Notes |
 |---|---|---|
