@@ -7,13 +7,13 @@ from decimal import Decimal
 
 import pytest
 from sqlalchemy import Engine, text
-from sqlalchemy.exc import IntegrityError
 
 from meridian.agents.transaction.amount_deviation import (
     AmountDeviationComputed,
     AmountDeviationUnknown,
 )
 from meridian.agents.transaction.errors import InvalidTransactionError
+from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.transaction_agent_dispatch import (
     TransactionAgentDispatchResult,
     run_transaction_agent,
@@ -127,8 +127,9 @@ def test_happy_path(app_role_engine: Engine, superuser_engine: Engine) -> None:
         # Alerted transaction
         tid = _seed_transaction(superuser_engine, aid, Decimal("1000.0"), 0)
         _, case_id = _seed_alert_case(superuser_engine, cid, tid)
+        inv_run = create_investigation_run(app_role_engine, case_id)
 
-        dispatch_result = run_transaction_agent(app_role_engine, case_id, tid)
+        dispatch_result = run_transaction_agent(app_role_engine, inv_run.investigation_run_id, tid)
 
         assert isinstance(dispatch_result, TransactionAgentDispatchResult)
         assert isinstance(dispatch_result.result, AmountDeviationComputed)
@@ -165,8 +166,9 @@ def test_domain_unknown(app_role_engine: Engine, superuser_engine: Engine) -> No
         # Alerted transaction but NO history
         tid = _seed_transaction(superuser_engine, aid, Decimal("1000.0"), 0)
         _, case_id = _seed_alert_case(superuser_engine, cid, tid)
+        inv_run = create_investigation_run(app_role_engine, case_id)
 
-        dispatch_result = run_transaction_agent(app_role_engine, case_id, tid)
+        dispatch_result = run_transaction_agent(app_role_engine, inv_run.investigation_run_id, tid)
 
         assert isinstance(dispatch_result, TransactionAgentDispatchResult)
         assert isinstance(dispatch_result.result, AmountDeviationUnknown)
@@ -203,20 +205,20 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
         # Transaction with NULL source account
         tid = _seed_transaction(superuser_engine, None, Decimal("1000.0"), 0)
         _, case_id = _seed_alert_case(superuser_engine, cid, tid)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+        inv_id = inv_run.investigation_run_id
 
         with pytest.raises(InvalidTransactionError, match="no source_account_id"):
-            run_transaction_agent(app_role_engine, case_id, tid)
+            run_transaction_agent(app_role_engine, inv_id, tid)
 
-        # We need to find the investigation_run_id to verify db state.
-        # It's the only run for this case.
+        # Verify investigation_runs row is IN_PROGRESS
         with superuser_engine.connect() as conn:
             inv_rows = conn.execute(
-                text("SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"),
-                {"cid": case_id},
+                text("SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"),
+                {"inv_id": inv_id},
             ).fetchall()
             assert len(inv_rows) == 1
-            inv_id = inv_rows[0][0]
-            assert inv_rows[0][1] == "IN_PROGRESS"
+            assert inv_rows[0][0] == "IN_PROGRESS"
 
             # Verify agent_runs row is FAILED
             ar_rows = conn.execute(
@@ -234,14 +236,3 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
         if tid is not None:
             with superuser_engine.begin() as conn:
                 conn.execute(text("DELETE FROM transactions WHERE transaction_id = :tid"), {"tid": tid})
-
-
-def test_invalid_case(app_role_engine: Engine) -> None:
-    """Use an invalid/nonexistent case_id."""
-    invalid_case_id = uuid.uuid4()
-    invalid_tid = uuid.uuid4()
-
-    with pytest.raises(IntegrityError) as excinfo:
-        run_transaction_agent(app_role_engine, invalid_case_id, invalid_tid)
-
-    assert "foreign key constraint" in str(excinfo.value).lower()
