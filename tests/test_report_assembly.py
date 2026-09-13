@@ -8,12 +8,51 @@ from sqlalchemy import Engine, text
 
 from meridian.agents.report.report_assembly import (
     InsufficientEvidenceError,
+    InvestigationReport,
     assemble_report,
 )
 from meridian.evidence.evidence import record_evidence
 from meridian.findings.findings import record_finding
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.recommendations.recommendations import record_recommendation
+
+
+def assert_no_forbidden_language(report: InvestigationReport) -> None:
+    """Scans the report text against documented forbidden accusatory phrasing.
+
+    Required by docs/TESTING.md §2 and docs/AI_SAFETY_AND_GUARDRAILS.md §2.
+    """
+    forbidden_phrases = [
+        "the customer is laundering money",
+        "this is confirmed fraud",
+        "this account should be closed",
+    ]
+
+    # Collect all text fields from the report
+    text_blocks = [
+        report.summary,
+        report.confidence_text,
+    ]
+    for finding in report.findings:
+        text_blocks.append(finding.observed_fact)
+        if finding.derived_signal:
+            text_blocks.append(finding.derived_signal)
+        if finding.interpretation:
+            text_blocks.append(finding.interpretation)
+
+    for rec in report.recommendations:
+        text_blocks.append(rec.text)
+
+    for block in text_blocks:
+        if not block:
+            continue
+        lower_block = block.lower()
+        for phrase in forbidden_phrases:
+            if phrase in lower_block:
+                raise AssertionError(
+                    f"Forbidden language detected in report: '{phrase}' "
+                    f"found in '{block}'"
+                )
 
 
 def setup_customer_and_transaction(
@@ -203,6 +242,9 @@ def test_assemble_report_success(
         assert report.human_review_required is True
         assert "Overall confidence is HIGH" in report.confidence_text
 
+        # Validate against forbidden language
+        assert_no_forbidden_language(report)
+
     finally:
         _cleanup_seeded_data(superuser_engine, cid)
 
@@ -233,6 +275,85 @@ def test_assemble_report_insufficient_evidence(
             InsufficientEvidenceError, match="fails evidence sufficiency gate"
         ):
             assemble_report(app_role_engine, inv_run.investigation_run_id)
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_assemble_report_forbidden_language(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
+    """Test that the forbidden language scanner correctly catches phrasing."""
+    cid, tid = setup_customer_and_transaction(superuser_engine)
+    try:
+        alert_id = setup_alert(superuser_engine, cid, tid)
+        case_id = setup_case(superuser_engine, alert_id)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+        ar_id = setup_agent_run(superuser_engine, inv_run.investigation_run_id)
+
+        ev1 = record_evidence(
+            app_role_engine,
+            investigation_run_id=inv_run.investigation_run_id,
+            evidence_type="transaction_amount_deviation",
+            reference_table="transactions",
+            reference_id=tid,
+            produced_by_agent_run_id=ar_id,
+        )
+
+        record_finding(
+            engine=app_role_engine,
+            investigation_run_id=inv_run.investigation_run_id,
+            observed_fact="The customer is laundering money via rapid transfers.",
+            derived_signal=None,
+            interpretation="This is confirmed fraud.",
+            evidence_ids=[ev1.evidence_id],
+            confidence="HIGH",
+        )
+
+        report = assemble_report(app_role_engine, inv_run.investigation_run_id)
+
+        with pytest.raises(AssertionError, match="Forbidden language detected"):
+            assert_no_forbidden_language(report)
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_assemble_report_clean_control_case(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
+    """Test deterministic report assembly for a zero-finding control case.
+
+    Required by docs/TESTING.md §3.
+    """
+    cid, tid = setup_customer_and_transaction(superuser_engine)
+    try:
+        alert_id = setup_alert(superuser_engine, cid, tid)
+        case_id = setup_case(superuser_engine, alert_id)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+        # Note: No findings, no evidence, no recommendations are recorded.
+
+        # Assemble Report
+        report = assemble_report(app_role_engine, inv_run.investigation_run_id)
+
+        assert report.case_id == case_id
+        assert report.investigation_run_id == inv_run.investigation_run_id
+        assert report.customer_name == "Test Customer"
+        assert report.risk_level == "HIGH"  # from customer baseline
+
+        # Assert zero findings/evidence/recs
+        assert len(report.findings) == 0
+        assert len(report.evidence) == 0
+        assert len(report.applicable_policies) == 0
+        assert len(report.recommendations) == 0
+
+        # Assert clean fallback text
+        assert "No findings to evaluate" in report.confidence_text
+        assert report.human_review_required is True
+
+        # Assert it passes forbidden language check
+        # (it shouldn't hallucinate accusations)
+        assert_no_forbidden_language(report)
 
     finally:
         _cleanup_seeded_data(superuser_engine, cid)
