@@ -28,6 +28,14 @@ For every agent/tool invocation and every human decision, capture (fields map to
 - Errors (full error detail server-side; redacted summary in any user-facing view)
 - Human decisions (who, what action, when, and any required reason text)
 
+**F8 Human Decision Audit Shape:**
+For human decisions, the `input_summary` MUST contain:
+- `decision`: The requested action (e.g. "APPROVE", "REJECT", "REQUEST_MORE_INFO", "ESCALATE")
+- `reason`: The justification text provided by the analyst (required for REJECT/REQUEST_MORE_INFO)
+The `output_summary` MUST contain:
+- `previous_status`: The case status prior to the decision
+- `new_status`: The case status after the decision
+
 **Do not log more than necessary.** PII and sensitive values are redacted at the logging boundary (`docs/SECURITY.md` §4), not left to individual call sites to decide inconsistently.
 
 ---

@@ -140,7 +140,7 @@ Deferred until entity-resolution / shared-device signals are implemented (`docs/
 | `status` | text | OPEN / IN_REVIEW / ESCALATED / CLOSED_APPROVED / CLOSED_REJECTED / CLOSED_MORE_INFO |
 | `assigned_analyst_id` | UUID FK → users, nullable | |
 | `opened_at` | timestamptz | |
-| `closed_at` | timestamptz, nullable | |
+| `closed_at` | timestamptz, nullable | represents the current review/decision-cycle closure timestamp; cleared if re-opened/escalated |
 | `deleted_at` | timestamptz, nullable | soft delete |
 | `created_at` | timestamptz | |
 

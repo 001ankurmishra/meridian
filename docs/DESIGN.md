@@ -67,10 +67,16 @@ Four explicit actions, each requiring the acting analyst's identity to be record
 
 | Action | Effect | Who can perform |
 |---|---|---|
-| Approve | Marks case `CLOSED_APPROVED`; recommendation accepted | Assigned analyst or senior analyst |
-| Reject | Marks case `CLOSED_REJECTED`; recommendation rejected with required reason text | Assigned analyst or senior analyst |
-| Request More Info | Reopens/extends `investigation_run`; can specify what's missing | Assigned analyst |
-| Escalate | Marks case `ESCALATED`; routes to compliance manager | Assigned analyst or senior analyst |
+| Approve | Marks case `CLOSED_APPROVED`; recommendation accepted | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
+| Reject | Marks case `CLOSED_REJECTED`; recommendation rejected with required reason text | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
+| Request More Info | Reopens/extends `investigation_run` (`CLOSED_MORE_INFO`); can specify what's missing | Assigned analyst only |
+| Escalate | Marks case `ESCALATED`; routes to compliance manager | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
+
+**F8 Design Clarifications:**
+- `CLOSED_MORE_INFO` is re-decidable. Its authorization tier matches `OPEN`/`IN_REVIEW` for Approve/Reject/Escalate.
+- `REQUEST_MORE_INFO` remains assigned-analyst-only.
+- `ESCALATED` cases may be Approved/Rejected **only** by a `senior_analyst` or `compliance_manager` (ordinary analysts cannot act after escalation).
+- `closed_at` represents the current review/decision-cycle closure timestamp and may be overwritten or cleared (e.g. to NULL upon Escalate) when the case re-enters an active state.
 
 None of these controls exist for the AI itself to invoke — they are human-only UI actions gated by RBAC (`docs/SECURITY.md`).
 
