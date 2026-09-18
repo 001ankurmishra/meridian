@@ -16,6 +16,7 @@ def record_agent_run(
     agent_name: str,
     fn: Callable[..., T],
     *args: Any,
+    tool_calls: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> T:
     """Wrap an agent invocation to record its execution in the database.
@@ -25,6 +26,13 @@ def record_agent_run(
         agent_name: Name of the agent (e.g., 'TransactionAgent').
         fn: The agent function to invoke.
         *args: Positional arguments to pass to fn.
+        tool_calls: A coarse, per-agent-run summary of the tool(s)/query(ies)
+            this invocation is known to make (F9). Keyword-only, so it can
+            never be confused with a positional argument to fn. None (the
+            default sentinel; never a mutable default) is recorded as an
+            empty object, meaning "no tool-call summary supplied" -- this
+            is never fabricated by this function itself, only ever passed
+            in by the caller who actually knows what fn does.
         **kwargs: Keyword arguments to pass to fn.
 
     Returns:
@@ -35,10 +43,11 @@ def record_agent_run(
 
     Side effects:
         Inserts exactly one row into the `agent_runs` table indicating the
-        run's status ('SUCCESS' or 'FAILED') and timestamps.
+        run's status ('SUCCESS' or 'FAILED'), timestamps, and tool_calls.
     """
     agent_run_id = uuid.uuid4()
     started_at = datetime.now(timezone.utc)
+    recorded_tool_calls: dict[str, Any] = tool_calls if tool_calls is not None else {}
 
     try:
         result = fn(*args, **kwargs)
@@ -77,7 +86,7 @@ def record_agent_run(
                     "agent_run_id": agent_run_id,
                     "investigation_run_id": investigation_run_id,
                     "agent_name": agent_name,
-                    "tool_calls": json.dumps({}),
+                    "tool_calls": json.dumps(recorded_tool_calls),
                     "started_at": started_at,
                     "completed_at": completed_at,
                 },
@@ -119,7 +128,7 @@ def record_agent_run(
                     "agent_run_id": agent_run_id,
                     "investigation_run_id": investigation_run_id,
                     "agent_name": agent_name,
-                    "tool_calls": json.dumps({}),
+                    "tool_calls": json.dumps(recorded_tool_calls),
                     "started_at": started_at,
                     "completed_at": completed_at,
                     "error": str(e),

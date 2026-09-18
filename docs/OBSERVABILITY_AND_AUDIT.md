@@ -36,6 +36,9 @@ The `output_summary` MUST contain:
 - `previous_status`: The case status prior to the decision
 - `new_status`: The case status after the decision
 
+**F9 `tool_calls` Convention:**
+`agent_runs.tool_calls` is populated by the dispatch layer (`orchestration.transaction_agent_dispatch`, `orchestration.policy_agent_dispatch`) with a coarse, static, per-agent-run summary of the tool(s)/quer(ies) that agent is documented to invoke — not a live, per-statement trace of an individual invocation. `orchestration.agent_run_tracking.record_agent_run()` accepts this as an explicit keyword-only `tool_calls` argument (`None` default, stored as an empty object) and never fabricates a value on its own; only a caller with direct knowledge of what the wrapped function does may supply one.
+
 **Do not log more than necessary.** PII and sensitive values are redacted at the logging boundary (`docs/SECURITY.md` §4), not left to individual call sites to decide inconsistently.
 
 ---
@@ -65,6 +68,12 @@ Given a `case_id`, it must be possible to reconstruct:
 5. What the human reviewer decided and when.
 
 This reconstruction should be achievable by querying `audit_events` + `agent_runs` + `evidence` + `findings`, joined on `investigation_run_id` — this is a concrete testable property, not just an aspiration (see `docs/TESTING.md`).
+
+**F9 implementation:** points 2, 3, and 5 above are implemented by `audit.audit_trail.get_case_audit_trail(engine, case_id)` (`src/meridian/audit/audit_trail.py`), which assembles a case's `investigation_runs` (each with its nested `agent_runs`, `evidence`, and `findings`, chronologically ordered) plus the case's `audit_events` (human decisions), all in one read-only call. It performs no writes and no authorization check — same authentication-boundary framing as `review.decisions.record_human_decision` (`docs/SECURITY.md`): it must not be exposed as an unauthenticated API boundary. It is a best-effort, point-in-time snapshot assembled from several independent `SELECT`s, not a single transactional read, so it is not guaranteed atomic against concurrent writes.
+
+**Known coverage gap (as of F9):** `agent_runs` — and therefore this reconstruction — only includes agents actually wrapped by `orchestration.agent_run_tracking.record_agent_run()`. As of this writing, only `TransactionAgent` (F3) and `PolicyAgent` (F5) are wrapped this way; `GraphAgent` (F4) and `ReportAgent` (F7) are not currently dispatched through `record_agent_run()` and so produce no `agent_runs` row — their executions are invisible to `get_case_audit_trail()` even when they ran as part of an investigation. Point 4 above (ReportAgent's synthesis) is therefore not yet reconstructable via this path. Closing this gap is an F4/F7 completeness item, out of scope for F9.
+
+Point 1 (which alert triggered the case) is not currently included in `get_case_audit_trail()`'s output — it can be obtained separately via `cases.alert_id` — and may be folded in by a future slice if a single combined view is needed.
 
 ---
 

@@ -1,4 +1,5 @@
 """TransactionAgent dispatch slice."""
+
 import uuid
 from dataclasses import dataclass
 
@@ -9,6 +10,20 @@ from meridian.agents.transaction.amount_deviation import (
     compute_amount_deviation,
 )
 from meridian.orchestration.agent_run_tracking import record_agent_run
+
+# Coarse, per-agent-run tool-call summary for TransactionAgent (F9).
+# This describes the fixed, deterministic set of SQL queries
+# compute_amount_deviation() is documented and known to run -- it is not
+# derived from a live trace of any individual invocation, so it stays
+# accurate only as long as it matches that function's actual behavior.
+_TRANSACTION_AGENT_TOOL_CALLS = {
+    "tool": "sql_query",
+    "queries": [
+        "transactions: lookup alerted transaction by transaction_id",
+        "accounts: resolve source_account_id to customer_id",
+        "transactions: trailing 90-day historical outgoing amounts for customer",
+    ],
+}
 
 
 @dataclass(frozen=True)
@@ -41,6 +56,7 @@ def run_transaction_agent(
         compute_amount_deviation,
         engine,
         transaction_id,
+        tool_calls=_TRANSACTION_AGENT_TOOL_CALLS,
     )
 
     return TransactionAgentDispatchResult(
