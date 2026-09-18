@@ -26,6 +26,8 @@ Every reported number in `docs/` or a resume/portfolio artifact must state its t
 
 **Reporting requirement:** any risk-scoring metric quoted anywhere in the project must include: dataset version, split methodology, and tier (§1). "PROTOTYPE, 40-case hand-labeled sample, v0.1" is an acceptable and honest label; a bare "92% precision" with no context is not acceptable.
 
+The currently implemented amount deviation risk signal is a PROTOTYPE heuristic (`value = deviation_multiple`). This explicit pass-through formula is an unvalidated placeholder mimicking the `confidence_threshold` pattern in §4; it was not derived from any ML evaluation or tuning process and its predictive utility is currently unknown.
+
 ---
 
 ## 3. Graph Evaluation
