@@ -1,4 +1,5 @@
 """Investigation run tracking."""
+
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -57,7 +58,7 @@ def create_investigation_run(
                 "run_id": run_id,
                 "case_id": case_id,
                 "now": now,
-            }
+            },
         )
 
     return InvestigationRunResult(

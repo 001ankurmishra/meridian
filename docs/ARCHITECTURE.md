@@ -144,12 +144,12 @@ Deferred to Phase 2. Will follow the same documentation pattern above once desig
 
 ```
 1. Receive alert → create investigation_run
-2. Always run: TransactionAgent (every alert has a transaction to analyze)
-3. If alert involves a new/rare counterparty or graph depth > 1 signal → run GraphAgent
+2. If alert has a transaction_id → run TransactionAgent
+3. If TransactionAgent successfully computes an amount deviation → run GraphAgent using the transaction's source_account_id
 4. Always run: PolicyAgent (every investigation needs applicable-policy context)
 5. Evaluate evidence sufficiency:
-   - If TransactionAgent and PolicyAgent both returned usable evidence → proceed to ReportAgent
-   - If critical evidence missing (e.g., TransactionAgent returned UNKNOWN for the primary signal) → flag investigation_run as INCOMPLETE, do not generate report, notify analyst
+   - If TransactionAgent and PolicyAgent both returned usable evidence → status COMPLETE
+   - If critical evidence missing (e.g., TransactionAgent returned UNKNOWN or was skipped) → status INCOMPLETE_INSUFFICIENT_EVIDENCE
 6. ReportAgent synthesizes findings; if no findings meet evidence bar → report states "insufficient evidence," not a fabricated conclusion
 7. Route to human review queue
 ```
