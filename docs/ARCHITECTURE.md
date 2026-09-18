@@ -75,7 +75,7 @@ All AI/DB/agent activity is written to the append-only audit log (`docs/OBSERVAB
 | `risk_engine` | ML-based anomaly/risk scoring (batch and on-demand) | `risk_signals` |
 | `evidence` | Canonical evidence records linking findings to source data | `evidence` |
 | `review` | Human approval workflow, decision capture | human decision fields on `cases`/`investigation_runs` |
-| `audit` | Append-only logging of all agent/tool/human actions | `audit_events` |
+| `audit` | Append-only logging of agent/tool/human actions (`audit_events`, F8); read-only reconstruction of a case's full investigation history for display/audit (`get_case_audit_trail`, F9) | `audit_events` |
 | `identity` | AuthN/AuthZ, RBAC | users/roles (see `docs/DATABASE_SCHEMA.md`) |
 | `retrieval` | Hybrid retrieval (BM25 + vector) shared library used by `agents.policy` | — |
 

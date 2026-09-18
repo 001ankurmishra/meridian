@@ -1,4 +1,5 @@
 """PolicyAgent dispatch slice."""
+
 import uuid
 
 from sqlalchemy import Engine
@@ -9,6 +10,19 @@ from meridian.agents.policy.policy_agent import (
     retrieve_policy_evidence,
 )
 from meridian.orchestration.agent_run_tracking import record_agent_run
+
+# Coarse, per-agent-run tool-call summary for PolicyAgent (F9).
+# Describes the fixed, deterministic hybrid retrieval PolicyAgent is
+# documented (docs/ARCHITECTURE.md #4.4, ADR-0004) to perform -- not a
+# live trace of any individual invocation.
+_POLICY_AGENT_TOOL_CALLS = {
+    "tool": "hybrid_retrieval",
+    "queries": [
+        "document_chunks: PostgreSQL full-text search (FTS) candidates",
+        "document_chunks: pgvector cosine-distance candidates",
+        "reciprocal_rank_fusion: merge FTS and vector candidate rankings",
+    ],
+}
 
 
 def run_policy_agent(
@@ -36,4 +50,5 @@ def run_policy_agent(
         investigation_run_id,
         "PolicyAgent",
         _do_retrieve,
+        tool_calls=_POLICY_AGENT_TOOL_CALLS,
     )
