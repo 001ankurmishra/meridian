@@ -175,7 +175,7 @@ def test_amount_deviation_unknown(
 
     assert status == "INCOMPLETE_INSUFFICIENT_EVIDENCE"
     mock_compute.assert_called_once()
-    mock_build.assert_not_called()
+    mock_build.assert_called_once()
     mock_retrieve.assert_called_once()
 
 
@@ -214,12 +214,13 @@ def test_transaction_agent_hard_failure(
     case_id = _seed_case_and_alert(superuser_engine, transaction_id=tid)
 
     mock_compute.side_effect = InvalidTransactionError("Boom")
+    mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     with pytest.raises(InvalidTransactionError, match="Boom"):
         orchestrate_investigation(app_role_engine, case_id)
 
     mock_build.assert_not_called()
-    mock_retrieve.assert_not_called()
+    mock_retrieve.assert_called_once()
 
     with superuser_engine.begin() as conn:
         inv_status = conn.execute(
@@ -252,18 +253,12 @@ def test_graph_agent_hard_failure(
         source_transaction_ids=(uuid.uuid4(),),
     )
     mock_build.side_effect = ValueError("Graph Boom")
+    mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
-    with pytest.raises(ValueError, match="Graph Boom"):
-        orchestrate_investigation(app_role_engine, case_id)
+    status = orchestrate_investigation(app_role_engine, case_id)
 
-    mock_retrieve.assert_not_called()
-
-    with superuser_engine.begin() as conn:
-        inv_status = conn.execute(
-            text("SELECT status FROM investigation_runs WHERE case_id = :cid"),
-            {"cid": case_id},
-        ).scalar()
-        assert inv_status == "FAILED"
+    mock_retrieve.assert_called_once()
+    assert status == "COMPLETE"
 
 
 @patch("meridian.orchestration.policy_agent_dispatch.retrieve_policy_evidence")
@@ -307,16 +302,3 @@ def test_case_invalid_state(app_role_engine: Engine, superuser_engine: Engine) -
     case_id = _seed_case_and_alert(superuser_engine, status="CLOSED")
     with pytest.raises(InvestigationError, match="is not OPEN"):
         orchestrate_investigation(app_role_engine, case_id)
-
-    # Already has a run
-    case_id2 = _seed_case_and_alert(superuser_engine, status="OPEN")
-    with superuser_engine.begin() as conn:
-        conn.execute(
-            text(
-                "INSERT INTO investigation_runs (investigation_run_id, case_id, status, started_at, created_at) "
-                "VALUES (:rid, :cid, 'COMPLETE', now(), now())"
-            ),
-            {"rid": uuid.uuid4(), "cid": case_id2},
-        )
-    with pytest.raises(InvestigationError, match="already has an investigation run"):
-        orchestrate_investigation(app_role_engine, case_id2)

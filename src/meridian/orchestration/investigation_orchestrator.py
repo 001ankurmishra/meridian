@@ -12,6 +12,7 @@ from sqlalchemy import Engine, text
 from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 from meridian.agents.transaction.amount_deviation import (
     AmountDeviationComputed,
+    AmountDeviationUnknown,
 )
 from meridian.orchestration.errors import InvestigationError
 from meridian.orchestration.graph_agent_dispatch import run_graph_agent
@@ -46,15 +47,6 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
         if case_row.status != "OPEN":
             raise InvestigationError(f"Case {case_id} is not OPEN.")
 
-        inv_row = conn.execute(
-            text("SELECT 1 FROM investigation_runs WHERE case_id = :cid"),
-            {"cid": case_id},
-        ).fetchone()
-        if inv_row:
-            raise InvestigationError(
-                f"Case {case_id} already has an investigation run."
-            )
-
         alert_row = conn.execute(
             text(
                 "SELECT customer_id, transaction_id, alert_type FROM alerts WHERE alert_id = :aid"
@@ -68,20 +60,10 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
     inv_run = create_investigation_run(engine, case_id)
     inv_id = inv_run.investigation_run_id
 
-    def _mark_failed(exc: Exception) -> None:
-        with engine.begin() as conn:
-            conn.execute(
-                text(
-                    "UPDATE investigation_runs SET status = 'FAILED', "
-                    "completed_at = :now WHERE investigation_run_id = :inv_id"
-                ),
-                {"now": datetime.now(timezone.utc), "inv_id": inv_id},
-            )
-        raise exc
-
     has_tx_evidence = False
     has_policy_evidence = False
     tx_result = None
+    fatal_error = None
 
     # Step 4.3 - Agent Dispatch
 
@@ -95,14 +77,15 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
             if isinstance(tx_result, AmountDeviationComputed):
                 has_tx_evidence = True
         except Exception as e:
-            _mark_failed(e)
+            fatal_error = e
 
     # 2. GraphAgent
-    if has_tx_evidence and isinstance(tx_result, AmountDeviationComputed):
+    if isinstance(tx_result, (AmountDeviationComputed, AmountDeviationUnknown)):
         try:
             run_graph_agent(engine, inv_id, tx_result.source_account_id, max_hops=3)
-        except Exception as e:
-            _mark_failed(e)
+        except Exception:
+            # GraphAgent failure does NOT determine final investigation status
+            pass
 
     # 3. PolicyAgent
     try:
@@ -110,9 +93,20 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
         if isinstance(policy_dispatch_result, PolicyEvidenceFound):
             has_policy_evidence = True
     except Exception as e:
-        _mark_failed(e)
+        if fatal_error is None:
+            fatal_error = e
 
     # Step 4.4 - Orchestrator Status Conclusion
+    if fatal_error is not None:
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "UPDATE investigation_runs SET status = 'FAILED', "
+                    "completed_at = :now WHERE investigation_run_id = :inv_id"
+                ),
+                {"now": datetime.now(timezone.utc), "inv_id": inv_id},
+            )
+        raise fatal_error
     if has_tx_evidence and has_policy_evidence:
         final_status = "COMPLETE"
     else:
