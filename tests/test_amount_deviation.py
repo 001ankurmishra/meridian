@@ -213,6 +213,7 @@ class TestAmountDeviation:
             assert result.deviation_multiple == Decimal("5")
             assert result.historical_transaction_count == 3
             assert set(result.source_transaction_ids) == set(hist_ids)
+            assert result.source_account_id == acct_id
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
 
@@ -264,6 +265,7 @@ class TestAmountDeviation:
             expected_dev = Decimal("980000.00") / Decimal("60000.00")
             assert result.deviation_multiple == expected_dev
             assert set(result.source_transaction_ids) == set(qualifying_ids)
+            assert result.source_account_id == acct_id
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
 
@@ -287,6 +289,7 @@ class TestAmountDeviation:
 
             assert isinstance(result, AmountDeviationUnknown)
             assert result.alerted_transaction_id == alerted_tid
+            assert result.source_account_id == acct_id
             assert "no qualifying" in result.reason
             # Verify no numeric average is accessible
             assert not hasattr(result, "historical_average")
@@ -335,6 +338,7 @@ class TestAmountDeviation:
             assert result.historical_transaction_count == 1
             assert result.source_transaction_ids == (included_tid,)
             assert result.historical_average == Decimal("2000.00")
+            assert result.source_account_id == acct_id
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
 
@@ -369,6 +373,7 @@ class TestAmountDeviation:
             result = compute_amount_deviation(app_engine, alerted_tid)
 
             assert isinstance(result, AmountDeviationUnknown)
+            assert result.source_account_id == acct_id
             assert "no qualifying" in result.reason
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
@@ -409,6 +414,7 @@ class TestAmountDeviation:
 
             # The incoming tx should not count, so no qualifying history
             assert isinstance(result, AmountDeviationUnknown)
+            assert result.source_account_id == cust_acct
             assert "no qualifying" in result.reason
         finally:
             _cleanup_seeded_data(superuser_engine, other_cid)
@@ -452,9 +458,7 @@ class TestAmountDeviation:
                 occurred_at=datetime.now(timezone.utc),
             )
 
-            with pytest.raises(
-                InvalidTransactionError, match="no source_account_id"
-            ):
+            with pytest.raises(InvalidTransactionError, match="no source_account_id"):
                 compute_amount_deviation(app_engine, tid)
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
@@ -496,6 +500,7 @@ class TestAmountDeviation:
             result = compute_amount_deviation(app_engine, alerted_tid)
 
             assert isinstance(result, AmountDeviationUnknown)
+            assert result.source_account_id == acct_id
             assert "zero" in result.reason
         finally:
             _cleanup_seeded_data(superuser_engine, cid)

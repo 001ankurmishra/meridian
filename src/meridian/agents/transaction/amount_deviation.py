@@ -30,6 +30,7 @@ class AmountDeviationComputed:
     """Result when qualifying historical transactions exist."""
 
     alerted_transaction_id: uuid.UUID
+    source_account_id: uuid.UUID
     alerted_amount: Decimal
     historical_average: Decimal
     deviation_multiple: Decimal
@@ -42,6 +43,7 @@ class AmountDeviationUnknown:
     """Result when deviation cannot be computed."""
 
     alerted_transaction_id: uuid.UUID
+    source_account_id: uuid.UUID
     reason: str
 
 
@@ -153,6 +155,7 @@ def compute_amount_deviation(
         if len(history_rows) == 0:
             return AmountDeviationUnknown(
                 alerted_transaction_id=tid,
+                source_account_id=source_account_id,
                 reason=(
                     "no qualifying historical transactions in the "
                     "90-day trailing window"
@@ -170,6 +173,7 @@ def compute_amount_deviation(
         if historical_average == 0:
             return AmountDeviationUnknown(
                 alerted_transaction_id=tid,
+                source_account_id=source_account_id,
                 reason=(
                     "historical average is zero; deviation multiple "
                     "is undefined"
@@ -182,6 +186,7 @@ def compute_amount_deviation(
         # 10. Return computed result
         return AmountDeviationComputed(
             alerted_transaction_id=tid,
+            source_account_id=source_account_id,
             alerted_amount=alerted_amount,
             historical_average=historical_average,
             deviation_multiple=deviation_multiple,
