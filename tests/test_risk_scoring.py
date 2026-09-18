@@ -26,6 +26,7 @@ def test_compute_risk_score_is_pure_pass_through() -> None:
     """
     signal = AmountDeviationComputed(
         alerted_transaction_id=uuid.uuid4(),
+        source_account_id=uuid.uuid4(),
         alerted_amount=Decimal("500.00"),
         historical_average=Decimal("100.00"),
         deviation_multiple=Decimal("5.0"),
@@ -120,6 +121,7 @@ def test_record_risk_signal_persists_row(
     try:
         signal = AmountDeviationComputed(
             alerted_transaction_id=tid,
+            source_account_id=uuid.uuid4(),
             alerted_amount=Decimal("500.00"),
             historical_average=Decimal("100.00"),
             deviation_multiple=Decimal("5.0"),
@@ -197,6 +199,7 @@ def test_compute_risk_score_rejects_unknown_on_static_bypass(
 
     unknown_signal = AmountDeviationUnknown(
         alerted_transaction_id=uuid.uuid4(),
+        source_account_id=uuid.uuid4(),
         reason="no qualifying historical transactions in the 90-day trailing window",
     )
 
