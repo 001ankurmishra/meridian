@@ -224,6 +224,8 @@ meridian_app has SELECT, INSERT only on this table; UPDATE/DELETE are not grante
 | `created_at` timestamptz | |
 
 ### 4.16 `risk_signals`
+**Status:** Implemented (F10). Currently writes exactly one `signal_type` (`amount_deviation`) with a pass-through formula (`value = deviation_multiple`). Provenance is limited to `investigation_run_id` + `customer_id` + `transaction_id` + `created_at` — there is no `created_by` or `agent_runs` linkage for this MVP.
+
 | Column | Type | Notes |
 |---|---|---|
 | `risk_signal_id` | UUID PK | |
