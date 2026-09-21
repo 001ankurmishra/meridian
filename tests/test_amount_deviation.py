@@ -107,6 +107,7 @@ def _seed_transaction(
     source_account_id: uuid.UUID | None = None,
     destination_account_id: uuid.UUID | None = None,
     amount: Decimal = Decimal("1000.00"),
+    currency: str | None = "INR",
     occurred_at: datetime | None = None,
 ) -> uuid.UUID:
     """Insert a transaction row with full control over columns."""
@@ -118,13 +119,14 @@ def _seed_transaction(
                 "INSERT INTO transactions "
                 "(transaction_id, source_account_id, destination_account_id, "
                 "amount, currency, occurred_at, created_at) "
-                "VALUES (:tid, :src, :dst, :amt, 'INR', :occ, :now)"
+                "VALUES (:tid, :src, :dst, :amt, :curr, :occ, :now)"
             ),
             {
                 "tid": tid,
                 "src": source_account_id,
                 "dst": destination_account_id,
                 "amt": amount,
+                "curr": currency,
                 "occ": ts,
                 "now": datetime.now(timezone.utc),
             },
@@ -214,6 +216,7 @@ class TestAmountDeviation:
             assert result.historical_transaction_count == 3
             assert set(result.source_transaction_ids) == set(hist_ids)
             assert result.source_account_id == acct_id
+            assert result.currency == "INR"
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
 
@@ -266,6 +269,7 @@ class TestAmountDeviation:
             assert result.deviation_multiple == expected_dev
             assert set(result.source_transaction_ids) == set(qualifying_ids)
             assert result.source_account_id == acct_id
+            assert result.currency == "INR"
         finally:
             _cleanup_seeded_data(superuser_engine, cid)
 
@@ -554,4 +558,282 @@ class TestAmountDeviation:
             assert acct_count_before == acct_count_after
             assert cust_count_before == cust_count_after
         finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    # ---------------------------------------------------------------------------
+    # F3 CURRENCY-CORRECTNESS TESTS (N1-N7)
+    # ---------------------------------------------------------------------------
+
+    def test_n1_computed_currency_comes_from_data(
+        self, superuser_engine: Engine, app_engine: Engine
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="USD",
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="USD",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            assert isinstance(result, AmountDeviationComputed)
+            assert result.currency == "USD"
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    @pytest.mark.parametrize("missing_val", [None, "", "   "])
+    def test_n2_alerted_currency_missing(
+        self, superuser_engine: Engine, app_engine: Engine, missing_val: str | None
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="INR",
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency=missing_val,
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_ALERTED_CURRENCY_MISSING,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_ALERTED_CURRENCY_MISSING
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    def test_n3_alerted_currency_null_and_no_history(
+        self, superuser_engine: Engine, app_engine: Engine
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency=None,
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_ALERTED_CURRENCY_MISSING,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_ALERTED_CURRENCY_MISSING
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    @pytest.mark.parametrize("missing_val", [None, "", "   "])
+    def test_n4_historical_currency_missing(
+        self, superuser_engine: Engine, app_engine: Engine, missing_val: str | None
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="INR",
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency=missing_val,
+                occurred_at=alerted_time - timedelta(days=20),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="INR",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_HISTORICAL_CURRENCY_MISSING,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_HISTORICAL_CURRENCY_MISSING
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    @pytest.mark.parametrize("mismatch_val", ["USD", "inr"])
+    def test_n5_currency_mismatch(
+        self, superuser_engine: Engine, app_engine: Engine, mismatch_val: str
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency=mismatch_val,
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="INR",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_CURRENCY_MISMATCH,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_CURRENCY_MISMATCH
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    def test_n6_precedence_missing_over_mismatch(
+        self, superuser_engine: Engine, app_engine: Engine
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            # Scenario (i): missing over mismatch
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency=None,
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="USD",
+                occurred_at=alerted_time - timedelta(days=20),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="INR",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_HISTORICAL_CURRENCY_MISSING,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_HISTORICAL_CURRENCY_MISSING
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    def test_n6_precedence_mismatch_over_zero_average(
+        self, superuser_engine: Engine, app_engine: Engine
+    ) -> None:
+        cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            alerted_time = datetime.now(timezone.utc)
+            # Scenario (ii): mismatch over zero average
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("0.00"),
+                currency="USD",
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="INR",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            from meridian.agents.transaction.amount_deviation import (
+                REASON_CURRENCY_MISMATCH,
+            )
+
+            assert isinstance(result, AmountDeviationUnknown)
+            assert result.reason == REASON_CURRENCY_MISMATCH
+        finally:
+            _cleanup_seeded_data(superuser_engine, cid)
+
+    def test_n7_guard_scope(self, superuser_engine: Engine, app_engine: Engine) -> None:
+        cid = _seed_customer(superuser_engine)
+        other_cid = _seed_customer(superuser_engine)
+        try:
+            acct_id = _seed_account(superuser_engine, cid)
+            other_acct = _seed_account(superuser_engine, other_cid)
+            alerted_time = datetime.now(timezone.utc)
+
+            # valid in-window row
+            valid_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="INR",
+                occurred_at=alerted_time - timedelta(days=10),
+            )
+            # (a) out-of-window row with USD
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="USD",
+                occurred_at=alerted_time - timedelta(days=100),
+            )
+            # (b) destination-only incoming tx with USD
+            _seed_transaction(
+                superuser_engine,
+                source_account_id=other_acct,
+                destination_account_id=acct_id,
+                amount=Decimal("100"),
+                currency="USD",
+                occurred_at=alerted_time - timedelta(days=20),
+            )
+
+            alerted_tid = _seed_transaction(
+                superuser_engine,
+                source_account_id=acct_id,
+                amount=Decimal("500"),
+                currency="INR",
+                occurred_at=alerted_time,
+            )
+            result = compute_amount_deviation(app_engine, alerted_tid)
+            assert isinstance(result, AmountDeviationComputed)
+            assert result.currency == "INR"
+            assert set(result.source_transaction_ids) == {valid_tid}
+        finally:
+            _cleanup_seeded_data(superuser_engine, other_cid)
             _cleanup_seeded_data(superuser_engine, cid)

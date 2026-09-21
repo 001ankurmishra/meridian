@@ -121,6 +121,7 @@ def test_all_evidence_found(
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
         source_transaction_ids=(uuid.uuid4(),),
+        currency="INR",
     )
     mock_run_graph.return_value = None
     mock_retrieve.return_value = PolicyEvidenceFound(
@@ -179,6 +180,7 @@ def test_policy_evidence_insufficient(
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
         source_transaction_ids=(uuid.uuid4(),),
+        currency="INR",
     )
     mock_run_graph.return_value = None
     mock_retrieve.return_value = PolicyEvidenceInsufficient()
@@ -292,6 +294,7 @@ def test_graph_agent_hard_failure(
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
         source_transaction_ids=(uuid.uuid4(),),
+        currency="INR",
     )
     mock_run_graph.side_effect = ValueError("Graph Boom")
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
@@ -324,6 +327,7 @@ def test_policy_agent_hard_failure(
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
         source_transaction_ids=(uuid.uuid4(),),
+        currency="INR",
     )
     mock_run_graph.return_value = None
     mock_retrieve.side_effect = RuntimeError("Policy Boom")
