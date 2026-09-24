@@ -195,6 +195,9 @@ meridian_app has SELECT, INSERT only on this table; UPDATE/DELETE are not grante
 | `created_at` | timestamptz | |
 
 ### 4.14 `recommendations`
+
+In the MVP, recommendations are authored deterministically by the F2 authoring step, one per INVESTIGATIVE finding, from a fixed human-review-directed template, in the same transaction as evidence and findings; REFERENCE (policy) findings produce none; no LLM is used; PROTOTYPE. The example text "Escalate case for enhanced human review" in the table below is illustrative only and is not what the MVP authors.
+
 | Column | Type | Notes |
 |---|---|---|
 | `recommendation_id` | UUID PK | |

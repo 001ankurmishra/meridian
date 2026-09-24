@@ -23,6 +23,15 @@ from meridian.findings.findings import (
     evaluate_evidence_sufficiency,
     record_finding_with_connection,
 )
+from meridian.recommendations.recommendations import (
+    record_recommendation_with_connection,
+)
+
+INVESTIGATIVE_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the alerted transaction and the historical transactions "
+    "used for comparison, before any determination is made."
+)
 
 PROTOTYPE_CONFIDENCE_FLOOR: Final[str] = "LOW"
 
@@ -54,15 +63,23 @@ class FindingDraft:
 
 
 @dataclass(frozen=True)
+class RecommendationDraft:
+    finding_index: int
+    text: str
+
+
+@dataclass(frozen=True)
 class AuthoringDrafts:
     evidence: tuple[EvidenceDraft, ...]
     findings: tuple[FindingDraft, ...]
+    recommendations: tuple[RecommendationDraft, ...]
 
 
 @dataclass(frozen=True)
 class AuthoringResult:
     evidence_ids: tuple[uuid.UUID, ...]
     finding_ids: tuple[uuid.UUID, ...]
+    recommendation_ids: tuple[uuid.UUID, ...]
 
 
 class AuthoringError(Exception):
@@ -86,6 +103,7 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
     """Build evidence and findings drafts deterministically from the outcome."""
     evidence: list[EvidenceDraft] = []
     findings: list[FindingDraft] = []
+    recommendations: list[RecommendationDraft] = []
 
     # Computed transaction outcome
     if outcome.transaction is not None and isinstance(
@@ -148,6 +166,12 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                 interpretation=interpretation,
                 evidence_keys=evidence_keys,
                 confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+            )
+        )
+        recommendations.append(
+            RecommendationDraft(
+                finding_index=len(findings) - 1,
+                text=INVESTIGATIVE_RECOMMENDATION_TEXT,
             )
         )
 
@@ -226,6 +250,7 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
     drafts = AuthoringDrafts(
         evidence=tuple(evidence),
         findings=tuple(findings),
+        recommendations=tuple(recommendations),
     )
 
     # Invariants
@@ -260,6 +285,16 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                 "Finding confidence violates prototype floor."
             )
 
+    inv_count = sum(1 for f in drafts.findings if f.category == FindingCategory.INVESTIGATIVE)  # noqa: E501
+    if len(drafts.recommendations) != inv_count:
+        raise AuthoringInvariantError("Exactly one recommendation must exist per INVESTIGATIVE finding.")  # noqa: E501
+
+    for r in drafts.recommendations:
+        if not (0 <= r.finding_index < len(drafts.findings)):
+            raise AuthoringInvariantError("Recommendation finding_index is out of bounds.")  # noqa: E501
+        if drafts.findings[r.finding_index].category != FindingCategory.INVESTIGATIVE:
+            raise AuthoringInvariantError("Recommendation targets a non-INVESTIGATIVE finding.")  # noqa: E501
+
     return drafts
 
 
@@ -293,7 +328,7 @@ def author_investigation_records(
 
     # 3. If no drafts
     if not drafts.evidence and not drafts.findings:
-        return AuthoringResult(evidence_ids=(), finding_ids=())
+        return AuthoringResult(evidence_ids=(), finding_ids=(), recommendation_ids=())
 
     # 4. Insert evidence
     resolved_keys: dict[str, uuid.UUID] = {}
@@ -332,8 +367,21 @@ def author_investigation_records(
         )
         finding_ids.append(record_f.finding_id)
 
-    # 6. Return
+    # 6. For each recommendation
+    recommendation_ids: list[uuid.UUID] = []
+    for rd in drafts.recommendations:
+        finding_id = finding_ids[rd.finding_index]
+        record_r = record_recommendation_with_connection(
+            conn=conn,
+            investigation_run_id=run_id,
+            recommendation_text=rd.text,
+            based_on_finding_ids=[finding_id],
+        )
+        recommendation_ids.append(record_r.recommendation_id)
+
+    # 7. Return
     return AuthoringResult(
         evidence_ids=tuple(evidence_ids),
         finding_ids=tuple(finding_ids),
+        recommendation_ids=tuple(recommendation_ids),
     )

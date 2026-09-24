@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
 
 
 @dataclass(frozen=True)
@@ -16,6 +16,82 @@ class RecommendationRecord:
     text: str
     based_on_finding_ids: list[uuid.UUID]
     created_at: datetime
+
+
+def record_recommendation_with_connection(
+    conn: Connection,
+    investigation_run_id: uuid.UUID,
+    recommendation_text: str,
+    based_on_finding_ids: list[uuid.UUID],
+) -> RecommendationRecord:
+    """Record a recommendation using an existing database connection.
+
+    Args:
+        conn: The caller-owned SQLAlchemy Connection.
+        investigation_run_id: The UUID of the investigation run.
+        recommendation_text: The text of the recommendation.
+        based_on_finding_ids: A list of finding UUIDs this recommendation is based on.
+            Can be empty if the layer does not enforce report-time sufficiency.
+
+    Returns:
+        A RecommendationRecord object containing the persisted recommendation details.
+
+    Raises:
+        ValueError: If any provided finding IDs do not exist in the findings table.
+    """
+    recommendation_id = uuid.uuid4()
+    now = datetime.now(timezone.utc)
+
+    if based_on_finding_ids:
+        result = conn.execute(
+            text(
+                "SELECT count(finding_id) FROM findings "
+                "WHERE finding_id = ANY(:finding_ids)"
+            ),
+            {"finding_ids": based_on_finding_ids},
+        ).scalar()
+
+        unique_finding_ids = set(based_on_finding_ids)
+        if result != len(unique_finding_ids):
+            raise ValueError(
+                "One or more provided finding IDs do not exist in the "
+                "findings table."
+            )
+
+    conn.execute(
+        text(
+            """
+            INSERT INTO recommendations (
+                recommendation_id,
+                investigation_run_id,
+                text,
+                based_on_finding_ids,
+                created_at
+            ) VALUES (
+                :recommendation_id,
+                :investigation_run_id,
+                :recommendation_text,
+                :based_on_finding_ids,
+                :now
+            )
+            """
+        ),
+        {
+            "recommendation_id": recommendation_id,
+            "investigation_run_id": investigation_run_id,
+            "recommendation_text": recommendation_text,
+            "based_on_finding_ids": based_on_finding_ids,
+            "now": now,
+        },
+    )
+
+    return RecommendationRecord(
+        recommendation_id=recommendation_id,
+        investigation_run_id=investigation_run_id,
+        text=recommendation_text,
+        based_on_finding_ids=based_on_finding_ids,
+        created_at=now,
+    )
 
 
 def record_recommendation(
@@ -43,57 +119,10 @@ def record_recommendation(
     Raises:
         ValueError: If any provided finding IDs do not exist in the findings table.
     """
-    recommendation_id = uuid.uuid4()
-    now = datetime.now(timezone.utc)
-
     with engine.begin() as conn:
-        if based_on_finding_ids:
-            result = conn.execute(
-                text(
-                    "SELECT count(finding_id) FROM findings "
-                    "WHERE finding_id = ANY(:finding_ids)"
-                ),
-                {"finding_ids": based_on_finding_ids},
-            ).scalar()
-
-            unique_finding_ids = set(based_on_finding_ids)
-            if result != len(unique_finding_ids):
-                raise ValueError(
-                    "One or more provided finding IDs do not exist in the "
-                    "findings table."
-                )
-
-        conn.execute(
-            text(
-                """
-                INSERT INTO recommendations (
-                    recommendation_id,
-                    investigation_run_id,
-                    text,
-                    based_on_finding_ids,
-                    created_at
-                ) VALUES (
-                    :recommendation_id,
-                    :investigation_run_id,
-                    :recommendation_text,
-                    :based_on_finding_ids,
-                    :now
-                )
-                """
-            ),
-            {
-                "recommendation_id": recommendation_id,
-                "investigation_run_id": investigation_run_id,
-                "recommendation_text": recommendation_text,
-                "based_on_finding_ids": based_on_finding_ids,
-                "now": now,
-            },
+        return record_recommendation_with_connection(
+            conn,
+            investigation_run_id,
+            recommendation_text,
+            based_on_finding_ids,
         )
-
-    return RecommendationRecord(
-        recommendation_id=recommendation_id,
-        investigation_run_id=investigation_run_id,
-        text=recommendation_text,
-        based_on_finding_ids=based_on_finding_ids,
-        created_at=now,
-    )
