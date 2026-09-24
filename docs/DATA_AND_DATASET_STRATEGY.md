@@ -49,6 +49,8 @@ Since real internal bank AML policy documents aren't available, the policy corpu
 
 This distinction must be visible in the UI/report wherever a policy citation appears (`docs/DESIGN.md` §6) — a citation to (a) is a real regulatory reference; a citation to (b) is illustrative.
 
+A four-document synthetic internal-policy corpus v1 now exists. Documents are loaded by `meridian.loader.main` and are marked `is_synthetic = true`. No `regulatory_guidance` documents are included yet; regulatory guidance remains deferred pending EXTERNAL source verification.
+
 ---
 
 ## 5. Data Governance
