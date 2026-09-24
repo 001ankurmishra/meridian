@@ -115,6 +115,9 @@ def _cleanup_data(
     superuser_engine: Engine, customer_id: uuid.UUID | None = None
 ) -> None:
     with superuser_engine.begin() as conn:
+        conn.execute(text("DELETE FROM recommendations"))
+        conn.execute(text("DELETE FROM findings"))
+        conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))
         conn.execute(text("DELETE FROM cases"))
@@ -292,6 +295,45 @@ def test_graph_agent_dispatch_invalid_hops(
             assert ar_rows[0][0] == "GraphAgent"
             assert ar_rows[0][1] == "FAILED"
             assert "max_hops must be >= 1" in ar_rows[0][2]
+
+    finally:
+        _cleanup_data(superuser_engine, cid)
+
+
+def test_passes_supplied_agent_run_id(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Graph dispatcher passes supplied agent_run_id to tracking."""
+    cid = _seed_customer(superuser_engine)
+    aid = _seed_account(superuser_engine, cid)
+    eid = _seed_entity(superuser_engine, reference_id=aid)
+
+    eid2 = _seed_entity(superuser_engine)
+    _seed_relationship(superuser_engine, eid, eid2)
+
+    case_id = _seed_alert_case(superuser_engine, cid)
+
+    try:
+        inv_run = create_investigation_run(app_role_engine, case_id)
+        supplied_ar_id = uuid.uuid4()
+
+        run_graph_agent(
+            app_role_engine,
+            inv_run.investigation_run_id,
+            aid,
+            max_hops=1,
+            agent_run_id=supplied_ar_id,
+        )  # noqa: E501
+
+        with superuser_engine.connect() as conn:
+            ar_rows = conn.execute(
+                text(
+                    "SELECT agent_run_id FROM agent_runs WHERE investigation_run_id = :inv_id"  # noqa: E501
+                ),  # noqa: E501
+                {"inv_id": inv_run.investigation_run_id},
+            ).fetchall()
+            assert len(ar_rows) == 1
+            assert ar_rows[0][0] == supplied_ar_id
 
     finally:
         _cleanup_data(superuser_engine, cid)

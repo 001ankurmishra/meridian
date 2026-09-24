@@ -29,6 +29,7 @@ def run_policy_agent(
     engine: Engine,
     investigation_run_id: uuid.UUID,
     query: str,
+    agent_run_id: uuid.UUID | None = None,
 ) -> PolicyAgentResult:
     """Run PolicyAgent and record the invocation.
 
@@ -36,6 +37,7 @@ def run_policy_agent(
         engine: Database engine.
         investigation_run_id: ID of the investigation run to attach this agent run to.
         query: The user-supplied query string for policy retrieval.
+        agent_run_id: Optional ID for the agent run.
 
     Returns:
         The exact result from the PolicyAgent domain layer.
@@ -51,4 +53,5 @@ def run_policy_agent(
         "PolicyAgent",
         _do_retrieve,
         tool_calls=_POLICY_AGENT_TOOL_CALLS,
+        agent_run_id=agent_run_id,
     )

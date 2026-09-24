@@ -1,4 +1,5 @@
 """Tests for PolicyAgent dispatch."""
+
 # ruff: noqa: E501
 import uuid
 from datetime import datetime, timezone
@@ -27,24 +28,34 @@ def seeded_case_id(superuser_engine: Engine) -> Generator[uuid.UUID, None, None]
     now = datetime.now(timezone.utc)
     with superuser_engine.begin() as conn:
         conn.execute(
-            text("INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) VALUES (:cid, 'Test', true, :now)"),
-            {"cid": cid, "now": now}
+            text(
+                "INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) VALUES (:cid, 'Test', true, :now)"
+            ),  # noqa: E501
+            {"cid": cid, "now": now},
         )
         conn.execute(
-            text("INSERT INTO accounts (account_id, customer_id, status, created_at) VALUES (:aid, :cid, 'active', :now)"),
-            {"aid": aid, "cid": cid, "now": now}
+            text(
+                "INSERT INTO accounts (account_id, customer_id, status, created_at) VALUES (:aid, :cid, 'active', :now)"
+            ),  # noqa: E501
+            {"aid": aid, "cid": cid, "now": now},
         )
         conn.execute(
-            text("INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) VALUES (:tid, :aid, 100, 'INR', :now, :now)"),
-            {"tid": tid, "aid": aid, "now": now}
+            text(
+                "INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) VALUES (:tid, :aid, 100, 'INR', :now, :now)"
+            ),  # noqa: E501
+            {"tid": tid, "aid": aid, "now": now},
         )
         conn.execute(
-            text("INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) VALUES (:alert_id, :cid, :tid, :now)"),
-            {"alert_id": alert_id, "cid": cid, "tid": tid, "now": now}
+            text(
+                "INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) VALUES (:alert_id, :cid, :tid, :now)"
+            ),  # noqa: E501
+            {"alert_id": alert_id, "cid": cid, "tid": tid, "now": now},
         )
         conn.execute(
-            text("INSERT INTO cases (case_id, alert_id, status, opened_at, created_at) VALUES (:case_id, :alert_id, 'OPEN', :now, :now)"),
-            {"case_id": case_id, "alert_id": alert_id, "now": now}
+            text(
+                "INSERT INTO cases (case_id, alert_id, status, opened_at, created_at) VALUES (:case_id, :alert_id, 'OPEN', :now, :now)"
+            ),  # noqa: E501
+            {"case_id": case_id, "alert_id": alert_id, "now": now},
         )
 
     yield case_id
@@ -52,11 +63,20 @@ def seeded_case_id(superuser_engine: Engine) -> Generator[uuid.UUID, None, None]
     with superuser_engine.begin() as conn:
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))
-        conn.execute(text("DELETE FROM cases WHERE case_id = :case_id"), {"case_id": case_id})
-        conn.execute(text("DELETE FROM alerts WHERE alert_id = :alert_id"), {"alert_id": alert_id})
-        conn.execute(text("DELETE FROM transactions WHERE transaction_id = :tid"), {"tid": tid})
+        conn.execute(
+            text("DELETE FROM cases WHERE case_id = :case_id"), {"case_id": case_id}
+        )  # noqa: E501
+        conn.execute(
+            text("DELETE FROM alerts WHERE alert_id = :alert_id"),
+            {"alert_id": alert_id},
+        )  # noqa: E501
+        conn.execute(
+            text("DELETE FROM transactions WHERE transaction_id = :tid"), {"tid": tid}
+        )  # noqa: E501
         conn.execute(text("DELETE FROM accounts WHERE account_id = :aid"), {"aid": aid})
-        conn.execute(text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": cid})
+        conn.execute(
+            text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": cid}
+        )  # noqa: E501
 
 
 @pytest.fixture
@@ -75,7 +95,7 @@ def agent_synthetic_corpus(
                 [
                     "This is a chunk about money laundering regulations.",
                     "Another chunk containing unrelated financial advice.",
-                    "Peculiar wording to test lexical search specifically: flibbertigibbet.",
+                    "Peculiar wording to test lexical search specifically: flibbertigibbet.",  # noqa: E501
                 ],
             ),
             (
@@ -83,7 +103,7 @@ def agent_synthetic_corpus(
                 "internal_policy",
                 "v1",
                 [
-                    "Semantic similarity target: The sky is blue and the sun is shining.",
+                    "Semantic similarity target: The sky is blue and the sun is shining.",  # noqa: E501
                     "A completely random chunk.",
                 ],
             ),
@@ -107,7 +127,7 @@ def agent_synthetic_corpus(
                     sa.text(
                         "INSERT INTO document_chunks "
                         "(chunk_id, document_id, chunk_text, chunk_index, embedding) "
-                        "VALUES (:cid, :did, :ctext, :cindex, cast(:emb as vector(384)))"
+                        "VALUES (:cid, :did, :ctext, :cindex, cast(:emb as vector(384)))"  # noqa: E501
                     ),
                     {
                         "cid": str(chunk_id),
@@ -127,7 +147,9 @@ def test_happy_path_evidence_found(
     inv_run = create_investigation_run(app_role_engine, seeded_case_id)
 
     # 2. Run PolicyAgent dispatch
-    res = run_policy_agent(app_role_engine, inv_run.investigation_run_id, "flibbertigibbet")
+    res = run_policy_agent(
+        app_role_engine, inv_run.investigation_run_id, "flibbertigibbet"
+    )  # noqa: E501
 
     # Assert result is what we expect
     assert isinstance(res, PolicyEvidenceFound)
@@ -137,7 +159,9 @@ def test_happy_path_evidence_found(
     # 3. Assert exact database state for agent_runs
     with app_role_engine.begin() as conn:
         ar_rows = conn.execute(
-            text("SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"),
+            text(
+                "SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"
+            ),  # noqa: E501
             {"inv_id": inv_run.investigation_run_id},
         ).fetchall()
         assert len(ar_rows) == 1
@@ -164,7 +188,9 @@ def test_domain_insufficient_evidence(
     # Assert exactly one agent_runs row, still status='SUCCESS'
     with app_role_engine.begin() as conn:
         ar_rows = conn.execute(
-            text("SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"),
+            text(
+                "SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"
+            ),  # noqa: E501
             {"inv_id": inv_run.investigation_run_id},
         ).fetchall()
         assert len(ar_rows) == 1
@@ -173,12 +199,15 @@ def test_domain_insufficient_evidence(
         assert ar_rows[0][2] is None
 
 
-def test_execution_failure(app_role_engine: Engine, monkeypatch: pytest.MonkeyPatch, seeded_case_id: uuid.UUID) -> None:
+def test_execution_failure(
+    app_role_engine: Engine, monkeypatch: pytest.MonkeyPatch, seeded_case_id: uuid.UUID
+) -> None:  # noqa: E501
     # Patch the domain function to raise an exception
     def mock_retrieve_policy_evidence(*args, **kwargs):
         raise ValueError("Simulated retrieval failure")
 
     import meridian.orchestration.policy_agent_dispatch
+
     monkeypatch.setattr(
         meridian.orchestration.policy_agent_dispatch,
         "retrieve_policy_evidence",
@@ -192,7 +221,9 @@ def test_execution_failure(app_role_engine: Engine, monkeypatch: pytest.MonkeyPa
 
     with app_role_engine.begin() as conn:
         ar_rows = conn.execute(
-            text("SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"),
+            text(
+                "SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"
+            ),  # noqa: E501
             {"inv_id": inv_run.investigation_run_id},
         ).fetchall()
         assert len(ar_rows) == 1
@@ -200,3 +231,27 @@ def test_execution_failure(app_role_engine: Engine, monkeypatch: pytest.MonkeyPa
         assert ar_rows[0][1] == "FAILED"
         assert ar_rows[0][2] is not None
         assert "Simulated retrieval failure" in ar_rows[0][2]
+
+
+def test_passes_supplied_agent_run_id(
+    app_role_engine: Engine, seeded_case_id: uuid.UUID, agent_synthetic_corpus: None
+) -> None:
+    inv_run = create_investigation_run(app_role_engine, seeded_case_id)
+    supplied_ar_id = uuid.uuid4()
+
+    run_policy_agent(
+        app_role_engine,
+        inv_run.investigation_run_id,
+        "flibbertigibbet",
+        agent_run_id=supplied_ar_id,
+    )  # noqa: E501
+
+    with app_role_engine.begin() as conn:
+        ar_rows = conn.execute(
+            text(
+                "SELECT agent_run_id FROM agent_runs WHERE investigation_run_id = :inv_id"
+            ),  # noqa: E501
+            {"inv_id": inv_run.investigation_run_id},
+        ).fetchall()
+        assert len(ar_rows) == 1
+        assert ar_rows[0][0] == supplied_ar_id

@@ -8,7 +8,7 @@ from alembic.config import Config
 from sqlalchemy import Engine, text
 
 from alembic import command
-from meridian.evidence.evidence import record_evidence
+from meridian.evidence.evidence import record_evidence, record_evidence_with_connection
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
 
@@ -112,9 +112,7 @@ def setup_alert(
     return alert_id
 
 
-def setup_case(
-    superuser_engine: Engine, alert_id: uuid.UUID
-) -> uuid.UUID:
+def setup_case(superuser_engine: Engine, alert_id: uuid.UUID) -> uuid.UUID:
     """Helper to setup a case for an alert."""
     case_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
@@ -132,6 +130,8 @@ def setup_case(
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
+        conn.execute(text("DELETE FROM recommendations"))
+        conn.execute(text("DELETE FROM findings"))
         conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))
@@ -422,6 +422,68 @@ def test_real_proof_case(app_role_engine: Engine, superuser_engine: Engine) -> N
 
         assert ar_inv_id == evidence_result.investigation_run_id
         assert db_ev[1] == ar_inv_id
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_record_evidence_with_connection_uses_caller_connection(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Connection-taking evidence persistence helper writes using the caller-owned connection."""  # noqa: E501
+    cid, tid = setup_customer_and_transaction(superuser_engine)
+    try:
+        alert_id = setup_alert(superuser_engine, cid, tid)
+        case_id = setup_case(superuser_engine, alert_id)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+
+        ar_id = uuid.uuid4()
+        with app_role_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "  # noqa: E501
+                    "VALUES (:ar_id, :inv_id, 'test_agent', '{}'::jsonb, 'SUCCESS', :now)"  # noqa: E501
+                ),
+                {
+                    "ar_id": ar_id,
+                    "inv_id": inv_run.investigation_run_id,
+                    "now": datetime.now(timezone.utc),
+                },  # noqa: E501
+            )
+
+        with app_role_engine.begin() as conn:
+            # We call record_evidence_with_connection with this connection.
+            result = record_evidence_with_connection(
+                conn,
+                inv_run.investigation_run_id,
+                "transaction",
+                "transactions",
+                tid,
+                produced_by_agent_run_id=ar_id,
+            )
+
+            # Uncommitted read should succeed inside this transaction
+            rows = conn.execute(
+                text("SELECT evidence_id FROM evidence WHERE evidence_id = :ev_id"),
+                {"ev_id": result.evidence_id},
+            ).fetchall()
+            assert len(rows) == 1
+
+            # Another connection should not see it yet, verifying it uses our uncommitted transaction  # noqa: E501
+            with superuser_engine.connect() as check_conn:
+                check_rows = check_conn.execute(
+                    text("SELECT evidence_id FROM evidence WHERE evidence_id = :ev_id"),
+                    {"ev_id": result.evidence_id},
+                ).fetchall()
+                assert len(check_rows) == 0
+
+        # After commit, it should be visible
+        with superuser_engine.connect() as check_conn:
+            check_rows = check_conn.execute(
+                text("SELECT evidence_id FROM evidence WHERE evidence_id = :ev_id"),
+                {"ev_id": result.evidence_id},
+            ).fetchall()
+            assert len(check_rows) == 1
 
     finally:
         _cleanup_seeded_data(superuser_engine, cid)

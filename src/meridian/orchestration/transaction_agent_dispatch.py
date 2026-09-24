@@ -38,13 +38,15 @@ def run_transaction_agent(
     engine: Engine,
     investigation_run_id: uuid.UUID,
     transaction_id: uuid.UUID,
+    agent_run_id: uuid.UUID | None = None,
 ) -> TransactionAgentDispatchResult:
-    """Dispatch the TransactionAgent for an investigation.
+    """Run the TransactionAgent (compute_amount_deviation).
 
     Args:
         engine: Application-role SQLAlchemy Engine.
-        investigation_run_id: The UUID of the active investigation run.
-        transaction_id: The UUID of the transaction.
+        investigation_run_id: The UUID of the current investigation run.
+        transaction_id: The UUID of the transaction to analyze.
+        agent_run_id: Optional ID for the agent run.
 
     Returns:
         A minimal frozen dataclass with the investigation_run_id and the F3 result.
@@ -57,6 +59,7 @@ def run_transaction_agent(
         engine,
         transaction_id,
         tool_calls=_TRANSACTION_AGENT_TOOL_CALLS,
+        agent_run_id=agent_run_id,
     )
 
     return TransactionAgentDispatchResult(

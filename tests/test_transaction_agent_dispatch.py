@@ -25,7 +25,7 @@ def _seed_customer(superuser_engine: Engine) -> uuid.UUID:
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) "
+                "INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) "  # noqa: E501
                 "VALUES (:cid, 'Test Customer', true, :now)"
             ),
             {"cid": cid, "now": datetime.now(timezone.utc)},
@@ -54,6 +54,7 @@ def _seed_transaction(
 ) -> uuid.UUID:
     tid = uuid.uuid4()
     import datetime as dt
+
     occurred_at = datetime.now(timezone.utc)
     if days_ago > 0:
         occurred_at -= dt.timedelta(days=days_ago)
@@ -61,7 +62,7 @@ def _seed_transaction(
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) "
+                "INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) "  # noqa: E501
                 "VALUES (:tid, :src, :amount, 'INR', :occ, :now)"
             ),
             {
@@ -84,7 +85,7 @@ def _seed_alert_case(
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) "
+                "INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) "  # noqa: E501
                 "VALUES (:aid, :cid, :tid, :now)"
             ),
             {"aid": alert_id, "cid": customer_id, "tid": transaction_id, "now": now},
@@ -101,6 +102,9 @@ def _seed_alert_case(
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
+        conn.execute(text("DELETE FROM recommendations"))
+        conn.execute(text("DELETE FROM findings"))
+        conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))
         conn.execute(text("DELETE FROM cases"))
@@ -112,8 +116,12 @@ def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> No
             ),
             {"cid": customer_id},
         )
-        conn.execute(text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id})
-        conn.execute(text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id})
+        conn.execute(
+            text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id}
+        )  # noqa: E501
+        conn.execute(
+            text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id}
+        )  # noqa: E501
 
 
 def test_happy_path(app_role_engine: Engine, superuser_engine: Engine) -> None:
@@ -129,7 +137,9 @@ def test_happy_path(app_role_engine: Engine, superuser_engine: Engine) -> None:
         _, case_id = _seed_alert_case(superuser_engine, cid, tid)
         inv_run = create_investigation_run(app_role_engine, case_id)
 
-        dispatch_result = run_transaction_agent(app_role_engine, inv_run.investigation_run_id, tid)
+        dispatch_result = run_transaction_agent(
+            app_role_engine, inv_run.investigation_run_id, tid
+        )  # noqa: E501
 
         assert isinstance(dispatch_result, TransactionAgentDispatchResult)
         assert isinstance(dispatch_result.result, AmountDeviationComputed)
@@ -139,7 +149,9 @@ def test_happy_path(app_role_engine: Engine, superuser_engine: Engine) -> None:
         # Verify investigation_runs row
         with superuser_engine.connect() as conn:
             inv_rows = conn.execute(
-                text("SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": dispatch_result.investigation_run_id},
             ).fetchall()
             assert len(inv_rows) == 1
@@ -147,7 +159,9 @@ def test_happy_path(app_role_engine: Engine, superuser_engine: Engine) -> None:
 
             # Verify agent_runs row
             ar_rows = conn.execute(
-                text("SELECT agent_name, status FROM agent_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT agent_name, status FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": dispatch_result.investigation_run_id},
             ).fetchall()
             assert len(ar_rows) == 1
@@ -168,7 +182,9 @@ def test_domain_unknown(app_role_engine: Engine, superuser_engine: Engine) -> No
         _, case_id = _seed_alert_case(superuser_engine, cid, tid)
         inv_run = create_investigation_run(app_role_engine, case_id)
 
-        dispatch_result = run_transaction_agent(app_role_engine, inv_run.investigation_run_id, tid)
+        dispatch_result = run_transaction_agent(
+            app_role_engine, inv_run.investigation_run_id, tid
+        )  # noqa: E501
 
         assert isinstance(dispatch_result, TransactionAgentDispatchResult)
         assert isinstance(dispatch_result.result, AmountDeviationUnknown)
@@ -178,7 +194,9 @@ def test_domain_unknown(app_role_engine: Engine, superuser_engine: Engine) -> No
         # Verify investigation_runs row is still IN_PROGRESS
         with superuser_engine.connect() as conn:
             inv_rows = conn.execute(
-                text("SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": dispatch_result.investigation_run_id},
             ).fetchall()
             assert len(inv_rows) == 1
@@ -186,7 +204,9 @@ def test_domain_unknown(app_role_engine: Engine, superuser_engine: Engine) -> No
 
             # Verify agent_runs row is SUCCESS
             ar_rows = conn.execute(
-                text("SELECT agent_name, status FROM agent_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT agent_name, status FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": dispatch_result.investigation_run_id},
             ).fetchall()
             assert len(ar_rows) == 1
@@ -214,7 +234,9 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
         # Verify investigation_runs row is IN_PROGRESS
         with superuser_engine.connect() as conn:
             inv_rows = conn.execute(
-                text("SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT status FROM investigation_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": inv_id},
             ).fetchall()
             assert len(inv_rows) == 1
@@ -222,7 +244,9 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
 
             # Verify agent_runs row is FAILED
             ar_rows = conn.execute(
-                text("SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT agent_name, status, error FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": inv_id},
             ).fetchall()
             assert len(ar_rows) == 1
@@ -235,4 +259,42 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
         _cleanup_seeded_data(superuser_engine, cid)
         if tid is not None:
             with superuser_engine.begin() as conn:
-                conn.execute(text("DELETE FROM transactions WHERE transaction_id = :tid"), {"tid": tid})
+                conn.execute(
+                    text("DELETE FROM transactions WHERE transaction_id = :tid"),
+                    {"tid": tid},
+                )  # noqa: E501
+
+
+def test_passes_supplied_agent_run_id(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Transaction dispatcher passes supplied agent_run_id to tracking."""
+    cid = _seed_customer(superuser_engine)
+    try:
+        aid = _seed_account(superuser_engine, cid)
+        _seed_transaction(superuser_engine, aid, Decimal("50.0"), 10)
+        _seed_transaction(superuser_engine, aid, Decimal("50.0"), 20)
+        tid = _seed_transaction(superuser_engine, aid, Decimal("1000.0"), 0)
+        _, case_id = _seed_alert_case(superuser_engine, cid, tid)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+
+        supplied_ar_id = uuid.uuid4()
+        run_transaction_agent(
+            app_role_engine,
+            inv_run.investigation_run_id,
+            tid,
+            agent_run_id=supplied_ar_id,
+        )  # noqa: E501
+
+        with superuser_engine.connect() as conn:
+            ar_rows = conn.execute(
+                text(
+                    "SELECT agent_run_id FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
+                {"inv_id": inv_run.investigation_run_id},
+            ).fetchall()
+            assert len(ar_rows) == 1
+            assert ar_rows[0][0] == supplied_ar_id
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)

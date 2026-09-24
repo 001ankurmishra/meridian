@@ -1,5 +1,5 @@
-"""Tests for findings module."""
 
+"""Tests for findings module."""
 import uuid
 from datetime import datetime, timezone
 
@@ -12,6 +12,7 @@ from meridian.evidence.evidence import record_evidence
 from meridian.findings.findings import (
     evaluate_evidence_sufficiency,
     record_finding,
+    record_finding_with_connection,
 )
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
@@ -84,9 +85,7 @@ def setup_alert(
     return alert_id
 
 
-def setup_case(
-    superuser_engine: Engine, alert_id: uuid.UUID
-) -> uuid.UUID:
+def setup_case(superuser_engine: Engine, alert_id: uuid.UUID) -> uuid.UUID:
     """Helper to setup a case for an alert."""
     case_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
@@ -188,8 +187,8 @@ def test_confidence_check_constraint(
                 )
                 conn.commit()
             assert (
-                "chk_findings_confidence" in str(excinfo.value).lower() or
-                "check constraint" in str(excinfo.value).lower()
+                "chk_findings_confidence" in str(excinfo.value).lower()
+                or "check constraint" in str(excinfo.value).lower()
             )
             conn.rollback()
     finally:
@@ -292,10 +291,9 @@ def test_record_finding_rejects_unresolvable_evidence_id(
         with superuser_engine.connect() as conn:
             res = conn.execute(
                 text(
-                    "SELECT count(*) FROM findings "
-                    "WHERE investigation_run_id = :inv_id"
+                    "SELECT count(*) FROM findings WHERE investigation_run_id = :inv_id"
                 ),
-                {"inv_id": inv_run.investigation_run_id}
+                {"inv_id": inv_run.investigation_run_id},
             ).scalar()
             assert res == 0
 
@@ -319,6 +317,7 @@ def test_real_proof_case(app_role_engine: Engine, superuser_engine: Engine) -> N
         # Generate some previous transactions to allow the deviation to be non-zero
         occurred_at_1 = datetime.now(timezone.utc)
         import datetime as dt
+
         occurred_at_1 -= dt.timedelta(days=10)
 
         with superuser_engine.begin() as conn:
@@ -395,8 +394,7 @@ def test_real_proof_case(app_role_engine: Engine, superuser_engine: Engine) -> N
         # 6. Verify finding fields
         assert finding_record.investigation_run_id == inv_run.investigation_run_id
         assert finding_record.observed_fact == (
-            f"Transaction deviation multiple is "
-            f"{agent_result.deviation_multiple:.2f}"
+            f"Transaction deviation multiple is {agent_result.deviation_multiple:.2f}"
         )
         assert finding_record.derived_signal == (
             f"Alerted amount: {agent_result.alerted_amount}"
@@ -406,6 +404,102 @@ def test_real_proof_case(app_role_engine: Engine, superuser_engine: Engine) -> N
 
         # 7. Verify evaluate_evidence_sufficiency
         assert evaluate_evidence_sufficiency(finding_record.evidence_ids) is True
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_record_finding_with_connection_uses_caller_connection(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Connection-taking finding persistence helper writes using the caller-owned connection and preserves validation."""  # noqa: E501
+    cid, tid = setup_customer_and_transaction(superuser_engine)
+    try:
+        alert_id = setup_alert(superuser_engine, cid, tid)
+        case_id = setup_case(superuser_engine, alert_id)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+
+        ar_id = uuid.uuid4()
+        with app_role_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "  # noqa: E501
+                    "VALUES (:ar_id, :inv_id, 'test_agent', '{}'::jsonb, 'SUCCESS', :now)"  # noqa: E501
+                ),
+                {
+                    "ar_id": ar_id,
+                    "inv_id": inv_run.investigation_run_id,
+                    "now": datetime.now(timezone.utc),
+                },  # noqa: E501
+            )
+
+            # Insert an evidence row
+            ev_id = uuid.uuid4()
+            conn.execute(
+                text(
+                    "INSERT INTO evidence ("
+                    "evidence_id, investigation_run_id, evidence_type, "
+                    "reference_table, reference_id, "
+                    "produced_by_agent_run_id, created_at) "
+                    "VALUES (:ev_id, :inv_id, 'transaction', "
+                    "'transactions', :tid, :ar_id, :now)"
+                ),
+                {
+                    "ev_id": ev_id,
+                    "inv_id": inv_run.investigation_run_id,
+                    "tid": tid,
+                    "ar_id": ar_id,
+                    "now": datetime.now(timezone.utc),
+                },
+            )
+
+        with app_role_engine.begin() as conn:
+            # We call record_finding_with_connection with this connection.
+            result = record_finding_with_connection(
+                conn,
+                inv_run.investigation_run_id,
+                "fact",
+                None,
+                None,
+                [ev_id],
+                "LOW",
+            )
+
+            # Uncommitted read should succeed inside this transaction
+            rows = conn.execute(
+                text("SELECT finding_id FROM findings WHERE finding_id = :f_id"),
+                {"f_id": result.finding_id},
+            ).fetchall()
+            assert len(rows) == 1
+
+            # Another connection should not see it yet, verifying it uses our uncommitted transaction  # noqa: E501
+            with superuser_engine.connect() as check_conn:
+                check_rows = check_conn.execute(
+                    text("SELECT finding_id FROM findings WHERE finding_id = :f_id"),
+                    {"f_id": result.finding_id},
+                ).fetchall()
+                assert len(check_rows) == 0
+
+        # After commit, it should be visible
+        with superuser_engine.connect() as check_conn:
+            check_rows = check_conn.execute(
+                text("SELECT finding_id FROM findings WHERE finding_id = :f_id"),
+                {"f_id": result.finding_id},
+            ).fetchall()
+            assert len(check_rows) == 1
+
+        # Verify invalid evidence throws error inside the connection
+        with app_role_engine.begin() as conn:
+            with pytest.raises(ValueError, match="do not exist in the evidence table"):
+                record_finding_with_connection(
+                    conn,
+                    inv_run.investigation_run_id,
+                    "fact",
+                    None,
+                    None,
+                    [uuid.uuid4()],
+                    "LOW",
+                )
 
     finally:
         _cleanup_seeded_data(superuser_engine, cid)
