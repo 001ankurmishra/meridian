@@ -11,7 +11,7 @@ from meridian.agents.report.report_assembly import (
     InvestigationReport,
     assemble_report,
 )
-from meridian.evidence.evidence import record_evidence
+from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, record_evidence
 from meridian.findings.findings import record_finding
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.recommendations.recommendations import record_recommendation
@@ -193,7 +193,7 @@ def test_assemble_report_success(
         ev_policy = record_evidence(
             app_role_engine,
             investigation_run_id=inv_run.investigation_run_id,
-            evidence_type="policy_chunk",
+            evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
             reference_id=uuid.uuid4(),
             produced_by_agent_run_id=ar_id,
