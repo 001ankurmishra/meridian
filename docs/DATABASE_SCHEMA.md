@@ -76,7 +76,7 @@ Index: `(customer_id)`.
 | `source_account_id` | UUID FK → accounts, nullable | |
 | `destination_account_id` | UUID FK → accounts, nullable | |
 | `amount` | numeric(18,2) | |
-| `currency` | text | default INR for worked examples |
+| `currency` | text, nullable | No DB default (worked-example and test data use `INR`). F3 requires a non-blank value on every row it compares; otherwise the amount-deviation result is Unknown. |
 | `transaction_type` | text | transfer/payment/etc. |
 | `occurred_at` | timestamptz | |
 | `counterparty_external_ref` | text, nullable | for transactions leaving the synthetic universe |

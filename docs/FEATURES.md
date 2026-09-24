@@ -22,7 +22,7 @@ Runs the rule-based dispatch described in `docs/ARCHITECTURE.md` §5: creates an
 
 **Phase:** MVP · **Module:** `agents.transaction`
 
-Computes, via SQL against `transactions`/`accounts`, the alerted transaction's deviation from the customer's historical behavior (e.g., multiple of trailing average, velocity of recent transactions, presence of a newly created beneficiary). Every computed signal links to the specific source rows used.
+Computes, via SQL against `transactions`/`accounts`, the alerted transaction's deviation from the customer's historical behavior (e.g., multiple of trailing average, velocity of recent transactions, presence of a newly created beneficiary). Every computed signal links to the specific source rows used. Amount comparison is performed only when the alerted transaction and every qualifying historical transaction have an established (non-blank) currency and all currencies are identical (exact string match, no normalization); otherwise the result is `UNKNOWN` (`AmountDeviationUnknown`) with a currency-specific reason.
 
 ## F4. Basic Transaction Graph
 

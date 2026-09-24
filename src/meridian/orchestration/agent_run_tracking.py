@@ -17,22 +17,20 @@ def record_agent_run(
     fn: Callable[..., T],
     *args: Any,
     tool_calls: dict[str, Any] | None = None,
+    agent_run_id: uuid.UUID | None = None,
     **kwargs: Any,
 ) -> T:
     """Wrap an agent invocation to record its execution in the database.
 
     Args:
+        engine: Application-role SQLAlchemy Engine.
         investigation_run_id: UUID of the investigation run.
         agent_name: Name of the agent (e.g., 'TransactionAgent').
         fn: The agent function to invoke.
         *args: Positional arguments to pass to fn.
         tool_calls: A coarse, per-agent-run summary of the tool(s)/query(ies)
-            this invocation is known to make (F9). Keyword-only, so it can
-            never be confused with a positional argument to fn. None (the
-            default sentinel; never a mutable default) is recorded as an
-            empty object, meaning "no tool-call summary supplied" -- this
-            is never fabricated by this function itself, only ever passed
-            in by the caller who actually knows what fn does.
+            this invocation is known to make (F9). Keyword-only.
+        agent_run_id: If provided, use this UUID for the run. Otherwise generate one.
         **kwargs: Keyword arguments to pass to fn.
 
     Returns:
@@ -45,7 +43,7 @@ def record_agent_run(
         Inserts exactly one row into the `agent_runs` table indicating the
         run's status ('SUCCESS' or 'FAILED'), timestamps, and tool_calls.
     """
-    agent_run_id = uuid.uuid4()
+    persisted_run_id = agent_run_id if agent_run_id is not None else uuid.uuid4()
     started_at = datetime.now(timezone.utc)
     recorded_tool_calls: dict[str, Any] = tool_calls if tool_calls is not None else {}
 
@@ -83,7 +81,7 @@ def record_agent_run(
                     """
                 ),
                 {
-                    "agent_run_id": agent_run_id,
+                    "agent_run_id": persisted_run_id,
                     "investigation_run_id": investigation_run_id,
                     "agent_name": agent_name,
                     "tool_calls": json.dumps(recorded_tool_calls),
@@ -125,7 +123,7 @@ def record_agent_run(
                     """
                 ),
                 {
-                    "agent_run_id": agent_run_id,
+                    "agent_run_id": persisted_run_id,
                     "investigation_run_id": investigation_run_id,
                     "agent_name": agent_name,
                     "tool_calls": json.dumps(recorded_tool_calls),

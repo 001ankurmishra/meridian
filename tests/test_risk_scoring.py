@@ -32,6 +32,7 @@ def test_compute_risk_score_is_pure_pass_through() -> None:
         deviation_multiple=Decimal("5.0"),
         historical_transaction_count=2,
         source_transaction_ids=(uuid.uuid4(), uuid.uuid4()),
+        currency="INR",
     )
     result = compute_risk_score(signal)
 
@@ -127,6 +128,7 @@ def test_record_risk_signal_persists_row(
             deviation_multiple=Decimal("5.0"),
             historical_transaction_count=2,
             source_transaction_ids=(uuid.uuid4(), uuid.uuid4()),
+            currency="INR",
         )
         result = compute_risk_score(signal)
 

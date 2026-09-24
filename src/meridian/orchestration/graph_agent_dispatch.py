@@ -52,6 +52,7 @@ def run_graph_agent(
     investigation_run_id: uuid.UUID,
     account_id: uuid.UUID,
     max_hops: int,
+    agent_run_id: uuid.UUID | None = None,
 ) -> GraphAgentDispatchResult:
     """Dispatch the GraphAgent for an investigation.
 
@@ -60,6 +61,7 @@ def run_graph_agent(
         investigation_run_id: The UUID of the active investigation run.
         account_id: The UUID of the account to analyze.
         max_hops: The maximum hops parameter for the bounded subgraph.
+        agent_run_id: Optional ID for the agent run.
 
     Returns:
         A minimal frozen dataclass with the investigation_run_id and the F4 result.
@@ -73,6 +75,7 @@ def run_graph_agent(
         account_id,
         max_hops,
         tool_calls=_GRAPH_AGENT_TOOL_CALLS,
+        agent_run_id=agent_run_id,
     )
 
     return GraphAgentDispatchResult(

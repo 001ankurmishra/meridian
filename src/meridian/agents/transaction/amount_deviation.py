@@ -16,12 +16,31 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Final
 
 from sqlalchemy import Engine, text
 
 from meridian.agents.transaction.errors import (
     InvalidTransactionError,
     TransactionNotFoundError,
+)
+
+REASON_NO_HISTORY: Final[str] = (
+    "no qualifying historical transactions in the 90-day trailing window"
+)
+REASON_ZERO_AVERAGE: Final[str] = (
+    "historical average is zero; deviation multiple is undefined"
+)
+REASON_ALERTED_CURRENCY_MISSING: Final[str] = (
+    "alerted transaction currency is missing or blank; amounts cannot be compared"
+)
+REASON_HISTORICAL_CURRENCY_MISSING: Final[str] = (
+    "one or more historical transaction currencies are missing or blank; "
+    "amounts cannot be compared"
+)
+REASON_CURRENCY_MISMATCH: Final[str] = (
+    "historical transaction currency differs from the alerted transaction currency; "
+    "amounts cannot be compared"
 )
 
 
@@ -36,6 +55,7 @@ class AmountDeviationComputed:
     deviation_multiple: Decimal
     historical_transaction_count: int
     source_transaction_ids: tuple[uuid.UUID, ...]
+    currency: str
 
 
 @dataclass(frozen=True)
@@ -94,8 +114,8 @@ def compute_amount_deviation(
         # 2. Fetch the alerted transaction
         alerted_row = conn.execute(
             text(
-                "SELECT transaction_id, source_account_id, amount, occurred_at "
-                "FROM transactions WHERE transaction_id = :tid"
+                "SELECT transaction_id, source_account_id, amount, occurred_at, "
+                "currency FROM transactions WHERE transaction_id = :tid"
             ),
             {"tid": tid},
         ).fetchone()
@@ -108,6 +128,7 @@ def compute_amount_deviation(
         source_account_id = alerted_row[1]
         alerted_amount: Decimal = alerted_row[2]
         alerted_occurred_at = alerted_row[3]
+        alerted_currency: str | None = alerted_row[4]
 
         # 3. source_account_id must not be NULL
         if source_account_id is None:
@@ -133,10 +154,18 @@ def compute_amount_deviation(
 
         customer_id: uuid.UUID = customer_row[0]
 
-        # 5. Qualifying history query
+        # 5. Alerted currency missing
+        if alerted_currency is None or alerted_currency.strip() == "":
+            return AmountDeviationUnknown(
+                alerted_transaction_id=tid,
+                source_account_id=source_account_id,
+                reason=REASON_ALERTED_CURRENCY_MISSING,
+            )
+
+        # 6. Qualifying history query
         history_rows = conn.execute(
             text(
-                "SELECT t.transaction_id, t.amount "
+                "SELECT t.transaction_id, t.amount, t.currency "
                 "FROM transactions t "
                 "JOIN accounts a ON a.account_id = t.source_account_id "
                 "WHERE a.customer_id = :customer_id "
@@ -151,36 +180,44 @@ def compute_amount_deviation(
             },
         ).fetchall()
 
-        # 6. Zero qualifying rows
+        # 7. Zero qualifying rows
         if len(history_rows) == 0:
             return AmountDeviationUnknown(
                 alerted_transaction_id=tid,
                 source_account_id=source_account_id,
-                reason=(
-                    "no qualifying historical transactions in the "
-                    "90-day trailing window"
-                ),
+                reason=REASON_NO_HISTORY,
             )
 
-        # 7. Compute average in Python from returned Decimal amounts
+        # 8/9. Validate historical currencies
+        if any(row[2] is None or row[2].strip() == "" for row in history_rows):
+            return AmountDeviationUnknown(
+                alerted_transaction_id=tid,
+                source_account_id=source_account_id,
+                reason=REASON_HISTORICAL_CURRENCY_MISSING,
+            )
+        if any(row[2] != alerted_currency for row in history_rows):
+            return AmountDeviationUnknown(
+                alerted_transaction_id=tid,
+                source_account_id=source_account_id,
+                reason=REASON_CURRENCY_MISMATCH,
+            )
+
+        # 10. Compute average in Python from returned Decimal amounts
         amounts: list[Decimal] = [row[1] for row in history_rows]
         source_ids: tuple[uuid.UUID, ...] = tuple(
             row[0] for row in history_rows
         )
         historical_average = sum(amounts, Decimal("0")) / len(amounts)
 
-        # 8. Zero average
+        # 11. Zero average
         if historical_average == 0:
             return AmountDeviationUnknown(
                 alerted_transaction_id=tid,
                 source_account_id=source_account_id,
-                reason=(
-                    "historical average is zero; deviation multiple "
-                    "is undefined"
-                ),
+                reason=REASON_ZERO_AVERAGE,
             )
 
-        # 9. Compute deviation multiple
+        # 12. Compute deviation multiple
         deviation_multiple = alerted_amount / historical_average
 
         # 10. Return computed result
@@ -192,4 +229,5 @@ def compute_amount_deviation(
             deviation_multiple=deviation_multiple,
             historical_transaction_count=len(history_rows),
             source_transaction_ids=source_ids,
+            currency=alerted_currency,
         )

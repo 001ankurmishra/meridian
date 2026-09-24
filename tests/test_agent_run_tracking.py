@@ -22,12 +22,13 @@ def _seed_customer(superuser_engine: Engine) -> uuid.UUID:
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) "
+                "INSERT INTO customers (customer_id, full_name, is_synthetic, created_at) "  # noqa: E501
                 "VALUES (:cid, 'Test Customer', true, :now)"
             ),
             {"cid": cid, "now": datetime.now(timezone.utc)},
         )
     return cid
+
 
 def _seed_account(superuser_engine: Engine, customer_id: uuid.UUID) -> uuid.UUID:
     aid = uuid.uuid4()
@@ -41,6 +42,7 @@ def _seed_account(superuser_engine: Engine, customer_id: uuid.UUID) -> uuid.UUID
         )
     return aid
 
+
 def _seed_transaction(
     superuser_engine: Engine,
     source_account_id: uuid.UUID | None,
@@ -51,12 +53,13 @@ def _seed_transaction(
     occurred_at = datetime.now(timezone.utc)
     if days_ago > 0:
         import datetime as dt
+
         occurred_at -= dt.timedelta(days=days_ago)
 
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) "
+                "INSERT INTO transactions (transaction_id, source_account_id, amount, currency, occurred_at, created_at) "  # noqa: E501
                 "VALUES (:tid, :src, :amount, 'INR', :occ, :now)"
             ),
             {
@@ -69,6 +72,7 @@ def _seed_transaction(
         )
     return tid
 
+
 def _seed_alert_case_investigation(
     superuser_engine: Engine, customer_id: uuid.UUID, transaction_id: uuid.UUID
 ) -> tuple[uuid.UUID, uuid.UUID, uuid.UUID]:
@@ -79,7 +83,7 @@ def _seed_alert_case_investigation(
     with superuser_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) "
+                "INSERT INTO alerts (alert_id, customer_id, transaction_id, created_at) "  # noqa: E501
                 "VALUES (:aid, :cid, :tid, :now)"
             ),
             {"aid": alert_id, "cid": customer_id, "tid": transaction_id, "now": now},
@@ -93,15 +97,19 @@ def _seed_alert_case_investigation(
         )
         conn.execute(
             text(
-                "INSERT INTO investigation_runs (investigation_run_id, case_id, status, started_at, created_at) "
+                "INSERT INTO investigation_runs (investigation_run_id, case_id, status, started_at, created_at) "  # noqa: E501
                 "VALUES (:inv_id, :case_id, 'IN_PROGRESS', :now, :now)"
             ),
             {"inv_id": inv_id, "case_id": case_id, "now": now},
         )
     return alert_id, case_id, inv_id
 
+
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
+        conn.execute(text("DELETE FROM recommendations"))
+        conn.execute(text("DELETE FROM findings"))
+        conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))
         conn.execute(text("DELETE FROM cases"))
@@ -113,8 +121,12 @@ def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> No
             ),
             {"cid": customer_id},
         )
-        conn.execute(text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id})
-        conn.execute(text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id})
+        conn.execute(
+            text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id}
+        )  # noqa: E501
+        conn.execute(
+            text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id}
+        )  # noqa: E501
 
 
 def test_migration_downgrade_upgrade(superuser_engine: Engine) -> None:
@@ -150,27 +162,38 @@ def test_app_role_privileges(app_role_engine: Engine, superuser_engine: Engine) 
             # INSERT should succeed
             conn.execute(
                 text(
-                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "
-                    "VALUES (:ar_id, :inv_id, 'test_agent', '{}'::jsonb, 'SUCCESS', :now)"
+                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "  # noqa: E501
+                    "VALUES (:ar_id, :inv_id, 'test_agent', '{}'::jsonb, 'SUCCESS', :now)"  # noqa: E501
                 ),
                 {"ar_id": ar_id, "inv_id": inv_id, "now": datetime.now(timezone.utc)},
             )
             conn.commit()
 
             # SELECT should succeed
-            count = conn.execute(text("SELECT count(*) FROM agent_runs WHERE agent_run_id = :ar_id"), {"ar_id": ar_id}).scalar()
+            count = conn.execute(
+                text("SELECT count(*) FROM agent_runs WHERE agent_run_id = :ar_id"),
+                {"ar_id": ar_id},
+            ).scalar()  # noqa: E501
             assert count == 1
 
             # UPDATE should fail
             with pytest.raises(Exception) as excinfo:
-                conn.execute(text("UPDATE agent_runs SET status = 'FAILED' WHERE agent_run_id = :ar_id"), {"ar_id": ar_id})
+                conn.execute(
+                    text(
+                        "UPDATE agent_runs SET status = 'FAILED' WHERE agent_run_id = :ar_id"
+                    ),
+                    {"ar_id": ar_id},
+                )  # noqa: E501
                 conn.commit()
             assert "permission denied" in str(excinfo.value).lower()
             conn.rollback()
 
             # DELETE should fail
             with pytest.raises(Exception) as excinfo:
-                conn.execute(text("DELETE FROM agent_runs WHERE agent_run_id = :ar_id"), {"ar_id": ar_id})
+                conn.execute(
+                    text("DELETE FROM agent_runs WHERE agent_run_id = :ar_id"),
+                    {"ar_id": ar_id},
+                )  # noqa: E501
                 conn.commit()
             assert "permission denied" in str(excinfo.value).lower()
             conn.rollback()
@@ -185,15 +208,17 @@ def test_fk_integrity(app_role_engine: Engine) -> None:
         with pytest.raises(Exception) as excinfo:
             conn.execute(
                 text(
-                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "
-                    "VALUES (gen_random_uuid(), gen_random_uuid(), 'test_agent', '{}'::jsonb, 'SUCCESS', NOW())"
+                    "INSERT INTO agent_runs (agent_run_id, investigation_run_id, agent_name, tool_calls, status, started_at) "  # noqa: E501
+                    "VALUES (gen_random_uuid(), gen_random_uuid(), 'test_agent', '{}'::jsonb, 'SUCCESS', NOW())"  # noqa: E501
                 )
             )
             conn.commit()
         assert "foreign key constraint" in str(excinfo.value).lower()
 
 
-def test_record_agent_run_success(app_role_engine: Engine, superuser_engine: Engine) -> None:
+def test_record_agent_run_success(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
     """Successful invocation produces a SUCCESS row and returns the correct value."""
     cid = _seed_customer(superuser_engine)
     try:
@@ -201,7 +226,7 @@ def test_record_agent_run_success(app_role_engine: Engine, superuser_engine: Eng
         # Create history and a current transaction
         _seed_transaction(superuser_engine, aid, 100.0, 10)
         _seed_transaction(superuser_engine, aid, 200.0, 5)
-        tid = _seed_transaction(superuser_engine, aid, 450.0, 0) # alerted transaction
+        tid = _seed_transaction(superuser_engine, aid, 450.0, 0)  # alerted transaction
 
         _, _, inv_id = _seed_alert_case_investigation(superuser_engine, cid, tid)
 
@@ -210,7 +235,7 @@ def test_record_agent_run_success(app_role_engine: Engine, superuser_engine: Eng
             inv_id,
             "TransactionAgent",
             compute_amount_deviation,
-            app_role_engine,  # pass engine as first positional arg for compute_amount_deviation
+            app_role_engine,  # pass engine as first positional arg for compute_amount_deviation  # noqa: E501
             tid,
         )
 
@@ -220,7 +245,9 @@ def test_record_agent_run_success(app_role_engine: Engine, superuser_engine: Eng
         # Verify db record
         with superuser_engine.connect() as conn:
             rows = conn.execute(
-                text("SELECT status, error, tool_calls FROM agent_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT status, error, tool_calls FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": inv_id},
             ).fetchall()
             assert len(rows) == 1
@@ -236,7 +263,9 @@ def _dummy_agent_fail(*args: Any, **kwargs: Any) -> None:
     raise ValueError("deliberate test failure")
 
 
-def test_record_agent_run_failure(app_role_engine: Engine, superuser_engine: Engine) -> None:
+def test_record_agent_run_failure(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
     """Failed invocation produces a FAILED row and re-raises exception."""
     cid = _seed_customer(superuser_engine)
     try:
@@ -255,13 +284,91 @@ def test_record_agent_run_failure(app_role_engine: Engine, superuser_engine: Eng
         # Verify db record
         with superuser_engine.connect() as conn:
             rows = conn.execute(
-                text("SELECT status, error, tool_calls FROM agent_runs WHERE investigation_run_id = :inv_id"),
+                text(
+                    "SELECT status, error, tool_calls FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
                 {"inv_id": inv_id},
             ).fetchall()
             assert len(rows) == 1
             assert rows[0][0] == "FAILED"
             assert "deliberate test failure" in rows[0][1]
             assert rows[0][2] == {}
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_record_agent_run_success_explicit_run_id(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Successful invocation produces a SUCCESS row and uses the supplied agent_run_id."""  # noqa: E501
+    cid = _seed_customer(superuser_engine)
+    try:
+        aid = _seed_account(superuser_engine, cid)
+        _seed_transaction(superuser_engine, aid, 100.0, 10)
+        _seed_transaction(superuser_engine, aid, 200.0, 5)
+        tid = _seed_transaction(superuser_engine, aid, 450.0, 0)
+
+        _, _, inv_id = _seed_alert_case_investigation(superuser_engine, cid, tid)
+        supplied_ar_id = uuid.uuid4()
+
+        result = record_agent_run(
+            app_role_engine,
+            inv_id,
+            "TransactionAgent",
+            compute_amount_deviation,
+            app_role_engine,
+            tid,
+            agent_run_id=supplied_ar_id,
+        )
+
+        assert isinstance(result, AmountDeviationComputed)
+
+        with superuser_engine.connect() as conn:
+            rows = conn.execute(
+                text(
+                    "SELECT agent_run_id, status FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
+                {"inv_id": inv_id},
+            ).fetchall()
+            assert len(rows) == 1
+            assert rows[0][0] == supplied_ar_id
+            assert rows[0][1] == "SUCCESS"
+
+    finally:
+        _cleanup_seeded_data(superuser_engine, cid)
+
+
+def test_record_agent_run_failure_explicit_run_id(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
+    """Failed invocation produces a FAILED row and uses the supplied agent_run_id."""
+    cid = _seed_customer(superuser_engine)
+    try:
+        aid = _seed_account(superuser_engine, cid)
+        tid = _seed_transaction(superuser_engine, aid, 100.0, 0)
+        _, _, inv_id = _seed_alert_case_investigation(superuser_engine, cid, tid)
+        supplied_ar_id = uuid.uuid4()
+
+        with pytest.raises(ValueError):
+            record_agent_run(
+                app_role_engine,
+                inv_id,
+                "TestAgent",
+                _dummy_agent_fail,
+                agent_run_id=supplied_ar_id,
+            )
+
+        with superuser_engine.connect() as conn:
+            rows = conn.execute(
+                text(
+                    "SELECT agent_run_id, status FROM agent_runs WHERE investigation_run_id = :inv_id"
+                ),  # noqa: E501
+                {"inv_id": inv_id},
+            ).fetchall()
+            assert len(rows) == 1
+            assert rows[0][0] == supplied_ar_id
+            assert rows[0][1] == "FAILED"
 
     finally:
         _cleanup_seeded_data(superuser_engine, cid)
