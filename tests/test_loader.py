@@ -43,6 +43,9 @@ def test_loader_idempotency_and_data_accuracy() -> None:
         assert a_count == 104
         assert t_count == 509  # 500 bg + 6 hist + 1 suspicious + 2 split = 509
 
+        doc_count = conn.execute(text("SELECT count(*) FROM documents")).scalar()
+        assert doc_count == 4
+
         # Verify orphans (none should exist)
         orphan_accts = conn.execute(
             text(
@@ -126,6 +129,9 @@ def test_loader_idempotency_and_data_accuracy() -> None:
         # The counts should be EXACTLY the same
         c_count_after = conn.execute(text("SELECT count(*) FROM customers")).scalar()
         assert c_count_after == 104
+
+        doc_count_after = conn.execute(text("SELECT count(*) FROM documents")).scalar()
+        assert doc_count_after == 4
 
         # Validate byte-for-byte matches
         second_run_txs = conn.execute(
@@ -216,7 +222,7 @@ def test_loader_least_privilege() -> None:
 
     loader_tables = [
         "customers", "accounts", "transactions", "beneficiaries",
-        "entities", "graph_relationships"
+        "entities", "graph_relationships", "documents", "document_chunks"
     ]
 
     with engine.connect() as conn:

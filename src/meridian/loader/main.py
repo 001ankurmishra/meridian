@@ -45,6 +45,8 @@ def clear_data(migrator_engine: Engine) -> None:
 
     print("Clearing tables...")
     with migrator_engine.begin() as conn:
+        conn.execute(text("DELETE FROM document_chunks"))
+        conn.execute(text("DELETE FROM documents"))
         conn.execute(text("DELETE FROM graph_relationships"))
         conn.execute(text("DELETE FROM entities"))
         conn.execute(text("DELETE FROM beneficiaries"))
@@ -253,6 +255,10 @@ def main() -> None:
     # Generate and Insert Background Data
     bg_data = generate_background_data()
     insert_data(loader_engine, bg_data)
+
+    from meridian.loader.policy_ingest import ingest_policy_corpus
+    docs_inserted, chunks_inserted = ingest_policy_corpus(loader_engine)
+    print(f"Policy corpus loaded: {docs_inserted} documents, {chunks_inserted} chunks.")
 
     print("Load complete.")
 
