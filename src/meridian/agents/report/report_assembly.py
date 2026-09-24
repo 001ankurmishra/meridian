@@ -6,7 +6,7 @@ from typing import List
 
 from sqlalchemy import Engine, text
 
-from meridian.evidence.evidence import EvidenceRecord
+from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, EvidenceRecord
 from meridian.findings.findings import FindingRecord, evaluate_evidence_sufficiency
 from meridian.recommendations.recommendations import RecommendationRecord
 
@@ -181,8 +181,14 @@ def assemble_report(
                 for row in evidence_rows
             ]
 
-        evidence = [e for e in all_evidence if e.evidence_type != "policy_chunk"]
-        policies = [e for e in all_evidence if e.evidence_type == "policy_chunk"]
+        evidence = [
+            e for e in all_evidence
+            if e.evidence_type != EVIDENCE_TYPE_POLICY_CHUNK
+        ]
+        policies = [
+            e for e in all_evidence
+            if e.evidence_type == EVIDENCE_TYPE_POLICY_CHUNK
+        ]
 
         # Deterministic summary and confidence
         summary = (
