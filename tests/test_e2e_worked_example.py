@@ -134,6 +134,7 @@ def test_worked_example_end_to_end(
         conn.execute(text("DELETE FROM findings"))
         conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM agent_runs"))
+        conn.execute(text("DELETE FROM risk_signals"))
         conn.execute(text("DELETE FROM investigation_runs"))
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
@@ -582,6 +583,13 @@ def test_worked_example_end_to_end(
                     {"cid": case_id},
                 )
             if run_id is not None:
+                conn.execute(
+                    text(
+                        "DELETE FROM risk_signals "
+                        "WHERE investigation_run_id = :rid"
+                    ),
+                    {"rid": run_id},
+                )
                 conn.execute(
                     text(
                         "DELETE FROM recommendations "

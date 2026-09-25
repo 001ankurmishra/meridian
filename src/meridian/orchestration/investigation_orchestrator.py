@@ -26,6 +26,10 @@ from meridian.orchestration.graph_agent_dispatch import run_graph_agent
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.policy_agent_dispatch import run_policy_agent
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
+from meridian.risk_engine.risk_signals import (
+    compute_risk_score,
+    record_risk_signal_with_connection,
+)
 
 
 def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
@@ -152,6 +156,16 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
         try:
             with engine.begin() as conn:
                 author_investigation_records(conn, outcome)
+
+                if isinstance(tx_result, AmountDeviationComputed):
+                    risk_score_result = compute_risk_score(tx_result)
+                    record_risk_signal_with_connection(
+                        conn=conn,
+                        investigation_run_id=inv_id,
+                        customer_id=alert_row.customer_id,
+                        transaction_id=alert_row.transaction_id,
+                        result=risk_score_result,
+                    )
                 conn.execute(
                     text(
                         "UPDATE investigation_runs SET status = :status, "
