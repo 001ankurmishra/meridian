@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
 
@@ -65,6 +65,69 @@ def compute_risk_score(signal: AmountDeviationComputed) -> RiskScoreResult:
     )
 
 
+def record_risk_signal_with_connection(
+    conn: Connection,
+    investigation_run_id: uuid.UUID | None,
+    customer_id: uuid.UUID,
+    transaction_id: uuid.UUID | None,
+    result: RiskScoreResult,
+) -> RiskScoreResult:
+    """Record a computed risk signal using an existing database connection.
+
+    Args:
+        conn: The caller-owned SQLAlchemy Connection.
+        investigation_run_id: UUID of the investigation run.
+        customer_id: UUID of the customer associated with the transaction.
+        transaction_id: UUID of the transaction being scored.
+        result: The computed risk score to persist.
+
+    Returns:
+        The same RiskScoreResult passed in, matching the project's convention.
+    """
+    risk_signal_id = uuid.uuid4()
+    created_at = datetime.now(timezone.utc)
+
+    conn.execute(
+        text(
+            """
+            INSERT INTO risk_signals (
+                risk_signal_id,
+                investigation_run_id,
+                customer_id,
+                transaction_id,
+                signal_type,
+                value,
+                model_version,
+                methodology,
+                created_at
+            ) VALUES (
+                :risk_signal_id,
+                :investigation_run_id,
+                :customer_id,
+                :transaction_id,
+                :signal_type,
+                :value,
+                NULL,
+                :methodology,
+                :created_at
+            )
+            """
+        ),
+        {
+            "risk_signal_id": risk_signal_id,
+            "investigation_run_id": investigation_run_id,
+            "customer_id": customer_id,
+            "transaction_id": transaction_id,
+            "signal_type": result.signal_type,
+            "value": result.value,
+            "methodology": result.methodology,
+            "created_at": created_at,
+        },
+    )
+
+    return result
+
+
 def record_risk_signal(
     engine: Engine,
     investigation_run_id: uuid.UUID | None,
@@ -87,46 +150,7 @@ def record_risk_signal(
     Side effects:
         Inserts exactly one row into `risk_signals`.
     """
-    risk_signal_id = uuid.uuid4()
-    created_at = datetime.now(timezone.utc)
-
     with engine.begin() as conn:
-        conn.execute(
-            text(
-                """
-                INSERT INTO risk_signals (
-                    risk_signal_id,
-                    investigation_run_id,
-                    customer_id,
-                    transaction_id,
-                    signal_type,
-                    value,
-                    model_version,
-                    methodology,
-                    created_at
-                ) VALUES (
-                    :risk_signal_id,
-                    :investigation_run_id,
-                    :customer_id,
-                    :transaction_id,
-                    :signal_type,
-                    :value,
-                    NULL,
-                    :methodology,
-                    :created_at
-                )
-                """
-            ),
-            {
-                "risk_signal_id": risk_signal_id,
-                "investigation_run_id": investigation_run_id,
-                "customer_id": customer_id,
-                "transaction_id": transaction_id,
-                "signal_type": result.signal_type,
-                "value": result.value,
-                "methodology": result.methodology,
-                "created_at": created_at,
-            },
+        return record_risk_signal_with_connection(
+            conn, investigation_run_id, customer_id, transaction_id, result
         )
-
-    return result
