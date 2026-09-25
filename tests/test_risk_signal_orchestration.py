@@ -67,7 +67,6 @@ def _seed_case_and_alert(
 
 def _cleanup(superuser_engine: Engine) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM risk_signals"))
         clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))

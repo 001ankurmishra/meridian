@@ -104,8 +104,6 @@ def _seed_alert_case(
 def _cleanup(superuser_engine: Engine, customer_id: uuid.UUID | None = None) -> None:
     with superuser_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
         clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))

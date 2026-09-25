@@ -111,7 +111,6 @@ def test_worked_example_end_to_end(
     # ==================== PRE-CLEAN ====================
     with superuser_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM risk_signals"))
         clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
@@ -468,35 +467,7 @@ def test_worked_example_end_to_end(
                     {"cid": case_id},
                 )
             if run_id is not None:
-                conn.execute(
-                    text("DELETE FROM risk_signals WHERE investigation_run_id = :rid"),
-                    {"rid": run_id},
-                )
-                conn.execute(
-                    text(
-                        "DELETE FROM recommendations WHERE investigation_run_id = :rid"
-                    ),
-                    {"rid": run_id},
-                )
-                conn.execute(
-                    text("DELETE FROM findings WHERE investigation_run_id = :rid"),
-                    {"rid": run_id},
-                )
-                conn.execute(
-                    text("DELETE FROM evidence WHERE investigation_run_id = :rid"),
-                    {"rid": run_id},
-                )
-                conn.execute(
-                    text("DELETE FROM agent_runs WHERE investigation_run_id = :rid"),
-                    {"rid": run_id},
-                )
-                conn.execute(
-                    text(
-                        "DELETE FROM investigation_runs "
-                        "WHERE investigation_run_id = :rid"
-                    ),
-                    {"rid": run_id},
-                )
+                clean_investigation_run_dependencies(conn, investigation_run_id=run_id)
             if case_id is not None:
                 conn.execute(
                     text("DELETE FROM cases WHERE case_id = :cid"),

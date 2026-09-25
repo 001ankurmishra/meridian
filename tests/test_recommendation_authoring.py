@@ -282,9 +282,6 @@ def test_u8_backward_compatibility() -> None:
 
 def _cleanup(superuser_engine: Engine) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM document_chunks"))
         conn.execute(text("DELETE FROM documents"))
         clean_investigation_run_dependencies(conn)
