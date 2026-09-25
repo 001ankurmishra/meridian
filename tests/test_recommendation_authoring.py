@@ -426,14 +426,19 @@ def test_d2_author_investigation_records(
         chunk_id = uuid.uuid4()
         conn.execute(
             text(
-                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
-            ),  # noqa: E501
+                "INSERT INTO documents "
+                "(document_id, title, document_type, version, "
+                "is_synthetic, created_at) "
+                "VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),
             {"did": doc_id},
         )
         conn.execute(
             text(
-                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
-            ),  # noqa: E501
+                "INSERT INTO document_chunks "
+                "(chunk_id, document_id, chunk_index, chunk_text, created_at) "
+                "VALUES (:cid, :did, 0, 'T', now())"
+            ),
             {"cid": chunk_id, "did": doc_id},
         )
 
@@ -493,8 +498,9 @@ def test_d2_author_investigation_records(
         # Check based_on_finding_ids matches INVESTIGATIVE finding
         inv_f_id = conn.execute(
             text(
-                "SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
-            )  # noqa: E501
+                "SELECT finding_id FROM findings "
+                "WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
+            )
         ).scalar()
         assert r_rows[0][1] == [inv_f_id]
 
@@ -514,14 +520,19 @@ def test_d3_unknown_transaction(
         chunk_id = uuid.uuid4()
         conn.execute(
             text(
-                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
-            ),  # noqa: E501
+                "INSERT INTO documents "
+                "(document_id, title, document_type, version, "
+                "is_synthetic, created_at) "
+                "VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),
             {"did": doc_id},
         )
         conn.execute(
             text(
-                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
-            ),  # noqa: E501
+                "INSERT INTO document_chunks "
+                "(chunk_id, document_id, chunk_index, chunk_text, created_at) "
+                "VALUES (:cid, :did, 0, 'T', now())"
+            ),
             {"cid": chunk_id, "did": doc_id},
         )
 
@@ -725,19 +736,24 @@ def test_o1_and_c1(
         chunk_id = uuid.uuid4()
         conn.execute(
             text(
-                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
-            ),  # noqa: E501
+                "INSERT INTO documents "
+                "(document_id, title, document_type, version, "
+                "is_synthetic, created_at) "
+                "VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),
             {"did": doc_id},
         )
         conn.execute(
             text(
-                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
-            ),  # noqa: E501
+                "INSERT INTO document_chunks "
+                "(chunk_id, document_id, chunk_index, chunk_text, created_at) "
+                "VALUES (:cid, :did, 0, 'T', now())"
+            ),
             {"cid": chunk_id, "did": doc_id},
         )
-        customer_id = conn.execute(
+        customer_id = conn.execute(  # noqa: F841
             text("SELECT customer_id FROM customers LIMIT 1")
-        ).scalar()  # noqa: E501, F841
+        ).scalar()
 
     _patch_agents(
         m_tx,
@@ -775,10 +791,11 @@ def test_o1_and_c1(
     with app_role_engine.begin() as conn:
         run = conn.execute(
             text(
-                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+                "SELECT investigation_run_id, status "
+                "FROM investigation_runs WHERE case_id = :cid"
             ),
             {"cid": case_id},
-        ).fetchone()  # noqa: E501
+        ).fetchone()
         assert run is not None
         assert run[1] == "COMPLETE"
         r = conn.execute(
@@ -790,8 +807,9 @@ def test_o1_and_c1(
         assert r == 1
         inv_f_id = conn.execute(
             text(
-                "SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
-            )  # noqa: E501
+                "SELECT finding_id FROM findings "
+                "WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
+            )
         ).scalar()
 
     # C1 test
@@ -841,10 +859,11 @@ def test_o2(
     with app_role_engine.begin() as conn:
         run = conn.execute(
             text(
-                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+                "SELECT investigation_run_id, status "
+                "FROM investigation_runs WHERE case_id = :cid"
             ),
             {"cid": case_id},
-        ).fetchone()  # noqa: E501
+        ).fetchone()
         assert run is not None
         assert run[1] == "INCOMPLETE_INSUFFICIENT_EVIDENCE"
         r = conn.execute(
@@ -872,14 +891,19 @@ def test_o3(
         chunk_id = uuid.uuid4()
         conn.execute(
             text(
-                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
-            ),  # noqa: E501
+                "INSERT INTO documents "
+                "(document_id, title, document_type, version, "
+                "is_synthetic, created_at) "
+                "VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),
             {"did": doc_id},
         )
         conn.execute(
             text(
-                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
-            ),  # noqa: E501
+                "INSERT INTO document_chunks "
+                "(chunk_id, document_id, chunk_index, chunk_text, created_at) "
+                "VALUES (:cid, :did, 0, 'T', now())"
+            ),
             {"cid": chunk_id, "did": doc_id},
         )
 
@@ -914,10 +938,11 @@ def test_o3(
     with app_role_engine.begin() as conn:
         run = conn.execute(
             text(
-                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+                "SELECT investigation_run_id, status "
+                "FROM investigation_runs WHERE case_id = :cid"
             ),
             {"cid": case_id},
-        ).fetchone()  # noqa: E501
+        ).fetchone()
         assert run is not None
         assert run[1] == "INCOMPLETE_INSUFFICIENT_EVIDENCE"
         r = conn.execute(
@@ -973,10 +998,11 @@ def test_o4(
     with app_role_engine.begin() as conn:
         run = conn.execute(
             text(
-                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+                "SELECT investigation_run_id, status "
+                "FROM investigation_runs WHERE case_id = :cid"
             ),
             {"cid": case_id},
-        ).fetchone()  # noqa: E501
+        ).fetchone()
         assert run is not None
         assert run[1] == "FAILED"
         r = conn.execute(

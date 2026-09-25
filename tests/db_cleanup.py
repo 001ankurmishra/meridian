@@ -9,7 +9,8 @@ def clean_investigation_run_dependencies(
 ) -> None:
     """
     Centralized helper for test database cleanup.
-    Explicitly deletes dependent tables in the correct FK order before deleting investigation_runs.
+    Explicitly deletes dependent tables in the correct FK order before
+    deleting investigation_runs.
     """
     if investigation_run_id:
         params = {"rid": str(investigation_run_id)}
