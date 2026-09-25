@@ -40,6 +40,7 @@ from meridian.recommendations.recommendations import (
     record_recommendation,
     record_recommendation_with_connection,
 )
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def test_u1_computed_tx_policy_found() -> None:
@@ -228,7 +229,9 @@ def test_u6_template_safety() -> None:
         "suspicious",
     ]
     for p in forbidden_phrases:
-        assert p.lower() not in text_val.lower(), f"Forbidden phrase '{p}' found in template"  # noqa: E501
+        assert p.lower() not in text_val.lower(), (
+            f"Forbidden phrase '{p}' found in template"
+        )  # noqa: E501
 
     forbidden_tokens = [
         "approve",
@@ -242,7 +245,9 @@ def test_u6_template_safety() -> None:
         "sar",
     ]
     for t in forbidden_tokens:
-        assert t.lower() not in text_val.lower(), f"Forbidden token '{t}' found in template"  # noqa: E501
+        assert t.lower() not in text_val.lower(), (
+            f"Forbidden token '{t}' found in template"
+        )  # noqa: E501
 
 
 def test_u7_determinism() -> None:
@@ -274,15 +279,12 @@ def test_u8_backward_compatibility() -> None:
 
 # ---------------- DB TESTS ----------------
 
+
 def _cleanup(superuser_engine: Engine) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM document_chunks"))
         conn.execute(text("DELETE FROM documents"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(text("DELETE FROM transactions"))
@@ -349,7 +351,12 @@ def _seed_investigation_run(app_role_engine: Engine, case_id: uuid.UUID) -> uuid
     return run_id
 
 
-def _seed_agent_run(app_role_engine: Engine, investigation_run_id: uuid.UUID, module: str, agent_run_id: uuid.UUID | None = None) -> uuid.UUID:  # noqa: E501
+def _seed_agent_run(
+    app_role_engine: Engine,
+    investigation_run_id: uuid.UUID,
+    module: str,
+    agent_run_id: uuid.UUID | None = None,
+) -> uuid.UUID:  # noqa: E501
     if agent_run_id is None:
         agent_run_id = uuid.uuid4()
     with app_role_engine.begin() as conn:
@@ -363,7 +370,9 @@ def _seed_agent_run(app_role_engine: Engine, investigation_run_id: uuid.UUID, mo
     return agent_run_id
 
 
-def test_d1_record_recommendation_with_connection(app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_d1_record_recommendation_with_connection(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     run_id = _seed_investigation_run(app_role_engine, case_id)
 
@@ -387,7 +396,9 @@ def test_d1_record_recommendation_with_connection(app_role_engine: Engine, super
     # 3. Unresolvable finding id raises ValueError
     with app_role_engine.begin() as conn:
         with pytest.raises(ValueError):
-            record_recommendation_with_connection(conn, run_id, "test 3", [uuid.uuid4()])  # noqa: E501
+            record_recommendation_with_connection(
+                conn, run_id, "test 3", [uuid.uuid4()]
+            )  # noqa: E501
 
     # 4. record_recommendation still works
     record_recommendation(app_role_engine, run_id, "test 4", [])
@@ -396,24 +407,34 @@ def test_d1_record_recommendation_with_connection(app_role_engine: Engine, super
         assert c == 2
 
 
-def test_d2_author_investigation_records(app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_d2_author_investigation_records(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     run_id = _seed_investigation_run(app_role_engine, case_id)
-    tx_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.transaction")  # noqa: E501
+    tx_agent_id = _seed_agent_run(
+        app_role_engine, run_id, "meridian.agents.transaction"
+    )  # noqa: E501
     policy_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.policy")
 
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
         doc_id = uuid.uuid4()
         chunk_id = uuid.uuid4()
         conn.execute(
-            text("INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"),  # noqa: E501
-            {"did": doc_id}
+            text(
+                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),  # noqa: E501
+            {"did": doc_id},
         )
         conn.execute(
-            text("INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"),  # noqa: E501
-            {"cid": chunk_id, "did": doc_id}
+            text(
+                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
+            ),  # noqa: E501
+            {"cid": chunk_id, "did": doc_id},
         )
 
     tx_outcome = TransactionOutcome(
@@ -463,33 +484,45 @@ def test_d2_author_investigation_records(app_role_engine: Engine, superuser_engi
     with app_role_engine.begin() as conn:
         f_count = conn.execute(text("SELECT count(*) FROM findings")).scalar()
         assert f_count == 2
-        r_rows = conn.execute(text("SELECT text, based_on_finding_ids FROM recommendations")).fetchall()  # noqa: E501
+        r_rows = conn.execute(
+            text("SELECT text, based_on_finding_ids FROM recommendations")
+        ).fetchall()  # noqa: E501
         assert len(r_rows) == 1
         assert r_rows[0][0] == INVESTIGATIVE_RECOMMENDATION_TEXT
 
         # Check based_on_finding_ids matches INVESTIGATIVE finding
         inv_f_id = conn.execute(
-            text("SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1")  # noqa: E501
+            text(
+                "SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
+            )  # noqa: E501
         ).scalar()
         assert r_rows[0][1] == [inv_f_id]
 
 
-def test_d3_unknown_transaction(app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_d3_unknown_transaction(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     run_id = _seed_investigation_run(app_role_engine, case_id)
-    tx_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.transaction")  # noqa: E501
+    tx_agent_id = _seed_agent_run(
+        app_role_engine, run_id, "meridian.agents.transaction"
+    )  # noqa: E501
     policy_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.policy")
 
     with superuser_engine.begin() as conn:
         doc_id = uuid.uuid4()
         chunk_id = uuid.uuid4()
         conn.execute(
-            text("INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"),  # noqa: E501
-            {"did": doc_id}
+            text(
+                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),  # noqa: E501
+            {"did": doc_id},
         )
         conn.execute(
-            text("INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"),  # noqa: E501
-            {"cid": chunk_id, "did": doc_id}
+            text(
+                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
+            ),  # noqa: E501
+            {"cid": chunk_id, "did": doc_id},
         )
 
     tx_outcome = TransactionOutcome(
@@ -537,10 +570,14 @@ def test_d3_unknown_transaction(app_role_engine: Engine, superuser_engine: Engin
 def test_d4_rollback(app_role_engine: Engine, superuser_engine: Engine) -> None:
     case_id = _seed_db(superuser_engine)
     run_id = _seed_investigation_run(app_role_engine, case_id)
-    tx_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.transaction")  # noqa: E501
+    tx_agent_id = _seed_agent_run(
+        app_role_engine, run_id, "meridian.agents.transaction"
+    )  # noqa: E501
 
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
 
     tx_outcome = TransactionOutcome(
@@ -564,7 +601,10 @@ def test_d4_rollback(app_role_engine: Engine, superuser_engine: Engine) -> None:
         policy=cast(PolicyOutcome, None),
     )
 
-    with patch("meridian.agents.report.authoring.record_recommendation_with_connection", side_effect=RuntimeError):  # noqa: E501
+    with patch(
+        "meridian.agents.report.authoring.record_recommendation_with_connection",
+        side_effect=RuntimeError,
+    ):  # noqa: E501
         try:
             with app_role_engine.begin() as conn:
                 author_investigation_records(conn, outcome)
@@ -583,10 +623,14 @@ def test_d4_rollback(app_role_engine: Engine, superuser_engine: Engine) -> None:
 def test_d5_guard(app_role_engine: Engine, superuser_engine: Engine) -> None:
     case_id = _seed_db(superuser_engine)
     run_id = _seed_investigation_run(app_role_engine, case_id)
-    tx_agent_id = _seed_agent_run(app_role_engine, run_id, "meridian.agents.transaction")  # noqa: E501
+    tx_agent_id = _seed_agent_run(
+        app_role_engine, run_id, "meridian.agents.transaction"
+    )  # noqa: E501
 
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
 
     tx_outcome = TransactionOutcome(
@@ -623,14 +667,31 @@ def test_d5_guard(app_role_engine: Engine, superuser_engine: Engine) -> None:
 
 # ---------------- ORCHESTRATOR TESTS ----------------
 
-def _patch_agents(m_tx: Any, m_graph: Any, m_policy: Any, tx_result: Any, policy_result: Any) -> None:  # noqa: E501
-    def tx_side_effect(engine: Engine, inv_id: uuid.UUID, tx_id: uuid.UUID, agent_run_id: uuid.UUID | None = None, **kwargs: Any) -> TransactionAgentDispatchResult:  # noqa: E501
+
+def _patch_agents(
+    m_tx: Any, m_graph: Any, m_policy: Any, tx_result: Any, policy_result: Any
+) -> None:  # noqa: E501
+    def tx_side_effect(
+        engine: Engine,
+        inv_id: uuid.UUID,
+        tx_id: uuid.UUID,
+        agent_run_id: uuid.UUID | None = None,
+        **kwargs: Any,
+    ) -> TransactionAgentDispatchResult:  # noqa: E501
         if agent_run_id is None:
             agent_run_id = uuid.uuid4()
         _seed_agent_run(engine, inv_id, "meridian.agents.transaction", agent_run_id)
-        return TransactionAgentDispatchResult(investigation_run_id=inv_id, result=tx_result)  # noqa: E501
+        return TransactionAgentDispatchResult(
+            investigation_run_id=inv_id, result=tx_result
+        )  # noqa: E501
 
-    def policy_side_effect(engine: Engine, inv_id: uuid.UUID, query: str, agent_run_id: uuid.UUID | None = None, **kwargs: Any) -> Any:  # noqa: E501
+    def policy_side_effect(
+        engine: Engine,
+        inv_id: uuid.UUID,
+        query: str,
+        agent_run_id: uuid.UUID | None = None,
+        **kwargs: Any,
+    ) -> Any:  # noqa: E501
         if agent_run_id is None:
             agent_run_id = uuid.uuid4()
         _seed_agent_run(engine, inv_id, "meridian.agents.policy", agent_run_id)
@@ -647,24 +708,41 @@ def _patch_agents(m_tx: Any, m_graph: Any, m_policy: Any, tx_result: Any, policy
 @patch("meridian.orchestration.investigation_orchestrator.run_transaction_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_graph_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_policy_agent")
-def test_o1_and_c1(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_o1_and_c1(
+    m_policy: Any,
+    m_graph: Any,
+    m_tx: Any,
+    app_role_engine: Engine,
+    superuser_engine: Engine,
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
         doc_id = uuid.uuid4()
         chunk_id = uuid.uuid4()
         conn.execute(
-            text("INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"),  # noqa: E501
-            {"did": doc_id}
+            text(
+                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),  # noqa: E501
+            {"did": doc_id},
         )
         conn.execute(
-            text("INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"),  # noqa: E501
-            {"cid": chunk_id, "did": doc_id}
+            text(
+                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
+            ),  # noqa: E501
+            {"cid": chunk_id, "did": doc_id},
         )
-        customer_id = conn.execute(text("SELECT customer_id FROM customers LIMIT 1")).scalar()  # noqa: E501, F841
+        customer_id = conn.execute(
+            text("SELECT customer_id FROM customers LIMIT 1")
+        ).scalar()  # noqa: E501, F841
 
-    _patch_agents(m_tx, m_graph, m_policy,
+    _patch_agents(
+        m_tx,
+        m_graph,
+        m_policy,
         AmountDeviationComputed(
             source_account_id=uuid.uuid4(),
             alerted_transaction_id=tx_id,
@@ -676,30 +754,44 @@ def test_o1_and_c1(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engi
             currency="USD",
         ),
         PolicyEvidenceFound(
-            citations=[PolicyCitation(
-                chunk_id=chunk_id,
-                document_id=doc_id,
-                title="Doc",
-                version="1",
-                chunk_index=0,
-                chunk_text="text",
-                document_type="policy",
-                is_synthetic=False,
-                rrf_score=0.9,
-            )]
-        )
+            citations=[
+                PolicyCitation(
+                    chunk_id=chunk_id,
+                    document_id=doc_id,
+                    title="Doc",
+                    version="1",
+                    chunk_index=0,
+                    chunk_text="text",
+                    document_type="policy",
+                    is_synthetic=False,
+                    rrf_score=0.9,
+                )
+            ]
+        ),
     )
 
     orchestrate_investigation(app_role_engine, case_id)
 
     with app_role_engine.begin() as conn:
-        run = conn.execute(text("SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"), {"cid": case_id}).fetchone()  # noqa: E501
+        run = conn.execute(
+            text(
+                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+            ),
+            {"cid": case_id},
+        ).fetchone()  # noqa: E501
         assert run is not None
         assert run[1] == "COMPLETE"
-        r = conn.execute(text("SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        r = conn.execute(
+            text(
+                "SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"
+            ),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert r == 1
         inv_f_id = conn.execute(
-            text("SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1")  # noqa: E501
+            text(
+                "SELECT finding_id FROM findings WHERE observed_fact LIKE 'Transaction%' LIMIT 1"
+            )  # noqa: E501
         ).scalar()
 
     # C1 test
@@ -713,13 +805,24 @@ def test_o1_and_c1(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engi
 @patch("meridian.orchestration.investigation_orchestrator.run_transaction_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_graph_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_policy_agent")
-def test_o2(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_o2(
+    m_policy: Any,
+    m_graph: Any,
+    m_tx: Any,
+    app_role_engine: Engine,
+    superuser_engine: Engine,
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
 
-    _patch_agents(m_tx, m_graph, m_policy,
+    _patch_agents(
+        m_tx,
+        m_graph,
+        m_policy,
         AmountDeviationComputed(
             source_account_id=uuid.uuid4(),
             alerted_transaction_id=tx_id,
@@ -730,64 +833,99 @@ def test_o2(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engine, sup
             source_transaction_ids=tuple(),
             currency="USD",
         ),
-        PolicyEvidenceInsufficient()
+        PolicyEvidenceInsufficient(),
     )
 
     orchestrate_investigation(app_role_engine, case_id)
 
     with app_role_engine.begin() as conn:
-        run = conn.execute(text("SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"), {"cid": case_id}).fetchone()  # noqa: E501
+        run = conn.execute(
+            text(
+                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+            ),
+            {"cid": case_id},
+        ).fetchone()  # noqa: E501
         assert run is not None
         assert run[1] == "INCOMPLETE_INSUFFICIENT_EVIDENCE"
-        r = conn.execute(text("SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        r = conn.execute(
+            text(
+                "SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"
+            ),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert r == 1
 
 
 @patch("meridian.orchestration.investigation_orchestrator.run_transaction_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_graph_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_policy_agent")
-def test_o3(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_o3(
+    m_policy: Any,
+    m_graph: Any,
+    m_tx: Any,
+    app_role_engine: Engine,
+    superuser_engine: Engine,
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     with superuser_engine.begin() as conn:
         doc_id = uuid.uuid4()
         chunk_id = uuid.uuid4()
         conn.execute(
-            text("INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"),  # noqa: E501
-            {"did": doc_id}
+            text(
+                "INSERT INTO documents (document_id, title, document_type, version, is_synthetic, created_at) VALUES (:did, 'T', 'internal_policy', '1', true, now())"
+            ),  # noqa: E501
+            {"did": doc_id},
         )
         conn.execute(
-            text("INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"),  # noqa: E501
-            {"cid": chunk_id, "did": doc_id}
+            text(
+                "INSERT INTO document_chunks (chunk_id, document_id, chunk_index, chunk_text, created_at) VALUES (:cid, :did, 0, 'T', now())"
+            ),  # noqa: E501
+            {"cid": chunk_id, "did": doc_id},
         )
 
-    _patch_agents(m_tx, m_graph, m_policy,
+    _patch_agents(
+        m_tx,
+        m_graph,
+        m_policy,
         AmountDeviationUnknown(
             source_account_id=uuid.uuid4(),
             alerted_transaction_id=uuid.uuid4(),
             reason="unknown",
         ),
         PolicyEvidenceFound(
-            citations=[PolicyCitation(
-                chunk_id=chunk_id,
-                document_id=doc_id,
-                title="Doc",
-                version="1",
-                chunk_index=0,
-                chunk_text="text",
-                document_type="policy",
-                is_synthetic=False,
-                rrf_score=0.9,
-            )]
-        )
+            citations=[
+                PolicyCitation(
+                    chunk_id=chunk_id,
+                    document_id=doc_id,
+                    title="Doc",
+                    version="1",
+                    chunk_index=0,
+                    chunk_text="text",
+                    document_type="policy",
+                    is_synthetic=False,
+                    rrf_score=0.9,
+                )
+            ]
+        ),
     )
 
     orchestrate_investigation(app_role_engine, case_id)
 
     with app_role_engine.begin() as conn:
-        run = conn.execute(text("SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"), {"cid": case_id}).fetchone()  # noqa: E501
+        run = conn.execute(
+            text(
+                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+            ),
+            {"cid": case_id},
+        ).fetchone()  # noqa: E501
         assert run is not None
         assert run[1] == "INCOMPLETE_INSUFFICIENT_EVIDENCE"
-        r = conn.execute(text("SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        r = conn.execute(
+            text(
+                "SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"
+            ),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert r == 0
 
 
@@ -795,13 +933,25 @@ def test_o3(m_policy: Any, m_graph: Any, m_tx: Any, app_role_engine: Engine, sup
 @patch("meridian.orchestration.investigation_orchestrator.run_transaction_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_graph_agent")
 @patch("meridian.orchestration.investigation_orchestrator.run_policy_agent")
-def test_o4(m_policy: Any, m_graph: Any, m_tx: Any, m_rec: Any, app_role_engine: Engine, superuser_engine: Engine) -> None:  # noqa: E501
+def test_o4(
+    m_policy: Any,
+    m_graph: Any,
+    m_tx: Any,
+    m_rec: Any,
+    app_role_engine: Engine,
+    superuser_engine: Engine,
+) -> None:  # noqa: E501
     case_id = _seed_db(superuser_engine)
     with superuser_engine.begin() as conn:
-        tx_id = conn.execute(text("SELECT transaction_id FROM transactions LIMIT 1")).scalar()  # noqa: E501
+        tx_id = conn.execute(
+            text("SELECT transaction_id FROM transactions LIMIT 1")
+        ).scalar()  # noqa: E501
         assert tx_id is not None
 
-    _patch_agents(m_tx, m_graph, m_policy,
+    _patch_agents(
+        m_tx,
+        m_graph,
+        m_policy,
         AmountDeviationComputed(
             source_account_id=uuid.uuid4(),
             alerted_transaction_id=tx_id,
@@ -812,7 +962,7 @@ def test_o4(m_policy: Any, m_graph: Any, m_tx: Any, m_rec: Any, app_role_engine:
             source_transaction_ids=tuple(),
             currency="USD",
         ),
-        PolicyEvidenceInsufficient()
+        PolicyEvidenceInsufficient(),
     )
 
     m_rec.side_effect = RuntimeError("authoring fail")
@@ -821,12 +971,28 @@ def test_o4(m_policy: Any, m_graph: Any, m_tx: Any, m_rec: Any, app_role_engine:
         orchestrate_investigation(app_role_engine, case_id)
 
     with app_role_engine.begin() as conn:
-        run = conn.execute(text("SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"), {"cid": case_id}).fetchone()  # noqa: E501
+        run = conn.execute(
+            text(
+                "SELECT investigation_run_id, status FROM investigation_runs WHERE case_id = :cid"
+            ),
+            {"cid": case_id},
+        ).fetchone()  # noqa: E501
         assert run is not None
         assert run[1] == "FAILED"
-        r = conn.execute(text("SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        r = conn.execute(
+            text(
+                "SELECT count(*) FROM recommendations WHERE investigation_run_id = :rid"
+            ),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert r == 0
-        f = conn.execute(text("SELECT count(*) FROM findings WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        f = conn.execute(
+            text("SELECT count(*) FROM findings WHERE investigation_run_id = :rid"),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert f == 0
-        e = conn.execute(text("SELECT count(*) FROM evidence WHERE investigation_run_id = :rid"), {"rid": run[0]}).scalar()  # noqa: E501
+        e = conn.execute(
+            text("SELECT count(*) FROM evidence WHERE investigation_run_id = :rid"),
+            {"rid": run[0]},
+        ).scalar()  # noqa: E501
         assert e == 0

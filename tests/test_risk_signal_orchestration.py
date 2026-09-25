@@ -16,6 +16,7 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationUnknown,
 )
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def _seed_case_and_alert(
@@ -66,13 +67,7 @@ def _seed_case_and_alert(
 
 def _cleanup(superuser_engine: Engine) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM risk_signals"))
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM risk_signals"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(text("DELETE FROM transactions"))
@@ -340,8 +335,7 @@ def test_r4_true_atomicity_rollback(
         # 3. Prove risk signal actually executed in this transaction
         risk_signals_count = conn.execute(
             text(
-                "SELECT count(*) FROM risk_signals "
-                "WHERE investigation_run_id = :run_id"
+                "SELECT count(*) FROM risk_signals WHERE investigation_run_id = :run_id"
             ),
             {"run_id": investigation_run_id},
         ).scalar()
@@ -483,10 +477,7 @@ def test_r5_end_to_end_real_db_insertion(
     # Assert it was removed due to rollback
     with app_role_engine.connect() as conn:
         count = conn.execute(
-            text(
-                "SELECT count(*) FROM risk_signals "
-                "WHERE investigation_run_id = :rid"
-            ),
+            text("SELECT count(*) FROM risk_signals WHERE investigation_run_id = :rid"),
             {"rid": inv_id},
         ).scalar()
         assert count == 0
@@ -499,10 +490,7 @@ def test_r5_end_to_end_real_db_insertion(
     # Assert it persists successfully
     with app_role_engine.connect() as conn:
         count = conn.execute(
-            text(
-                "SELECT count(*) FROM risk_signals "
-                "WHERE investigation_run_id = :rid"
-            ),
+            text("SELECT count(*) FROM risk_signals WHERE investigation_run_id = :rid"),
             {"rid": inv_id},
         ).scalar()
         assert count == 1

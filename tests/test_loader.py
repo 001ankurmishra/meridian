@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy import create_engine, text
 
+from tests.db_cleanup import clean_investigation_run_dependencies
+
 
 def test_loader_idempotency_and_data_accuracy() -> None:
     """
@@ -23,7 +25,7 @@ def test_loader_idempotency_and_data_accuracy() -> None:
         migrator_engine = create_engine(migrator_url)
         with migrator_engine.begin() as conn:
             conn.execute(text("DELETE FROM audit_events"))
-            conn.execute(text("DELETE FROM investigation_runs"))
+            clean_investigation_run_dependencies(conn)
             conn.execute(text("DELETE FROM cases"))
             conn.execute(text("DELETE FROM alerts"))
 
@@ -89,9 +91,10 @@ def test_loader_idempotency_and_data_accuracy() -> None:
               AND c_dst.full_name = 'Tech Solutions Inc'
         """)
         ).scalar()
-        assert float(
-            suspicious_tx_amount if suspicious_tx_amount is not None else 0.0
-        ) == 980000.0
+        assert (
+            float(suspicious_tx_amount if suspicious_tx_amount is not None else 0.0)
+            == 980000.0
+        )
 
         # Save specific values to check idempotency byte-for-byte
         first_run_txs = conn.execute(
@@ -221,8 +224,14 @@ def test_loader_least_privilege() -> None:
     engine = create_engine(loader_url)
 
     loader_tables = [
-        "customers", "accounts", "transactions", "beneficiaries",
-        "entities", "graph_relationships", "documents", "document_chunks"
+        "customers",
+        "accounts",
+        "transactions",
+        "beneficiaries",
+        "entities",
+        "graph_relationships",
+        "documents",
+        "document_chunks",
     ]
 
     with engine.connect() as conn:
@@ -245,7 +254,11 @@ def test_loader_least_privilege() -> None:
             assert f"permission denied for table {table}" in str(excinfo.value)
 
     orchestration_tables = [
-        "alerts", "cases", "investigation_runs", "users", "audit_events"
+        "alerts",
+        "cases",
+        "investigation_runs",
+        "users",
+        "audit_events",
     ]
 
     # Loader should fail to SELECT or INSERT into orchestration tables

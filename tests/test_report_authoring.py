@@ -28,6 +28,7 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationUnknown,
 )
 from meridian.evidence.evidence import EVIDENCE_TYPE_ALERTED_TRANSACTION
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 # 8. Computed transaction produces the required investigative evidence/finding.
@@ -70,10 +71,10 @@ def test_8_computed_transaction() -> None:
 
     finding = drafts.findings[0]
     assert finding.category == FindingCategory.INVESTIGATIVE
-    assert "123.46" in (finding.observed_fact or '')
-    assert "100.00" in (finding.derived_signal or '')
-    assert "1.234" in (finding.derived_signal or '')
-    assert "PROTOTYPE" in (finding.interpretation or '')
+    assert "123.46" in (finding.observed_fact or "")
+    assert "100.00" in (finding.derived_signal or "")
+    assert "1.234" in (finding.derived_signal or "")
+    assert "PROTOTYPE" in (finding.interpretation or "")
 
 
 # 9. Unknown transaction produces no evidence/finding.
@@ -170,12 +171,12 @@ def test_11_policy_found_with_citations() -> None:
 
     finding = drafts.findings[0]
     assert finding.category == FindingCategory.REFERENCE
-    assert "'MY_ALERT'" in (finding.observed_fact or '')
-    assert "Doc A (version 1.0, chunk 1)" in (finding.observed_fact or '')
-    assert "Doc B (version 2.0, chunk 5, synthetic)" in (finding.observed_fact or '')
-    assert "0.1234" in (finding.derived_signal or '')
-    assert "0.9876" in (finding.derived_signal or '')
-    assert "PROTOTYPE" in (finding.interpretation or '')
+    assert "'MY_ALERT'" in (finding.observed_fact or "")
+    assert "Doc A (version 1.0, chunk 1)" in (finding.observed_fact or "")
+    assert "Doc B (version 2.0, chunk 5, synthetic)" in (finding.observed_fact or "")
+    assert "0.1234" in (finding.derived_signal or "")
+    assert "0.9876" in (finding.derived_signal or "")
+    assert "PROTOTYPE" in (finding.interpretation or "")
 
 
 # 12. Policy Insufficient produces no reference evidence/finding.
@@ -374,7 +375,7 @@ def test_17_forbidden_language() -> None:
         ),
     )
     drafts = build_authoring_drafts(outcome)
-    text = (drafts.findings[0].interpretation or '').lower()
+    text = (drafts.findings[0].interpretation or "").lower()
 
     assert "money laundering" not in text
     assert "structuring" not in text
@@ -512,6 +513,7 @@ def test_19_persistence_atomicity(
 
     # We will mock record_finding_with_connection to fail on the second call
     import meridian.findings.findings as findings
+
     original_record = findings.record_finding_with_connection
 
     call_count = 0
@@ -550,14 +552,7 @@ def test_19_persistence_atomicity(
 
     # Cleanup
     with superuser_engine.begin() as conn:
-        conn.execute(
-            text("DELETE FROM agent_runs WHERE investigation_run_id = :rid"),
-            {"rid": run_id},
-        )
-        conn.execute(
-            text("DELETE FROM investigation_runs WHERE investigation_run_id = :rid"),
-            {"rid": run_id},
-        )
+        clean_investigation_run_dependencies(conn, run_id)
         conn.execute(text("DELETE FROM cases WHERE case_id = :cid"), {"cid": case_id})
 
 
@@ -640,12 +635,5 @@ def test_20_no_drafts(app_role_engine: Engine, superuser_engine: Engine) -> None
 
     # Cleanup
     with superuser_engine.begin() as conn:
-        conn.execute(
-            text("DELETE FROM agent_runs WHERE investigation_run_id = :rid"),
-            {"rid": run_id},
-        )
-        conn.execute(
-            text("DELETE FROM investigation_runs WHERE investigation_run_id = :rid"),
-            {"rid": run_id},
-        )
+        clean_investigation_run_dependencies(conn, run_id)
         conn.execute(text("DELETE FROM cases WHERE case_id = :cid"), {"cid": case_id})

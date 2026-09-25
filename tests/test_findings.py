@@ -1,5 +1,5 @@
-
 """Tests for findings module."""
+
 import uuid
 from datetime import datetime, timezone
 
@@ -16,6 +16,7 @@ from meridian.findings.findings import (
 )
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def setup_customer_and_transaction(
@@ -103,10 +104,7 @@ def setup_case(superuser_engine: Engine, alert_id: uuid.UUID) -> uuid.UUID:
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(

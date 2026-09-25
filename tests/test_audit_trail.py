@@ -15,6 +15,7 @@ from meridian.findings.findings import record_finding
 from meridian.orchestration.agent_run_tracking import record_agent_run
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def _seed_customer(superuser_engine: Engine) -> uuid.UUID:
@@ -103,10 +104,7 @@ def _seed_alert_case(
 def _cleanup(superuser_engine: Engine, customer_id: uuid.UUID | None = None) -> None:
     with superuser_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         if customer_id is not None:
