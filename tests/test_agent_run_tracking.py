@@ -15,6 +15,7 @@ from meridian.agents.transaction.amount_deviation import (
     compute_amount_deviation,
 )
 from meridian.orchestration.agent_run_tracking import record_agent_run
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def _seed_customer(superuser_engine: Engine) -> uuid.UUID:
@@ -107,11 +108,7 @@ def _seed_alert_case_investigation(
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(

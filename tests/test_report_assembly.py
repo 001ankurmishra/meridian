@@ -15,6 +15,7 @@ from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, record_eviden
 from meridian.findings.findings import record_finding
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.recommendations.recommendations import record_recommendation
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def assert_no_forbidden_language(report: InvestigationReport) -> None:
@@ -148,11 +149,7 @@ def setup_agent_run(superuser_engine: Engine, inv_run_id: uuid.UUID) -> uuid.UUI
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(

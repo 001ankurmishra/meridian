@@ -20,6 +20,7 @@ from meridian.agents.transaction.amount_deviation import (
 )
 from meridian.agents.transaction.errors import InvalidTransactionError
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def _seed_case_and_alert(
@@ -83,11 +84,7 @@ def _assert_terminal_state(
 
 def _cleanup(superuser_engine: Engine) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(text("DELETE FROM transactions"))

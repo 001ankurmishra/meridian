@@ -7,6 +7,7 @@ from sqlalchemy import Engine, create_engine, text
 from meridian.agents.policy.chunking import chunk_document
 from meridian.loader.policy_corpus import POLICY_CORPUS_V1
 from meridian.loader.policy_ingest import ingest_policy_corpus
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def test_corpus_contract() -> None:
@@ -49,7 +50,7 @@ def test_ingestion(engines: tuple[Engine, Engine]) -> None:
 
     with migrator_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
 
@@ -76,7 +77,9 @@ def test_ingestion(engines: tuple[Engine, Engine]) -> None:
         ).fetchall()
 
         invalid_dims = conn.execute(
-            text("SELECT count(*) FROM document_chunks WHERE vector_dims(embedding) != 384")
+            text(
+                "SELECT count(*) FROM document_chunks WHERE vector_dims(embedding) != 384"
+            )
         ).scalar()
         assert invalid_dims == 0
 
@@ -104,7 +107,7 @@ def test_reset_reload_repeatability(engines: tuple[Engine, Engine]) -> None:
 
     with migrator_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
 
@@ -134,7 +137,7 @@ def test_real_retrieval_integration(engines: tuple[Engine, Engine]) -> None:
 
     with migrator_engine.begin() as conn:
         conn.execute(text("DELETE FROM audit_events"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
 

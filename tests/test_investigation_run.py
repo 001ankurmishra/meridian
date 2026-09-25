@@ -11,6 +11,7 @@ from meridian.orchestration.investigation_run import (
     InvestigationRunResult,
     create_investigation_run,
 )
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 def _seed_customer(superuser_engine: Engine) -> uuid.UUID:
@@ -39,7 +40,9 @@ def _seed_account(superuser_engine: Engine, customer_id: uuid.UUID) -> uuid.UUID
     return aid
 
 
-def _seed_transaction(superuser_engine: Engine, source_account_id: uuid.UUID | None) -> uuid.UUID:
+def _seed_transaction(
+    superuser_engine: Engine, source_account_id: uuid.UUID | None
+) -> uuid.UUID:
     tid = uuid.uuid4()
     with superuser_engine.begin() as conn:
         conn.execute(
@@ -82,7 +85,7 @@ def _seed_alert_case(
 
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(
@@ -92,11 +95,17 @@ def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> No
             ),
             {"cid": customer_id},
         )
-        conn.execute(text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id})
-        conn.execute(text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id})
+        conn.execute(
+            text("DELETE FROM accounts WHERE customer_id = :cid"), {"cid": customer_id}
+        )
+        conn.execute(
+            text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id}
+        )
 
 
-def test_create_investigation_run_success(app_role_engine: Engine, superuser_engine: Engine) -> None:
+def test_create_investigation_run_success(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
     """Test successful creation of investigation run."""
     cid = _seed_customer(superuser_engine)
     try:
@@ -119,7 +128,7 @@ def test_create_investigation_run_success(app_role_engine: Engine, superuser_eng
                     "SELECT case_id, status, started_at, created_at, completed_at "
                     "FROM investigation_runs WHERE investigation_run_id = :inv_id"
                 ),
-                {"inv_id": result.investigation_run_id}
+                {"inv_id": result.investigation_run_id},
             ).fetchall()
             assert len(rows) == 1
             row = rows[0]

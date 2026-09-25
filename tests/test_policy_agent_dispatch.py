@@ -16,6 +16,7 @@ from meridian.agents.policy.policy_agent import (
 from meridian.agents.policy.retrieval import embed_document_chunk
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.policy_agent_dispatch import run_policy_agent
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 
 @pytest.fixture
@@ -61,8 +62,7 @@ def seeded_case_id(superuser_engine: Engine) -> Generator[uuid.UUID, None, None]
     yield case_id
 
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(
             text("DELETE FROM cases WHERE case_id = :case_id"), {"case_id": case_id}
         )  # noqa: E501

@@ -13,6 +13,7 @@ from meridian.orchestration.graph_agent_dispatch import (
     run_graph_agent,
 )
 from meridian.orchestration.investigation_run import create_investigation_run
+from tests.db_cleanup import clean_investigation_run_dependencies
 
 # --- Data Seed Helpers ---
 
@@ -115,11 +116,7 @@ def _cleanup_data(
     superuser_engine: Engine, customer_id: uuid.UUID | None = None
 ) -> None:
     with superuser_engine.begin() as conn:
-        conn.execute(text("DELETE FROM recommendations"))
-        conn.execute(text("DELETE FROM findings"))
-        conn.execute(text("DELETE FROM evidence"))
-        conn.execute(text("DELETE FROM agent_runs"))
-        conn.execute(text("DELETE FROM investigation_runs"))
+        clean_investigation_run_dependencies(conn)
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(text("DELETE FROM graph_relationships"))
