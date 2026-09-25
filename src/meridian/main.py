@@ -3,9 +3,11 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from meridian.api import api_router
 from meridian.db.session import get_db
 
 app = FastAPI(title="Meridian AML Copilot")
+app.include_router(api_router)
 
 
 @app.get("/health")
