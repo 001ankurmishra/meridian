@@ -246,6 +246,10 @@ def main() -> None:
     migrator_engine = get_migrator_engine()
     clear_data(migrator_engine)
 
+    from meridian.loader.dev_users import seed_dev_users
+
+    seed_dev_users(migrator_engine)
+
     loader_engine = get_loader_engine()
 
     # Generate and Insert Worked Example
@@ -257,6 +261,7 @@ def main() -> None:
     insert_data(loader_engine, bg_data)
 
     from meridian.loader.policy_ingest import ingest_policy_corpus
+
     docs_inserted, chunks_inserted = ingest_policy_corpus(loader_engine)
     print(f"Policy corpus loaded: {docs_inserted} documents, {chunks_inserted} chunks.")
 

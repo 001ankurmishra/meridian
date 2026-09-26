@@ -61,6 +61,18 @@ A four-document synthetic internal-policy corpus v1 now exists. Documents are lo
 
 ---
 
-## 6. Related Documents
+## 6. Development Identities
+
+A minimal deterministic seed provides two users for local development and demonstration:
+- `dev.analyst.1@meridian.local` (role: `analyst`, UUID `e26bbc72-e869-50f5-b62b-f1e51703ddc5`)
+- `dev.senior.analyst.1@meridian.local` (role: `senior_analyst`, UUID `e54f2839-b7bb-5e8f-bc41-67b7f97451a0`)
+
+These UUIDs are deterministically generated using `uuid.uuid5(uuid.NAMESPACE_OID, "<name>")`.
+When the database is seeded (`meridian.loader.dev_users`), existing user rows with these IDs are verified. The seed validates existing identity data rather than blindly skipping conflicts. Any mismatch in email or role fails loudly (throws an exception).
+**IMPORTANT**: These identities are for local/demo use only and do NOT constitute an authentication system.
+
+---
+
+## 7. Related Documents
 
 `docs/DATABASE_SCHEMA.md` §3 and §4.1 (provenance/synthetic flag), `docs/EVALUATION.md` §8 (fixture set), `docs/TESTING.md` §3 (fixtures reused for tests), `docs/PRODUCT_BRIEF.md` §5 (the canonical worked example this data must support).
