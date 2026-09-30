@@ -12,7 +12,7 @@ from meridian.agents.graph.subgraph import (
 )
 from meridian.orchestration.agent_run_tracking import record_agent_run
 
-# Coarse, per-agent-run tool-call summary for GraphAgent (F11).
+# Coarse, per-agent-run tool-call summary for GraphAgent (F9).
 # This describes the fixed, deterministic set of SQL queries
 # the primitive operations are known to run.
 _GRAPH_AGENT_TOOL_CALLS = {

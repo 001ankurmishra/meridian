@@ -37,7 +37,7 @@ The `output_summary` MUST contain:
 - `new_status`: The case status after the decision
 
 **F9 `tool_calls` Convention:**
-`agent_runs.tool_calls` is populated by the dispatch layer (`orchestration.transaction_agent_dispatch`, `orchestration.policy_agent_dispatch`) with a coarse, static, per-agent-run summary of the tool(s)/quer(ies) that agent is documented to invoke — not a live, per-statement trace of an individual invocation. `orchestration.agent_run_tracking.record_agent_run()` accepts this as an explicit keyword-only `tool_calls` argument (`None` default, stored as an empty object) and never fabricates a value on its own; only a caller with direct knowledge of what the wrapped function does may supply one.
+`agent_runs.tool_calls` is populated by the dispatch layer (`orchestration.transaction_agent_dispatch`, `orchestration.policy_agent_dispatch`, `orchestration.graph_agent_dispatch`) with a coarse, static, per-agent-run summary of the tool(s)/quer(ies) that agent is documented to invoke — not a live, per-statement trace of an individual invocation. `orchestration.agent_run_tracking.record_agent_run()` accepts this as an explicit keyword-only `tool_calls` argument (`None` default, stored as an empty object) and never fabricates a value on its own; only a caller with direct knowledge of what the wrapped function does may supply one.
 
 **Do not log more than necessary.** PII and sensitive values are redacted at the logging boundary (`docs/SECURITY.md` §4), not left to individual call sites to decide inconsistently.
 

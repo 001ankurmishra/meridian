@@ -60,6 +60,29 @@ Scope (Features F11–F14):
 
 **Dependencies:** Phase 1 complete; risk-scoring calibration depends on having a labeled synthetic fixture set (`docs/DATA_AND_DATASET_STRATEGY.md`).
 
+### Phase 2 kickoff notes (recorded 2026-10-01)
+
+**Phase 1 baseline.** Phase 2 was scoped against commit `9165deb` ("feat(phase1): surface computed risk signals and verify e2e flow"), contained in `main` via merge commit `d6b22ed` (PR #24). This document does not itself declare the Phase 1 exit criteria met; that assessment is not recorded here.
+
+**Execution model.** The Phase 2 scope list above is unordered. The relationships below are a partial order, not a linear sequence. "Hard" means a dependency stated in this roadmap or its referenced documents. "Soft" and all tie-breaks are ASSUMPTION/PROPOSAL, not repository requirements.
+
+| Capability | Hard prerequisite (documented) | Soft dependency (ASSUMPTION) |
+|---|---|---|
+| Labeled evaluation fixture foundation (enabling task added at kickoff; not a scope bullet above) | Phase 1 baseline | none |
+| Calibrated risk scoring | Labeled synthetic fixture set (Dependencies line above; `docs/EVALUATION.md` §2) | Additional deterministic risk signals (see open decision A/B) |
+| Entity resolution | ADR for the approach (exit criteria above) | Planted near-duplicate fixtures |
+| Stronger graph analytics | none documented | Planted-subgraph fixtures (`docs/EVALUATION.md` §3); entity resolution |
+| Sanctions/watchlist agent (F11) | Agent documented per `docs/ARCHITECTURE.md` §4 before merge; design and tables TBD (`docs/FEATURES.md`) | Verified dataset license (EXTERNAL); entity resolution |
+| Adverse media agent (F12) | Agent documented per `docs/ARCHITECTURE.md` §4 before merge; design TBD (`docs/FEATURES.md`) | Retrieval reranking |
+| Retrieval reranking | ADR if retrieval architecture changes (exit criteria above); labeled query set (`docs/EVALUATION.md` §4) | none |
+| React investigation workspace | none documented | Outputs of new Phase 2 agents |
+
+**Recorded order.** (1) Task 0: this documentation kickoff. (2) Task 1: labeled evaluation fixture foundation v0.1, before any calibration work. (3) Everything else is unordered by the repository; the tie-break PROPOSAL is: calibration, then entity resolution, then graph analytics and sanctions, then reranking and adverse media, then the React workspace. Design and ADR work on independent items may proceed in parallel.
+
+**Open decisions (unresolved as of this note).**
+- A/B: calibrate the current `amount_deviation` signal only (A), or add further deterministic risk signals first and then calibrate the expanded set (B). To be decided after Task 1 is verified and before calibration is scoped.
+- `orchestrator_version`: add via migration, or remove from `docs/DATABASE_SCHEMA.md` §4.10. Unresolved.
+
 ---
 
 ## Phase 3 — Production Readiness
