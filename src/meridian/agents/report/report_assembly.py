@@ -9,6 +9,7 @@ from sqlalchemy import Engine, text
 from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, EvidenceRecord
 from meridian.findings.findings import FindingRecord, evaluate_evidence_sufficiency
 from meridian.recommendations.recommendations import RecommendationRecord
+from meridian.risk_engine.risk_signals import RiskSignalRecord
 
 
 class InsufficientEvidenceError(Exception):
@@ -33,6 +34,7 @@ class InvestigationReport:
     evidence: List[EvidenceRecord]
     applicable_policies: List[EvidenceRecord]
     recommendations: List[RecommendationRecord]
+    risk_signals: List[RiskSignalRecord]
     confidence_text: str
     human_review_required: bool = True
 
@@ -182,12 +184,40 @@ def assemble_report(
             ]
 
         evidence = [
-            e for e in all_evidence
-            if e.evidence_type != EVIDENCE_TYPE_POLICY_CHUNK
+            e for e in all_evidence if e.evidence_type != EVIDENCE_TYPE_POLICY_CHUNK
         ]
         policies = [
-            e for e in all_evidence
-            if e.evidence_type == EVIDENCE_TYPE_POLICY_CHUNK
+            e for e in all_evidence if e.evidence_type == EVIDENCE_TYPE_POLICY_CHUNK
+        ]
+
+        # 6. Fetch Risk Signals
+        risk_signals_rows = conn.execute(
+            text(
+                """
+                SELECT risk_signal_id, investigation_run_id, customer_id,
+                       transaction_id, signal_type, value, model_version,
+                       methodology, created_at
+                FROM risk_signals
+                WHERE investigation_run_id = :run_id
+                ORDER BY created_at ASC
+                """
+            ),
+            {"run_id": investigation_run_id},
+        ).fetchall()
+
+        risk_signals = [
+            RiskSignalRecord(
+                risk_signal_id=row.risk_signal_id,
+                investigation_run_id=row.investigation_run_id,
+                customer_id=row.customer_id,
+                transaction_id=row.transaction_id,
+                signal_type=row.signal_type,
+                value=row.value,
+                model_version=row.model_version,
+                methodology=row.methodology,
+                created_at=row.created_at,
+            )
+            for row in risk_signals_rows
         ]
 
         # Deterministic summary and confidence
@@ -220,6 +250,7 @@ def assemble_report(
             evidence=evidence,
             applicable_policies=policies,
             recommendations=recommendations,
+            risk_signals=risk_signals,
             confidence_text=confidence_text,
             human_review_required=True,
         )

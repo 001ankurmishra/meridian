@@ -11,10 +11,8 @@ policy_agent).
 This value does NOT represent an overall AML risk score, a customer risk level,
 or a comprehensive risk assessment of any kind.
 
-Furthermore, this module is NOT automatically invoked as part of any investigation
-run, dispatch, or orchestration flow. F2/Orchestrator integration is unimplemented.
-This module is called explicitly by whatever caller holds a valid
-`investigation_run_id`.
+Furthermore, this module IS automatically invoked by the orchestrator for
+amount-deviation findings.
 
 Provenance is limited to `investigation_run_id` + `customer_id` + `transaction_id` +
 `created_at`. There is no `agent_runs` linkage and no `created_by` column, which
@@ -31,6 +29,19 @@ from decimal import Decimal
 from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
+
+
+@dataclass(frozen=True)
+class RiskSignalRecord:
+    risk_signal_id: uuid.UUID
+    investigation_run_id: uuid.UUID | None
+    customer_id: uuid.UUID
+    transaction_id: uuid.UUID | None
+    signal_type: str
+    value: Decimal | None
+    model_version: str | None
+    methodology: str
+    created_at: datetime
 
 
 @dataclass(frozen=True)

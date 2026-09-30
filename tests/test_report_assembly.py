@@ -150,6 +150,7 @@ def setup_agent_run(superuser_engine: Engine, inv_run_id: uuid.UUID) -> uuid.UUI
 def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> None:
     with superuser_engine.begin() as conn:
         clean_investigation_run_dependencies(conn)
+        conn.execute(text("DELETE FROM audit_events"))
         conn.execute(text("DELETE FROM cases"))
         conn.execute(text("DELETE FROM alerts"))
         conn.execute(
@@ -235,6 +236,8 @@ def test_assemble_report_success(
 
         assert len(report.recommendations) == 1
         assert report.recommendations[0].recommendation_id == rec.recommendation_id
+
+        assert report.risk_signals == []
 
         assert report.human_review_required is True
         assert "Overall confidence is HIGH" in report.confidence_text
@@ -338,11 +341,12 @@ def test_assemble_report_clean_control_case(
         assert report.customer_name == "Test Customer"
         assert report.risk_level == "HIGH"  # from customer baseline
 
-        # Assert zero findings/evidence/recs
+        # Assert zero findings/evidence/recs/signals
         assert len(report.findings) == 0
         assert len(report.evidence) == 0
         assert len(report.applicable_policies) == 0
         assert len(report.recommendations) == 0
+        assert report.risk_signals == []
 
         # Assert clean fallback text
         assert "No findings to evaluate" in report.confidence_text
