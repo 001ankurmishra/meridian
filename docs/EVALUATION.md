@@ -28,6 +28,38 @@ Every reported number in `docs/` or a resume/portfolio artifact must state its t
 
 The currently implemented amount deviation risk signal is a PROTOTYPE heuristic (`value = deviation_multiple`). This explicit pass-through formula is an unvalidated placeholder mimicking the `confidence_threshold` pattern in §4; it was not derived from any ML evaluation or tuning process and its predictive utility is currently unknown.
 
+### Amount Deviation Baseline (PROTOTYPE)
+
+**Disclaimer:** No threshold was selected. No calibration was performed. No risk-level mapping was derived. The amount-deviation implementation was unchanged. The dataset is synthetic. Small sample size limits inference.
+
+**Metadata:**
+* **Methodology Tier:** PROTOTYPE
+* **Fixture Version:** 0.1
+* **Generator Version:** 0.1
+* **Seed:** baseline_seed
+* **Split Methodology:** md5(seed_fix_id) % 2 even=train odd=eval
+
+**Exclusions:**
+* `worked_example`: 1
+* `runtime_edge_case`: 1
+
+**ROC-AUC Results:**
+* **Train:** 1.0 (7 positive, 4 negative)
+* **Validation (Eval):** 1.0 (5 positive, 2 negative)
+* **Pooled:** 1.0 (12 positive, 6 negative)
+
+**Per-Scenario Statistics:**
+* **structuring:** n=3, computed=3, unknown=0, min=1.288135593220338983050847458, median=1.288135593220338983050847458, max=1.288135593220338983050847458
+* **rapid_movement:** n=3, computed=3, unknown=0, min=50, median=50, max=50
+* **circular_transfer:** n=3, computed=3, unknown=0, min=9.8, median=9.8, max=9.8
+* **mule_account_chain:** n=3, computed=3, unknown=0, min=5, median=5, max=5
+* **clean_control:** n=6, computed=6, unknown=0, min=0.09090909090909090909090909091, median=0.0909090909090909090909090909, max=0.09090909090909090909090909091
+
+**Reproduction Command:**
+```bash
+export $(cat .env | xargs) && PYTHONPATH=$(pwd)/src .venv/bin/python -m meridian.fixtures.amount_deviation_baseline
+```
+
 ---
 
 ## 3. Graph Evaluation
