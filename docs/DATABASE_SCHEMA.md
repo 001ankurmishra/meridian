@@ -152,7 +152,7 @@ Deferred until entity-resolution / shared-device signals are implemented (`docs/
 | `status` | text | IN_PROGRESS / COMPLETE / INCOMPLETE_INSUFFICIENT_EVIDENCE / FAILED |
 | `started_at` | timestamptz | |
 | `completed_at` | timestamptz, nullable | |
-| `orchestrator_version` | text | for reproducibility |
+| `orchestrator_version` | text | for reproducibility. **DISCREPANCY (UNRESOLVED):** documented here since the Phase 0 scaffold, but no migration creates this column and no source or test references it as of commit `d6b22ed`. The resolution (add via migration, or remove from this document) has not been decided; see `docs/ROADMAP.md` Phase 2 kickoff notes. |
 | `created_at` | timestamptz | |
 
 ### 4.11 `agent_runs`
