@@ -74,7 +74,13 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ## 8. Synthetic Fixture Set
 
-A fixed, versioned set of alert scenarios (including the worked example in `docs/PRODUCT_BRIEF.md` §5, plus additional planted-pattern cases: structuring, rapid movement, circular transfers, mule accounts, and at least one clean/non-suspicious control case) underlies all evaluation categories above. See `docs/DATA_AND_DATASET_STRATEGY.md` for generation details and `docs/TESTING.md` for how this set is also used as regression fixtures.
+The `v0.1` synthetic fixture corpus (`src/meridian/fixtures/generator.py`) produces a deterministic evaluation set of 20 explicitly labeled scenarios:
+- **Scenario taxonomy:** structuring, rapid movement, circular transfers, mule chains, clean control, and insufficient history.
+- **Explicit ground truth:** Each fixture explicitly declares its intended ground truth (e.g. `AML_STRUCTURING`, `CLEAN`) and evaluation target directly in its manifest.
+- **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly (e.g., "4 deposits of 9500 in 24 hours"), along with the IDs of pattern members.
+- **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically. A single pattern's data never crosses the split boundary.
+- **Deterministic generation:** Data is predictably generated using MD5/UUID5 hashes combined with fixed timeline anchor relative offsets.
+- **Limitations:** The v0.1 data structure focuses purely on exercising code pathways; the numeric distributions do not represent a calibrated true-to-life realistic simulation, and the data volumes are extremely small (no noise/distractors).
 
 ---
 

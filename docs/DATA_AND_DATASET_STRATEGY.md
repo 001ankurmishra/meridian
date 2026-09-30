@@ -37,7 +37,13 @@ Where public datasets don't cover a needed scenario (e.g., realistic Indian-Rupe
   - Multiple-counterparty funneling
   - Sudden behavioral change (e.g., dormant account suddenly active)
 
-Every synthetic-generation run is versioned (a generator version string stored in `source` columns) so fixtures and evaluation results stay reproducible.
+Every synthetic-generation run is versioned (e.g. `generator_version` and `fixture_version`) so fixtures and evaluation results stay reproducible.
+To ensure exact byte-for-byte reproducibility across runs and environments, the generator uses:
+- A fixed `ANCHOR_TIMESTAMP` (e.g., `2026-01-01T12:00:00Z`). All transaction times and event dates are derived as fixed relative `timedelta` offsets from this anchor.
+- Deterministic UUIDs generated via `uuid5` using the generator seed, fixture ID, and record keys, meaning the same seed always produces the exact same primary and foreign keys.
+- No dependence on system entropy, `PYTHONHASHSEED`, or environmental timezone variations.
+
+**Important:** This synthetic fixture corpus (v0.1) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
 
 ---
 
