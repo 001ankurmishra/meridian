@@ -107,6 +107,18 @@ def test_ui_smoke_happy_path(live_server_url: str, ui_smoke_engine: Engine) -> N
     at.run(timeout=10)
 
     at.text_input(key="active_case_id").input(str(case_id)).run()
+
+    # Fetch report to render the risk signals section
+    for b in at.button:
+        if b.label == "Fetch Report":
+            b.click().run()
+            break
+
+    assert any(
+        "No computed risk signals for this investigation run" in m.value
+        for m in at.markdown
+    )
+
     at.selectbox(key="acting_identity").select(
         "Dev Senior Analyst 1 (senior_analyst)"
     ).run()

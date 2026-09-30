@@ -105,6 +105,25 @@ if st.button("Fetch Report"):
             st.write(f"**Evidence Completeness Status**: {comp_status}")
             st.write(f"**Confidence**: {report.get('confidence_text')}")
 
+            st.subheader("Computed Risk Signals")
+            risk_signals = report.get("risk_signals", [])
+            if not risk_signals:
+                st.write("No computed risk signals for this investigation run")
+            else:
+                for rs in risk_signals:
+                    with st.container(border=True):
+                        st.markdown(
+                            "*PROTOTYPE — not a validated risk score "
+                            "or AML determination*"
+                        )
+                        st.markdown(f"**Signal Type**: {rs.get('signal_type')}")
+                        st.markdown(f"**Value**: {rs.get('value')}")
+                        st.markdown(f"**Methodology**: {rs.get('methodology')}")
+                        if rs.get("transaction_id"):
+                            st.markdown(
+                                f"**Related transaction:** {rs.get('transaction_id')}"
+                            )
+
             st.subheader("Findings")
             for f in report.get("findings", []):
                 with st.container(border=True):

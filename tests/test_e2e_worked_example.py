@@ -340,6 +340,32 @@ def test_worked_example_end_to_end(
         report_finding_ids = [f.finding_id for f in report.findings]
         assert report_finding_ids == db_finding_ids
 
+        # --- 7f.1: Risk Signals (F10) ---
+        assert len(report.risk_signals) == 1, "Expected 1 F10 signal"
+        f10_signal = report.risk_signals[0]
+        assert f10_signal.signal_type == "amount_deviation"
+        assert f10_signal.methodology == "PROTOTYPE"
+        assert f10_signal.value is not None
+        assert f10_signal.investigation_run_id == run_id
+
+        # Verify it traces to the database
+        with app_role_engine.connect() as conn:
+            db_signal = conn.execute(
+                text(
+                    "SELECT signal_type, methodology, value, "
+                    "customer_id, transaction_id "
+                    "FROM risk_signals WHERE risk_signal_id = :rs_id"
+                ),
+                {"rs_id": f10_signal.risk_signal_id}
+            ).fetchone()
+            assert db_signal is not None, "Signal must be persisted"
+            assert db_signal.signal_type == f10_signal.signal_type
+            assert db_signal.methodology == f10_signal.methodology
+            assert db_signal.value == f10_signal.value
+            assert db_signal.customer_id == customer_id
+            assert db_signal.transaction_id == transaction_id
+
+
         # --- 7g: Policy classification (the integration
         #         defect) ---
         assert len(report.applicable_policies) > 0, (

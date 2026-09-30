@@ -122,7 +122,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 
 ### 4.5 ReportAgent
 - **Responsibility:** Synthesize findings from other agents into the structured Fact→Signal→Interpretation→Recommendation report; enforce the no-unsupported-conclusions rule.
-- **Inputs:** All evidence/findings produced in the investigation run.
+- **Inputs:** All evidence/findings/risk_signals produced in the investigation run.
 - **Outputs:** `findings`, `recommendations`, draft report.
 - **Tools:** Read access to evidence/findings store; write access limited to draft report fields (not case disposition).
 - **Permissions:** No write access to case status, account status, or any downstream system.
