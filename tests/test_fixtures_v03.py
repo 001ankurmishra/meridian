@@ -43,7 +43,7 @@ def compute_hash(data: dict[str, Any]) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
 
-def test_determinism_v03(tmp_path):
+def test_determinism_v03(tmp_path: typing.Any) -> None:
     def run_generator(hash_seed: str, fixture_seed: str, cwd: str) -> str:
         env = os.environ.copy()
         env["PYTHONHASHSEED"] = hash_seed
@@ -104,8 +104,8 @@ def test_seed_sensitivity() -> None:
     seeds = ["seed_A", "seed_B", "seed_C"]
     results = [generate_fixtures_v03(s) for s in seeds]
 
-    def extract_tuples(res):
-        tups = []
+    def extract_tuples(res: dict[str, Any]) -> list[Any]:
+        tups: list[Any] = []
         amts = {tx["transaction_id"]: tx["amount"] for tx in res["transactions"]}
         for fix in res["manifest"]["fixtures"]:
             if fix["scenario_class"] in ("worked_example", "insufficient_history"):
@@ -351,7 +351,8 @@ def _get_counts(engine: Engine) -> dict[str, int]:
     with engine.connect() as conn:
 
         def count(table: str) -> int:
-            return conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+            val = conn.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+            return int(val) if val is not None else 0
 
         return {
             "risk_signals": count("risk_signals"),
@@ -361,7 +362,7 @@ def _get_counts(engine: Engine) -> dict[str, int]:
         }
 
 
-def test_db_backed_integration_and_overlap(superuser_engine: Engine):
+def test_db_backed_integration_and_overlap(superuser_engine: Engine) -> None:
     res_v03 = generate_fixtures_v03("overlap_test_seed")
     clear_data(superuser_engine)
     insert_data(superuser_engine, res_v03)
@@ -439,7 +440,6 @@ def test_baseline_compatibility(tmp_path: typing.Any, superuser_engine: Engine) 
     insert_data(superuser_engine, res_v03)
     try:
         from meridian.fixtures.amount_deviation_baseline import measure_baseline
-
         counts_before = _get_counts(superuser_engine)
         measure_baseline(superuser_engine, res_v03["manifest"])
         counts_after = _get_counts(superuser_engine)

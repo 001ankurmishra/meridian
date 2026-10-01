@@ -51,11 +51,12 @@ Per `CLAUDE.md` §21/§692 of the master prompt, create deterministic fixtures f
 
 These fixtures serve triple duty: functional tests (§1), evaluation ground truth (`docs/EVALUATION.md` §8), and demo material (`docs/PRODUCT_BRIEF.md`).
 
-**Fixture Determinism Tests (v0.1 and v0.2):**
+**Fixture Determinism Tests (v0.1, v0.2, and v0.3):**
 - **Strict Byte-for-Byte Cross-Process Determinism:** The `tests/test_fixtures.py` and `tests/test_fixtures_v02.py` suites explicitly verify that two independent generation runs inside the same or different processes produce identical JSON serialized bytes for a given seed and fixture version.
 - **Environment Independence:** The suite verifies that `PYTHONHASHSEED` randomization and the current working directory do not affect generation output by asserting exact equality of the generated manifest.
 - **Integration Smoke Tests:** The suite includes a full ingestion and orchestration smoke test that invokes the actual database loader and alert-intake APIs, checks that records persist correctly, and validates that cleanup functions remove the deterministic data perfectly without lingering constraints.
 - **Variance and Subtypes (v0.2):** The `test_fixtures_v02.py` suite explicitly verifies within-class variance (e.g., that different fixtures of the same type do not share identical transaction amounts), hard negative subtype generation (`typical` vs `large_legitimate`), and deterministic split assignment via hash methodologies.
+- **Design Guardrails (v0.3):** The `test_fixtures_v03.py` suite adds tests verifying that quotas (beneficiary status), target velocity bounds, and neutral alert vocabularies strictly adhere to design. It also tests DB-backed integration to ensure the read-only signal pipelines correctly compute values from generated data without overlapping scopes.
 
 ---
 

@@ -131,6 +131,3 @@ Explicitly research-tier; not required for the core product story. Only pursued 
 | F10, F14 | `risk_engine` | `risk_signals` | — | Risk-score labeling rules | ML metrics | Regression |
 | F11–F13 | Phase 2 additions | new tables TBD | Least privilege | Evidence-first | Agent metrics | Fixtures TBD |
 | F15–F17 | §3, §9 | `users`/`roles` | Full model | — | System/agent metrics | Security + E2E |
-
-## Phase 2 Testing
-- ✅ Task 6: Fixture Corpus v0.3 (neutral vocab, quotas, velocity fix)

@@ -106,11 +106,12 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ## 8. Synthetic Fixture Set
 
-The `v0.1` and `v0.2` synthetic fixture corpora (`src/meridian/fixtures/generator.py`) produce deterministic evaluation sets.
+The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures/generator.py`) produce deterministic evaluation sets.
 - **v0.1:** 20 explicitly labeled scenarios, used to verify code paths. Very rigid numeric values with no variance.
 - **v0.2:** 58 explicitly labeled scenarios, introducing **seeded variance** and **hard negative subtypes**.
   - **Scenario taxonomy:** structuring, rapid movement, circular transfers, mule chains, clean control (subtypes: typical, large_legitimate), and insufficient history.
   - **Subtypes and Variance:** In v0.2, scenarios are subdivided into *baseline* (typical suspicious behavior) and *elevated* (highly suspicious behavior). Clean controls include *typical* and *large_legitimate* (hard negatives with amounts resembling suspicious activity but clean topology). All generated amounts, timestamps, and UUIDs are deterministically derived from the combination of the `seed` and `fixture_id` via SHA-256 hashes, producing reproducible distributions with within-class variance rather than identical duplicate values.
+- **v0.3:** 58 explicitly labeled scenarios matching v0.2's composition (8 of each class + 2 specials). Introduces beneficiary-state quotas (20% absent, 40% fresh, 40% established) applied via a common distribution independent of scenario class. Also introduces exact target-velocity generation via isolated extra transaction counts, and strictly neutral vocabulary (`large_transaction`, `new_beneficiary`, `rapid_movement`) for alert types decoupled from ground truth. Like v0.1/v0.2, v0.3 is a synthetic evaluation fixture corpus and makes no statistical independence or real-world predictive performance claim.
 - **Explicit ground truth:** Each fixture explicitly declares its intended ground truth (e.g. `AML_STRUCTURING`, `CLEAN`) and evaluation target directly in its manifest.
 - **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly, along with the IDs of pattern members.
 - **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically via a hash-based assignment. A single pattern's data never crosses the split boundary.
