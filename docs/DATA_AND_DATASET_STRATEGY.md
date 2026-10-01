@@ -44,8 +44,9 @@ To ensure exact byte-for-byte reproducibility across runs and environments, the 
 - Deterministic UUIDs generated via `uuid5` using the generator seed, fixture ID, and record keys, meaning the same seed always produces the exact same primary and foreign keys.
 - No dependence on system entropy, `PYTHONHASHSEED`, or environmental timezone variations.
 - **Hard Negatives:** v0.2 includes `large_legitimate` clean controls to evaluate the system's ability to distinguish high-volume but structurally normal activity from actual suspicious patterns.
+- **Quota-based Independence (v0.3):** Introduces quota-based beneficiary distribution (20/40/40) and label-neutral alert types, ensuring these attributes are completely decoupled from scenario classes.
 
-**Important:** This synthetic fixture corpus (v0.1 and v0.2) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
+**Important:** This synthetic fixture corpus (v0.1, v0.2, and v0.3) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
 
 ---
 
