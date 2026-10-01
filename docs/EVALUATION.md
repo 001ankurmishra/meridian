@@ -30,7 +30,7 @@ The currently implemented amount deviation risk signal is a PROTOTYPE heuristic 
 
 ### Amount Deviation Baseline (PROTOTYPE)
 
-**Disclaimer:** No threshold was selected. No calibration was performed. No risk-level mapping was derived. The amount-deviation implementation was unchanged. The dataset is synthetic. Small sample size limits inference.
+**Disclaimer:** No threshold was selected. No calibration was performed. No risk-level mapping was derived. The amount-deviation implementation was unchanged. The dataset is synthetic. Small sample size limits inference. v0.1 AUC=1.0 is a fixture-construction artifact and is not evidence of predictive utility.
 
 **Metadata:**
 * **Methodology Tier:** PROTOTYPE

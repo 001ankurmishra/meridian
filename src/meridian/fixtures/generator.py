@@ -478,24 +478,19 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
         return h / float(2**256 - 1)
 
     def deterministic_int(seed: str, key: str, min_val: int, max_val: int) -> int:
-        f = deterministic_float(seed, key)
-        return min_val + int(f * (max_val - min_val + 1))
+        h = int(hashlib.sha256(f"{seed}:{key}".encode("utf-8")).hexdigest(), 16)
+        range_val = max_val - min_val
+        return min_val + (h % (range_val + 1))
 
     def deterministic_amount(
         seed: str, key: str, min_amt: float, max_amt: float
     ) -> Decimal:
-        f = deterministic_float(seed, key)
-        val = min_amt + f * (max_amt - min_amt)
-        return Decimal(val).quantize(Decimal("0.01"))
-
-    def _get_split(seed: str, fix_id: str, sc: str, st: str) -> str:
-        # Sort by fixture ID happens implicitly if we process in order.
-        # The assignment should be deterministic and alternate based on fix_id hash
-        # to avoid leakage. Stratification is achieved because we process each
-        # (sc, st) group and the assignment is based on a hash of (seed, fix_id).
-        # assignment is based on a hash of (seed, fix_id).
-        val = int(hashlib.sha256(f"{seed}_{fix_id}".encode()).hexdigest(), 16)
-        return "train" if val % 2 == 0 else "eval"
+        h = int(hashlib.sha256(f"{seed}:{key}".encode("utf-8")).hexdigest(), 16)
+        min_cents = int(Decimal(str(min_amt)) * 100)
+        max_cents = int(Decimal(str(max_amt)) * 100)
+        range_cents = max_cents - min_cents
+        val_cents = min_cents + (h % (range_cents + 1))
+        return Decimal(val_cents) / Decimal("100.00")
 
     def add_entity(
         e_id: uuid.UUID, e_type: str, r_id: uuid.UUID, created_at: datetime
@@ -657,7 +652,13 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
             tx_ids = []
             if pattern_type == "structuring":
                 for i in range(4):
-                    tx_amt = (target_amt / Decimal(4)).quantize(Decimal("0.01"))
+                    if i == 3:
+                        tx_amt = target_amt
+                    else:
+                        noise = deterministic_amount(
+                            seed, f"{fix_id}_noise_{i}", -50.0, 50.0
+                        )
+                        tx_amt = max(Decimal("0.01"), target_amt + noise)
                     tx_id, _ = add_tx(fix_id, f"tx_{i}", a1, None, tx_amt, 24.0 - i)
                     tx_ids.append(tx_id)
             elif pattern_type == "rapid_movement":
@@ -703,7 +704,7 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
                     "scenario_class": sc,
                     "scenario_subtype": st,
                     "taxonomy": sc,
-                    "split": _get_split(seed, fix_id, sc, st),
+                    "split": "temp",
                     "customer_id": str(c1),
                     "account_ids": [str(a1)],
                     "transaction_ids": [str(t) for t in tx_ids],
@@ -719,7 +720,7 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
                     "planted_pattern": planted_patt,
                     "pattern_members": [str(t) for t in tx_ids],
                     "runtime_expectation": "COMPLETE",
-                    "split_methodology": "sha256(seed_fix_id) % 2 even=train odd=eval",
+                    "split_methodology": "stable sorted alternating",
                 }
             )
 
@@ -854,7 +855,7 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
             "scenario_class": "insufficient_history",
             "scenario_subtype": "baseline",
             "taxonomy": "runtime_edge_case",
-            "split": _get_split(seed, fix_id, "insufficient_history", "baseline"),
+            "split": "temp",
             "customer_id": str(c1),
             "account_ids": [str(a1)],
             "transaction_ids": [str(tx1)],
@@ -870,7 +871,7 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
             "planted_pattern": "New account with no history",
             "pattern_members": [str(tx1)],
             "runtime_expectation": "INCOMPLETE_INSUFFICIENT_EVIDENCE",
-            "split_methodology": "sha256(seed_fix_id) % 2 even=train odd=eval",
+            "split_methodology": "stable sorted alternating",
         }
     )
 
@@ -916,16 +917,29 @@ def generate_fixtures_v02(seed: str = "default_seed") -> dict[str, Any]:
             "planted_pattern": "Worked example reference",
             "pattern_members": [],
             "runtime_expectation": "COMPLETE",
-            "split_methodology": "sha256(seed_fix_id) % 2 even=train odd=eval",
+            "split_methodology": "stable sorted alternating",
         }
     )
+
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for fix in manifest_entries:
+        groups[(fix["scenario_class"], fix.get("scenario_subtype", "none"))].append(fix)
+
+    for (sc, st), group in sorted(groups.items()):
+        group.sort(key=lambda x: x["fixture_id"])
+        group_hash = int(hashlib.sha256(f"{seed}_{sc}_{st}".encode()).hexdigest(), 16)
+        current_is_train = (group_hash % 2 == 0)
+        for fix in group:
+            fix["split"] = "train" if current_is_train else "eval"
+            current_is_train = not current_is_train
 
     manifest: dict[str, Any] = {
         "manifest_schema_version": MANIFEST_SCHEMA_VERSION,
         "fixture_version": FIXTURE_VERSION,
         "generator_version": GENERATOR_VERSION,
         "seed": seed,
-        "split_methodology": "sha256(seed_fix_id) % 2 even=train odd=eval",
+        "split_methodology": "stable sorted alternating",
         "anchor_timestamp": ANCHOR_TIMESTAMP.isoformat(),
         "fixtures": manifest_entries,
     }

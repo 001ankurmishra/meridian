@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import typing
 import uuid
 from decimal import Decimal
 from typing import Any
@@ -79,7 +80,7 @@ sys.stdout.write(canonical_json(res["manifest"]))
     assert len(out1) > 0
 
 
-def test_seed_sensitivity():
+def test_seed_sensitivity() -> None:
     res1 = generate_fixtures_v02("seed_A")
     res2 = generate_fixtures_v02("seed_B")
 
@@ -96,7 +97,7 @@ def test_seed_sensitivity():
     amt2 = get_amounts(res2)
 
     def get_eval_targets(manifest, amounts) -> dict:
-        targets = {}
+        targets: typing.Dict[str, typing.Any] = {}
         for fx in manifest:
             if fx["scenario_class"] in ["worked_example", "insufficient_history"]:
                 continue
@@ -116,7 +117,7 @@ def test_seed_sensitivity():
         )
 
 
-def test_within_class_variance():
+def test_within_class_variance() -> None:
     res = generate_fixtures_v02("test_variance_seed")
     man = res["manifest"]["fixtures"]
 
@@ -125,7 +126,7 @@ def test_within_class_variance():
 
     amts = get_amounts(res)
 
-    subtypes = {}
+    subtypes: typing.Dict[str, typing.Any] = {}
     for fx in man:
         if fx["scenario_class"] in ["worked_example", "insufficient_history"]:
             continue
@@ -140,14 +141,14 @@ def test_within_class_variance():
         )
 
 
-def test_v01_regression():
+def test_v01_regression() -> None:
     res1 = generate_fixtures("test_seed")
     res2 = generate_fixtures("test_seed")
 
     assert canonical_json(res1["manifest"]) == canonical_json(res2["manifest"])
 
 
-def test_manifest_validation():
+def test_manifest_validation() -> None:
     res = generate_fixtures_v02("test_seed")
     man = res["manifest"]
 
@@ -166,7 +167,7 @@ def test_manifest_validation():
             assert fx["ground_truth"] is not None
 
 
-def test_split_integrity():
+def test_split_integrity() -> None:
     res = generate_fixtures_v02("test_split_seed")
     counts = {}
     for fx in res["manifest"]["fixtures"]:
@@ -179,7 +180,7 @@ def test_split_integrity():
         counts[key][sp] += 1
 
 
-def test_corpus_integrity():
+def test_corpus_integrity() -> None:
     res = generate_fixtures_v02("test_integrity")
 
     assert len(res["manifest"]["fixtures"]) == 58
@@ -195,7 +196,7 @@ def test_corpus_integrity():
         assert isinstance(tx["amount"], float)
 
 
-def test_architecture_boundary():
+def test_architecture_boundary() -> None:
     import os
     import subprocess
     import sys
@@ -214,7 +215,7 @@ sys.exit(0)
     assert res.returncode == 0, "Generator shouldn't import agents or risk_engine"
 
 
-def test_baseline_compatibility(tmp_path, superuser_engine: Engine):
+def test_baseline_compatibility(tmp_path: typing.Any, superuser_engine: Engine) -> None:
     res_v02 = generate_fixtures_v02("baseline_seed")
     clear_data(superuser_engine)
     insert_data(superuser_engine, res_v02)
@@ -223,6 +224,13 @@ def test_baseline_compatibility(tmp_path, superuser_engine: Engine):
         env = os.environ.copy()
         env["PYTHONPATH"] = os.path.abspath("src")
         env["DATABASE_URL"] = superuser_engine.url.render_as_string(hide_password=False)
+
+        from sqlalchemy import text
+        with superuser_engine.connect() as conn:
+            cnt_rs_before = conn.scalar(text("SELECT count(*) FROM risk_signals"))
+            cnt_al_before = conn.scalar(text("SELECT count(*) FROM alerts"))
+            cnt_ca_before = conn.scalar(text("SELECT count(*) FROM cases"))
+            cnt_ir_before = conn.scalar(text("SELECT count(*) FROM investigation_runs"))
 
         res2 = subprocess.run(
             [
@@ -241,6 +249,17 @@ def test_baseline_compatibility(tmp_path, superuser_engine: Engine):
         )
         parsed = json.loads(res2.stdout)
         assert parsed["metadata"]["fixture_version"] == "0.2"
+
+        with superuser_engine.connect() as conn:
+            cnt_rs_after = conn.scalar(text("SELECT count(*) FROM risk_signals"))
+            cnt_al_after = conn.scalar(text("SELECT count(*) FROM alerts"))
+            cnt_ca_after = conn.scalar(text("SELECT count(*) FROM cases"))
+            cnt_ir_after = conn.scalar(text("SELECT count(*) FROM investigation_runs"))
+
+        assert cnt_rs_before == cnt_rs_after, "Baseline mutated risk_signals"
+        assert cnt_al_before == cnt_al_after, "Baseline mutated alerts"
+        assert cnt_ca_before == cnt_ca_after, "Baseline mutated cases"
+        assert cnt_ir_before == cnt_ir_after, "Baseline mutated investigation_runs"
 
         res_v01 = generate_fixtures("baseline_seed")
         clear_data(superuser_engine)
