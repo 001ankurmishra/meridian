@@ -204,3 +204,9 @@ Per `CLAUDE.md` §10, in priority order for this project: **correctness/evidence
 ## 9. Related Documents
 
 `docs/DATABASE_SCHEMA.md` (data model detail), `docs/SECURITY.md` (trust boundaries), `docs/AI_SAFETY_AND_GUARDRAILS.md` (agent behavioral constraints), `docs/DECISIONS.md` (ADR index), `docs/ROADMAP.md` (phased build-out).
+
+## 10. Fixture Corpora
+
+| Version | Description |
+|---|---|
+| v0.3 | Quota-based beneficiary distributions, label-neutral alert types, and exact target velocity |
