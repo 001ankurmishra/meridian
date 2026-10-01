@@ -37,13 +37,15 @@ Where public datasets don't cover a needed scenario (e.g., realistic Indian-Rupe
   - Multiple-counterparty funneling
   - Sudden behavioral change (e.g., dormant account suddenly active)
 
-Every synthetic-generation run is versioned (e.g. `generator_version` and `fixture_version`) so fixtures and evaluation results stay reproducible.
+- Every synthetic-generation run is versioned (e.g. `generator_version` and `fixture_version`) so fixtures and evaluation results stay reproducible.
 To ensure exact byte-for-byte reproducibility across runs and environments, the generator uses:
 - A fixed `ANCHOR_TIMESTAMP` (e.g., `2026-01-01T12:00:00Z`). All transaction times and event dates are derived as fixed relative `timedelta` offsets from this anchor.
+- **Seeded Variance:** v0.2 introduces variance to distributions (e.g., transaction amounts). To maintain determinism, amounts and timestamps are scaled using a reproducible PRNG mechanism driven by SHA-256 hashes of the `seed` + `fixture_id` + `record_key`. This guarantees intra-class variation without breaking strict determinism.
 - Deterministic UUIDs generated via `uuid5` using the generator seed, fixture ID, and record keys, meaning the same seed always produces the exact same primary and foreign keys.
 - No dependence on system entropy, `PYTHONHASHSEED`, or environmental timezone variations.
+- **Hard Negatives:** v0.2 includes `large_legitimate` clean controls to evaluate the system's ability to distinguish high-volume but structurally normal activity from actual suspicious patterns.
 
-**Important:** This synthetic fixture corpus (v0.1) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
+**Important:** This synthetic fixture corpus (v0.1 and v0.2) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
 
 ---
 

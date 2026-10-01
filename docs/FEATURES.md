@@ -24,6 +24,8 @@ Runs the rule-based dispatch described in `docs/ARCHITECTURE.md` §5: creates an
 
 Computes, via SQL against `transactions`/`accounts`, the alerted transaction's deviation from the customer's historical behavior (e.g., multiple of trailing average, velocity of recent transactions, presence of a newly created beneficiary). Every computed signal links to the specific source rows used. Amount comparison is performed only when the alerted transaction and every qualifying historical transaction have an established (non-blank) currency and all currencies are identical (exact string match, no normalization); otherwise the result is `UNKNOWN` (`AmountDeviationUnknown`) with a currency-specific reason.
 
+Velocity is now IMPLEMENTED as a computation-only signal (`src/meridian/agents/transaction/transaction_velocity.py`). It uses a 24-hour window as a PROTOTYPE definition parameter, counts the customer's outgoing transactions including the alerted one, links to source rows, and has no Unknown state. It is NOT yet wired into dispatch, evidence, F10 scoring or the report. The newly-created-beneficiary signal is still NOT implemented.
+
 ## F4. Basic Transaction Graph
 
 **Phase:** MVP · **Module:** `agents.graph`

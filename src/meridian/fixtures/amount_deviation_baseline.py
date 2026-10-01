@@ -11,7 +11,6 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationUnknown,
     compute_amount_deviation,
 )
-from meridian.fixtures.generator import FIXTURE_VERSION, GENERATOR_VERSION
 from meridian.risk_engine.risk_signals import compute_risk_score
 
 
@@ -176,13 +175,22 @@ def measure_baseline(
             continue
         aucs[split_name] = compute_roc_auc(data["pos"], data["neg"])
 
+    fix_ver = fixtures_manifest.get("fixture_version", "0.1")
+    gen_ver = fixtures_manifest.get("generator_version", "0.1")
+    split_method = fixtures_manifest.get(
+        "split_methodology", "md5(seed_fix_id) % 2 even=train odd=eval"
+    )
+
+    if fix_ver >= "0.2" and "split_methodology" not in fixtures_manifest:
+        raise ValueError("Missing split methodology in manifest for version >= 0.2")
+
     # Output contract
     report = {
         "metadata": {
-            "fixture_version": FIXTURE_VERSION,
-            "generator_version": GENERATOR_VERSION,
+            "fixture_version": fix_ver,
+            "generator_version": gen_ver,
             "seed": seed,
-            "split_methodology": "md5(seed_fix_id) % 2 even=train odd=eval",
+            "split_methodology": split_method,
             "methodology_tier": "PROTOTYPE",
             "explicit_disclaimer": (
                 "No threshold was selected. No calibration was performed. "
@@ -200,12 +208,24 @@ def measure_baseline(
 
 
 if __name__ == "__main__":
+    import argparse
     import os
     import sys
 
     from sqlalchemy import create_engine
 
-    from meridian.fixtures.generator import generate_fixtures
+    from meridian.fixtures.generator import generate_fixtures, generate_fixtures_v02
+
+    parser = argparse.ArgumentParser(
+        description="Amount deviation baseline measurement"
+    )
+    parser.add_argument(
+        "--fixture-version",
+        choices=["0.1", "0.2"],
+        default="0.1",
+        help="Version of the fixture corpus to generate (default: 0.1)",
+    )
+    args = parser.parse_args()
 
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
@@ -215,7 +235,10 @@ if __name__ == "__main__":
     engine = create_engine(db_url)
     # The evaluation fixture corpus is assumed to already exist in the database.
     # We still need the manifest to know which transactions to process.
-    res = generate_fixtures("baseline_seed")
+    if args.fixture_version == "0.2":
+        res = generate_fixtures_v02("baseline_seed")
+    else:
+        res = generate_fixtures("baseline_seed")
 
     report = measure_baseline(engine, res["manifest"])
     print(canonical_json(report), end="")

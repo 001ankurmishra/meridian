@@ -80,7 +80,7 @@ Scope (Features F11–F14):
 **Recorded order.** (1) Task 0: this documentation kickoff. (2) Task 1: labeled evaluation fixture foundation v0.1, before any calibration work. (3) Everything else is unordered by the repository; the tie-break PROPOSAL is: calibration, then entity resolution, then graph analytics and sanctions, then reranking and adverse media, then the React workspace. Design and ADR work on independent items may proceed in parallel.
 
 **Open decisions (unresolved as of this note).**
-- A/B: calibrate the current `amount_deviation` signal only (A), or add further deterministic risk signals first and then calibrate the expanded set (B). To be decided after Task 1 is verified and before calibration is scoped.
+- A/B resolved in favor of B (bounded): add deterministic signals already documented for the TransactionAgent (`docs/ARCHITECTURE.md` §4.2, `docs/FEATURES.md` F3) one slice at a time, then calibrate the expanded signal set; any calibration claim must name the signal-set version.
 - `orchestrator_version`: add via migration, or remove from `docs/DATABASE_SCHEMA.md` §4.10. Unresolved.
 
 ---

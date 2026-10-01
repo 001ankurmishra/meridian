@@ -30,7 +30,7 @@ The currently implemented amount deviation risk signal is a PROTOTYPE heuristic 
 
 ### Amount Deviation Baseline (PROTOTYPE)
 
-**Disclaimer:** No threshold was selected. No calibration was performed. No risk-level mapping was derived. The amount-deviation implementation was unchanged. The dataset is synthetic. Small sample size limits inference.
+**Disclaimer:** No threshold was selected. No calibration was performed. No risk-level mapping was derived. The amount-deviation implementation was unchanged. The dataset is synthetic. Small sample size limits inference. v0.1 AUC=1.0 is a fixture-construction artifact and is not evidence of predictive utility.
 
 **Metadata:**
 * **Methodology Tier:** PROTOTYPE
@@ -106,13 +106,15 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ## 8. Synthetic Fixture Set
 
-The `v0.1` synthetic fixture corpus (`src/meridian/fixtures/generator.py`) produces a deterministic evaluation set of 20 explicitly labeled scenarios:
-- **Scenario taxonomy:** structuring, rapid movement, circular transfers, mule chains, clean control, and insufficient history.
+The `v0.1` and `v0.2` synthetic fixture corpora (`src/meridian/fixtures/generator.py`) produce deterministic evaluation sets.
+- **v0.1:** 20 explicitly labeled scenarios, used to verify code paths. Very rigid numeric values with no variance.
+- **v0.2:** 58 explicitly labeled scenarios, introducing **seeded variance** and **hard negative subtypes**.
+  - **Scenario taxonomy:** structuring, rapid movement, circular transfers, mule chains, clean control (subtypes: typical, large_legitimate), and insufficient history.
+  - **Subtypes and Variance:** In v0.2, scenarios are subdivided into *baseline* (typical suspicious behavior) and *elevated* (highly suspicious behavior). Clean controls include *typical* and *large_legitimate* (hard negatives with amounts resembling suspicious activity but clean topology). All generated amounts, timestamps, and UUIDs are deterministically derived from the combination of the `seed` and `fixture_id` via SHA-256 hashes, producing reproducible distributions with within-class variance rather than identical duplicate values.
 - **Explicit ground truth:** Each fixture explicitly declares its intended ground truth (e.g. `AML_STRUCTURING`, `CLEAN`) and evaluation target directly in its manifest.
-- **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly (e.g., "4 deposits of 9500 in 24 hours"), along with the IDs of pattern members.
-- **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically. A single pattern's data never crosses the split boundary.
-- **Deterministic generation:** Data is predictably generated using MD5/UUID5 hashes combined with fixed timeline anchor relative offsets.
-- **Limitations:** The v0.1 data structure focuses purely on exercising code pathways; the numeric distributions do not represent a calibrated true-to-life realistic simulation, and the data volumes are extremely small (no noise/distractors).
+- **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly, along with the IDs of pattern members.
+- **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically via a hash-based assignment. A single pattern's data never crosses the split boundary.
+- **Limitations:** While v0.2 adds intra-class variance and hard negatives, it remains synthetic. The numeric distributions do not represent a calibrated true-to-life realistic simulation.
 
 ---
 
