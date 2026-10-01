@@ -100,7 +100,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Responsibility:** Analyze the alerted customer's transaction history for anomalies (amount deviation, velocity, new counterparties).
 - **Inputs:** customer ID, account ID(s), alert transaction ID.
 - **Outputs:** Derived signals (e.g., "16.3× historical average") with links to source transaction rows.
-- **Tools:** Read-only SQL query tool scoped to `transactions`, `accounts`, `customers` (parameterized queries only — no free-form SQL execution from LLM output; see `docs/SECURITY.md`).
+- **Tools:** Read-only SQL query tool scoped to `transactions`, `accounts`, `customers`, `beneficiaries` (parameterized queries only — no free-form SQL execution from LLM output; see `docs/SECURITY.md`).
 - **Permissions:** Read-only.
 - **Failure behavior:** If a required aggregate cannot be computed (e.g., insufficient history), return `UNKNOWN` for that signal, not an estimate.
 
