@@ -82,6 +82,7 @@ Scope (Features F11–F14):
 **Open decisions (unresolved as of this note).**
 - A/B resolved in favor of B (bounded): add deterministic signals already documented for the TransactionAgent (`docs/ARCHITECTURE.md` §4.2, `docs/FEATURES.md` F3) one slice at a time, then calibrate the expanded signal set; any calibration claim must name the signal-set version.
 - `orchestrator_version`: add via migration, or remove from `docs/DATABASE_SCHEMA.md` §4.10. Unresolved.
+- Risk-scoring approach: ADR-0005 (Proposed). Maintainer decision pending on its D4: re-scope the "Calibrated risk scoring" bullet to documented methodology plus measured per-signal evaluation (PROTOTYPE), or pursue an externally sourced labeled dataset now.
 
 ---
 
