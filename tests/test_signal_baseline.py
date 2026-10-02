@@ -59,7 +59,8 @@ def test_direction_handling() -> None:
     from meridian.fixtures.amount_deviation_baseline import compute_roc_auc
 
     # Beneficiary age: LOWER = more suspicious
-    # If planted data has lower age than clean, AUC should be 1.0 (after applying direction)
+    # If planted data has lower age than clean, AUC should be 1.0 (after applying
+    # direction)
     planted_ages = [Decimal(100), Decimal(200)]  # lower
     clean_ages = [Decimal(1000), Decimal(2000)]  # higher
 
@@ -83,25 +84,38 @@ def test_selection_and_strictness() -> None:
         "seed": "test",
         "split_methodology": "test",
         "fixtures": [
-            {"scenario_class": "worked_example", "split": "train", "ground_truth": "CLEAN"},
-            {"scenario_class": "insufficient_history", "split": "eval", "ground_truth": "CLEAN"},
+            {
+                "scenario_class": "worked_example",
+                "split": "train",
+                "ground_truth": "CLEAN",
+            },
+            {
+                "scenario_class": "insufficient_history",
+                "split": "eval",
+                "ground_truth": "CLEAN",
+            },
         ],
     }
 
     report = measure_signal_baselines(engine, manifest)
     assert report["exclusions"]["worked_example"] == 1
     assert report["exclusions"]["insufficient_history"] == 1
-    assert sum(c["n"] for c in report["signals"]["amount_deviation"]["per_scenario_statistics"].values()) == 0
+    amt_dev_stats = report["signals"]["amount_deviation"]["per_scenario_statistics"]
+    assert sum(c["n"] for c in amt_dev_stats.values()) == 0
 
     # Missing split
-    manifest["fixtures"].append({"scenario_class": "structuring", "ground_truth": "CLEAN"})  # type: ignore[attr-defined]
+    manifest["fixtures"].append(
+        {"scenario_class": "structuring", "ground_truth": "CLEAN"}
+    )  # type: ignore[attr-defined]
     with pytest.raises(ValueError, match="Missing split"):
         measure_signal_baselines(engine, manifest)
 
     manifest["fixtures"].pop()  # type: ignore[attr-defined]
 
     # Unexpected split
-    manifest["fixtures"].append({"scenario_class": "structuring", "split": "invalid", "ground_truth": "CLEAN"})  # type: ignore[attr-defined]
+    manifest["fixtures"].append(
+        {"scenario_class": "structuring", "split": "invalid", "ground_truth": "CLEAN"}
+    )  # type: ignore[attr-defined]
     with pytest.raises(ValueError, match="Unexpected split"):
         measure_signal_baselines(engine, manifest)
 
@@ -119,9 +133,13 @@ def test_statistics() -> None:
     assert _compute_median([]) is None
     assert _compute_median([Decimal("1.0")]) == Decimal("1.0")
     assert _compute_median([Decimal("1.0"), Decimal("3.0")]) == Decimal("2.0")
-    assert _compute_median([Decimal("2.0"), Decimal("3.0"), Decimal("4.0")]) == Decimal("3.0")
+    assert _compute_median(
+        [Decimal("2.0"), Decimal("3.0"), Decimal("4.0")]
+    ) == Decimal("3.0")
     # exact Decimal arithmetic
-    assert _compute_median([Decimal("1.111111"), Decimal("2.222222")]) == Decimal("1.6666665")
+    assert _compute_median(
+        [Decimal("1.111111"), Decimal("2.222222")]
+    ) == Decimal("1.6666665")
 
 
 def test_determinism(tmp_path: typing.Any, superuser_engine: Engine) -> None:
@@ -136,7 +154,9 @@ def test_determinism(tmp_path: typing.Any, superuser_engine: Engine) -> None:
             env["PYTHONHASHSEED"] = hash_seed
             env["PYTHONPATH"] = os.path.abspath("src")
             # Override DATABASE_URL to use the test database
-            env["DATABASE_URL"] = superuser_engine.url.render_as_string(hide_password=False)
+            env["DATABASE_URL"] = superuser_engine.url.render_as_string(
+                hide_password=False
+            )
             script = """
 import sys
 from meridian.fixtures.signal_baseline import measure_signal_baselines
@@ -219,7 +239,9 @@ def test_db_backed_integration(superuser_engine: Engine) -> None:
 
         # Check total included counts match
         for signal_name, signal_data in signals.items():
-            total_n = sum(stats["n"] for stats in signal_data["per_scenario_statistics"].values())
+            total_n = sum(
+                stats["n"] for stats in signal_data["per_scenario_statistics"].values()
+            )
             # Total fixtures = 58. worked_example = 1, insufficient = 1. Eligible = 56
             assert total_n == 56
 
@@ -232,7 +254,10 @@ def test_db_backed_integration(superuser_engine: Engine) -> None:
                     group += "/" + fx["scenario_subtype"]
                 man_groups.add(group)
 
-        assert set(signals["amount_deviation"]["per_scenario_statistics"].keys()) == man_groups
+        assert (
+            set(signals["amount_deviation"]["per_scenario_statistics"].keys())
+            == man_groups
+        )
 
         assert "worked_example" in report["exclusions"]
         assert "insufficient_history" in report["exclusions"]
@@ -244,7 +269,13 @@ def test_import_guard() -> None:
     import ast
     from pathlib import Path
 
-    file_path = Path(__file__).parent.parent / "src" / "meridian" / "fixtures" / "signal_baseline.py"
+    file_path = (
+        Path(__file__).parent.parent
+        / "src"
+        / "meridian"
+        / "fixtures"
+        / "signal_baseline.py"
+    )
     with open(file_path, "r") as f:
         tree = ast.parse(f.read())
 
@@ -277,8 +308,12 @@ def test_import_guard() -> None:
         if isinstance(node, ast.Import):
             for alias in node.names:
                 for forbidden in forbidden_imports:
-                    assert not alias.name.startswith(forbidden), f"Forbidden import: {alias.name}"
+                    assert not alias.name.startswith(
+                        forbidden
+                    ), f"Forbidden import: {alias.name}"
         elif isinstance(node, ast.ImportFrom):
             if node.module:
                 for forbidden in forbidden_imports:
-                    assert not node.module.startswith(forbidden), f"Forbidden import: {node.module}"
+                    assert not node.module.startswith(
+                        forbidden
+                    ), f"Forbidden import: {node.module}"

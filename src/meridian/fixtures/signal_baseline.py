@@ -32,7 +32,8 @@ BENEFICIARY_AGE_DIRECTION = "LOWER"  # LOWER age = more suspicious
 
 
 def _compute_median(values: list[Decimal]) -> Decimal | None:
-    # Intentional duplication from amount_deviation_baseline.py to avoid importing private helpers
+    # Intentional duplication from amount_deviation_baseline.py to avoid
+    # importing private helpers
     if not values:
         return None
     s = sorted(values)
@@ -89,7 +90,8 @@ def _evaluate_signal(
         sc = fx["scenario_class"]
         st = fx.get("scenario_subtype")
 
-        # Ensure deterministic group ordering by creating a composite key, we'll format it back later if needed,
+        # Ensure deterministic group ordering by creating a composite key,
+        # we'll format it back later if needed,
         # but the prompt asks for statistics "Per scenario class/subtype".
         # Let's use a tuple for the group key.
         group_key = f"{sc}/{st}" if st else sc
@@ -129,7 +131,8 @@ def _evaluate_signal(
             stats_by_scenario[group_key]["values"].append(computed_val)
 
             # Apply fixed signal direction before AUC
-            # If HIGHER is more suspicious, leave as is. If LOWER is more suspicious, negate it.
+            # If HIGHER is more suspicious, leave as is.
+            # If LOWER is more suspicious, negate it.
             auc_val = computed_val if direction == "HIGHER" else -computed_val
 
             cls_key = "pos" if is_pos else "neg"
@@ -155,8 +158,11 @@ def _evaluate_signal(
             "max": max_val,
         }
         if signal_name == "beneficiary_age":
-            # Just put the aggregate unknown reasons per group? No, prompt says: "For beneficiary age also report: unknown count by reason" globally per signal or per group?
-            # It just says "For beneficiary age also report: unknown count by reason". Let's put it at the signal level.
+            # Just put the aggregate unknown reasons per group? No, prompt says:
+            # "For beneficiary age also report: unknown count by reason" globally
+            # per signal or per group?
+            # It just says "For beneficiary age also report: unknown count by reason".
+            # Let's put it at the signal level.
             pass
         scenario_reports[group_key] = rep
 
@@ -245,9 +251,15 @@ def measure_signal_baselines(
         },
         "exclusions": dict(sorted(excluded_counts.items())),
         "signals": {
-            "amount_deviation": _evaluate_signal(engine, eligible_fixtures, "amount_deviation"),
-            "transaction_velocity": _evaluate_signal(engine, eligible_fixtures, "transaction_velocity"),
-            "beneficiary_age": _evaluate_signal(engine, eligible_fixtures, "beneficiary_age"),
+            "amount_deviation": _evaluate_signal(
+                engine, eligible_fixtures, "amount_deviation"
+            ),
+            "transaction_velocity": _evaluate_signal(
+                engine, eligible_fixtures, "transaction_velocity"
+            ),
+            "beneficiary_age": _evaluate_signal(
+                engine, eligible_fixtures, "beneficiary_age"
+            ),
         }
     }
     return report
