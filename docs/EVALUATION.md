@@ -60,6 +60,63 @@ The currently implemented amount deviation risk signal is a PROTOTYPE heuristic 
 export $(cat .env | xargs) && PYTHONPATH=$(pwd)/src .venv/bin/python -m meridian.fixtures.amount_deviation_baseline
 ```
 
+### Single-Signal Baselines on Corpus v0.3 (PROTOTYPE)
+
+**Reproduction Command:**
+```bash
+export $(cat .env | xargs) && PYTHONPATH=$(pwd)/src .venv/bin/python -m meridian.fixtures.signal_baseline
+```
+Note: The v0.3 evaluation fixture corpus is assumed to already exist in the database.
+You can load it by using the same test loading pattern used in the `tests/test_fixtures_v03.py` tests.
+
+**Disclaimer:**
+* methodology tier is PROTOTYPE
+* no threshold was derived
+* no calibration was derived
+* no risk level was derived
+* no signal combination was derived
+* no signal ranking was derived
+* signals were unchanged
+* data is synthetic
+* n is small
+* report n_positive and n_negative
+* Hanley-McNeil SE is approximate
+* v0.1 AUC=1.0 remains a fixture-construction artifact
+* no v0.2 velocity or beneficiary-age results exist and must not be quoted
+* v0.2 is not suitable for those measurements
+* circular_transfer and mule_account_chain were not designed to be detected by these three signals
+
+**Metadata:**
+* **Fixture Version:** 0.3
+* **Generator Version:** 0.3
+* **Seed:** baseline_seed
+* **Split Methodology:** stable sorted alternating
+
+**Signal directions:**
+Signal directions were fixed before measurement:
+* `amount_deviation`: HIGHER = more suspicious
+* `transaction_velocity`: HIGHER = more suspicious
+* `beneficiary_age`: LOWER age = more suspicious
+
+**What drives the numbers:**
+**Amount deviation**
+* overlapping ratio ranges
+* hard-negative control subtypes
+
+**Velocity**
+* structuring intentionally has multi-transaction behavior
+* busy_legitimate provides overlap
+* rapid_movement, circular_transfer and mule_account_chain have no extra outgoing transactions
+
+**Beneficiary age**
+* state/age distribution is constructed independently of class
+* departures from approximately 0.5 are therefore attributable to sampling and unknown handling, not evidence of detection ability
+
+**Observed Output (VERBATIM):**
+```json
+{"exclusions":{"insufficient_history":1,"worked_example":1},"metadata":{"explicit_disclaimer":"No threshold was derived. No calibration was derived. No risk level was derived. No signal combination was derived. Signals were not modified. Data is synthetic. Sample size is small. Results reflect fixture design parameters. Results are not evidence of real-world AML detection performance.","fixture_version":"0.3","generator_version":"0.3","methodology_tier":"PROTOTYPE","seed":"baseline_seed","signal_directions":{"amount_deviation":"HIGHER","beneficiary_age":"LOWER","transaction_velocity":"HIGHER"},"split_methodology":"stable sorted alternating"},"signals":{"amount_deviation":{"auc_results":{"eval":{"auc":0.703125,"auc_se_hanley_mcneil":0.09878,"n_negative":12,"n_positive":16,"unknown_excluded":true},"pooled":{"auc":0.701823,"auc_se_hanley_mcneil":0.069262,"n_negative":24,"n_positive":32,"unknown_excluded":true},"train":{"auc":0.729167,"auc_se_hanley_mcneil":0.095329,"n_negative":12,"n_positive":16,"unknown_excluded":true}},"per_scenario_statistics":{"circular_transfer/baseline":{"max":"1.409999579669886002048556240","median":"1.170001445715326306520136072","min":"0.6099991300352803047896231183","n":4,"n_computed":4,"n_unknown":0},"circular_transfer/elevated":{"max":"13.50999989567140666242397054","median":"11.43999877902896218991690499","min":"8.579998958640678966277313987","n":4,"n_computed":4,"n_unknown":0},"clean_control/busy_legitimate":{"max":"1.460000419466019756849530548","median":"1.104999851321399536561135671","min":"0.6400017369376467704444955596","n":8,"n_computed":8,"n_unknown":0},"clean_control/large_legitimate":{"max":"11.13002124306174193106283835","median":"6.46500883298685760161933171","min":"4.100000370508968169574544552","n":8,"n_computed":8,"n_unknown":0},"clean_control/typical":{"max":"1.320001265702623168686517103","median":"0.759999570339729666237082732","min":"0.5499995746461249101923295548","n":8,"n_computed":8,"n_unknown":0},"mule_account_chain/baseline":{"max":"1.870001125988974499796632603","median":"1.660001420055136806178197188","min":"0.7299993254744493689218304243","n":4,"n_computed":4,"n_unknown":0},"mule_account_chain/elevated":{"max":"11.17997292990573463628160577","median":"8.61499007988002865613241352","min":"4.809997196811931299583207642","n":4,"n_computed":4,"n_unknown":0},"rapid_movement/baseline":{"max":"1.760000115610361289604677595","median":"1.209997687829526933440477902","min":"0.6000004667346543479833562422","n":4,"n_computed":4,"n_unknown":0},"rapid_movement/elevated":{"max":"13.71998033033725585886645013","median":"10.51499489406607805569628773","min":"5.899998364538121825027736905","n":4,"n_computed":4,"n_unknown":0},"structuring/baseline":{"max":"1.770000500579293573795181815","median":"1.335000069427555834126048454","min":"0.8499997568139622389563693298","n":4,"n_computed":4,"n_unknown":0},"structuring/elevated":{"max":"11.45999696238057545672367878","median":"8.69000152972856764249864866","min":"4.850003340935061660070993926","n":4,"n_computed":4,"n_unknown":0}}},"beneficiary_age":{"auc_results":{"eval":{"auc":0.521368,"auc_se_hanley_mcneil":0.127534,"n_negative":9,"n_positive":13,"unknown_excluded":true},"pooled":{"auc":0.396991,"auc_se_hanley_mcneil":0.089586,"n_negative":18,"n_positive":24,"unknown_excluded":true},"train":{"auc":0.252525,"auc_se_hanley_mcneil":0.114618,"n_negative":9,"n_positive":11,"unknown_excluded":true}},"per_scenario_statistics":{"circular_transfer/baseline":{"max":"19008000","median":"3888000","min":"216000","n":4,"n_computed":3,"n_unknown":1},"circular_transfer/elevated":{"max":"16588800","median":"8380800","min":"46800","n":4,"n_computed":3,"n_unknown":1},"clean_control/busy_legitimate":{"max":"24796800","median":"2.80080E+6","min":"111600","n":8,"n_computed":6,"n_unknown":2},"clean_control/large_legitimate":{"max":"33264000","median":"1.47600E+6","min":"108000","n":8,"n_computed":6,"n_unknown":2},"clean_control/typical":{"max":"27734400","median":"1.96740E+6","min":"140400","n":8,"n_computed":6,"n_unknown":2},"mule_account_chain/baseline":{"max":"29116800","median":"26438400","min":"187200","n":4,"n_computed":3,"n_unknown":1},"mule_account_chain/elevated":{"max":"32832000","median":"12096000","min":"39600","n":4,"n_computed":3,"n_unknown":1},"rapid_movement/baseline":{"max":"6048000","median":"4060800","min":"205200","n":4,"n_computed":3,"n_unknown":1},"rapid_movement/elevated":{"max":"32832000","median":"31881600","min":"212400","n":4,"n_computed":3,"n_unknown":1},"structuring/baseline":{"max":"21945600","median":"4924800","min":"176400","n":4,"n_computed":3,"n_unknown":1},"structuring/elevated":{"max":"9417600","median":"4924800","min":"172800","n":4,"n_computed":3,"n_unknown":1}},"unknown_reasons":{"no matching beneficiary record for this customer and destination account":14}},"transaction_velocity":{"auc_results":{"eval":{"auc":0.484375,"auc_se_hanley_mcneil":0.112286,"n_negative":12,"n_positive":16,"unknown_excluded":true},"pooled":{"auc":0.442057,"auc_se_hanley_mcneil":0.078427,"n_negative":24,"n_positive":32,"unknown_excluded":true},"train":{"auc":0.398438,"auc_se_hanley_mcneil":0.110428,"n_negative":12,"n_positive":16,"unknown_excluded":true}},"per_scenario_statistics":{"circular_transfer/baseline":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"circular_transfer/elevated":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"clean_control/busy_legitimate":{"max":"5","median":"3.5","min":"2","n":8,"n_computed":8,"n_unknown":0},"clean_control/large_legitimate":{"max":"2","median":"1","min":"1","n":8,"n_computed":8,"n_unknown":0},"clean_control/typical":{"max":"2","median":"1","min":"1","n":8,"n_computed":8,"n_unknown":0},"mule_account_chain/baseline":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"mule_account_chain/elevated":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"rapid_movement/baseline":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"rapid_movement/elevated":{"max":"1","median":"1","min":"1","n":4,"n_computed":4,"n_unknown":0},"structuring/baseline":{"max":"6","median":"4.5","min":"2","n":4,"n_computed":4,"n_unknown":0},"structuring/elevated":{"max":"6","median":"5.5","min":"3","n":4,"n_computed":4,"n_unknown":0}}}}}
+```
+
 ---
 
 ## 3. Graph Evaluation
