@@ -49,8 +49,9 @@ What this makes easier, harder, or what it forecloses.
 | [ADR-0002](decisions/0002-postgresql-vs-separate-graph-database.md) | PostgreSQL (+pgvector, adjacency tables) vs. a separate graph database | Accepted |
 | [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed — provider not yet locked in |
 | [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Proposed |
+| [ADR-0005](decisions/0005-risk-scoring-approach.md) | Risk-scoring approach (Phase 2) | Proposed |
 
-Future ADRs (evidence model, risk-scoring approach, orchestration-framework revisit, authentication model, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers (e.g., risk-scoring ADR is expected around Phase 2 calibration work).
+Future ADRs (evidence model, orchestration-framework revisit, authentication model, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers.
 
 ---
 
