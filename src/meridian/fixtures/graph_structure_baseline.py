@@ -170,14 +170,16 @@ def measure_graph_baseline(
             "seed": seed,
             "methodology_tier": "PROTOTYPE",
             "metric_interpretation_note": (
-                "These signals measure deterministic structural fidelity against an oracle, "
-                "not probabilistic predictive utility. Therefore ROC-AUC is mathematically "
-                "inappropriate. Exact match rate and MAE are reported."
+                "These signals measure deterministic structural fidelity "
+                "against an oracle, not probabilistic predictive utility. "
+                "Therefore ROC-AUC is mathematically inappropriate. "
+                "Exact match rate and MAE are reported."
             ),
             "explicit_disclaimer": (
                 "No threshold was selected. No calibration was performed. "
-                "No risk-level mapping was derived. These primitives do not assign risk scores. "
-                "Their predictive utility for AML behavior remains uncalibrated."
+                "No risk-level mapping was derived. These primitives do not "
+                "assign risk scores. Their predictive utility for AML "
+                "behavior remains uncalibrated."
             ),
         },
         "exclusions": dict(sorted(excluded_counts.items())),

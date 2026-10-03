@@ -1,12 +1,11 @@
 import os
 import subprocess
-from decimal import Decimal
 
 from sqlalchemy import Engine
 
 from meridian.fixtures.generator_v04 import generate_fixtures_v04
-from meridian.loader.main import clear_data, insert_data
 from meridian.fixtures.graph_structure_baseline import measure_graph_baseline
+from meridian.loader.main import clear_data, insert_data
 
 
 def test_determinism(tmp_path, superuser_engine: Engine):
@@ -61,7 +60,7 @@ def test_determinism(tmp_path, superuser_engine: Engine):
 
 def test_baseline_integration(superuser_engine: Engine):
     res = generate_fixtures_v04("integration_seed")
-    
+
     # Load data
     clear_data(superuser_engine)
     insert_data(superuser_engine, res)
