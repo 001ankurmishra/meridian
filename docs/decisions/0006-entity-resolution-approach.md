@@ -1,6 +1,6 @@
 # ADR-0006: Entity-Resolution Approach (Phase 2)
 
-Status: Proposed
+Status: Accepted
 Date: 2026-10-03
 
 ## Context
@@ -16,9 +16,47 @@ Before designing the approach, we must acknowledge the current repository state:
 - FACT: ADR-0002 mandates PostgreSQL and NetworkX for graph construction.
 - FACT: ADR-0005 prohibits performance claims from generator-defined evaluation relationships without independent validation.
 
-## Decision (Proposed)
+## Decision (Accepted 2026-10-04; D5 deferred)
 
-D1. PROPOSED: We will adopt a **deterministic, rule-based entity-resolution approach** (e.g., exact matches on identifiers, deterministic string similarity thresholds, exact DOB matching) rather than an LLM-based generative approach. This aligns with F13 (explainability).
+D1. ACCEPTED: We will adopt a **deterministic, rule-based entity-resolution approach** rather than an LLM-based generative approach. This aligns with F13 (explainability).
+
+The accepted first slice is narrowly defined as a computation-only, read-only approach matching on:
+* exact equality after a fixed normalization specification for `customers.full_name`
+* AND exact equality of `customers.date_of_birth`
+
+Normalization version 1 should be:
+* Unicode NFKC normalization
+* Unicode case folding
+* collapse each run of Unicode whitespace to one space
+* trim leading/trailing whitespace
+
+Version 1 does NOT include:
+* punctuation removal
+* diacritic stripping
+* token reordering
+* initials/abbreviation expansion
+* nickname mapping
+* transliteration
+* phonetic matching
+* edit distance
+* fuzzy similarity thresholds
+
+Any change to the normalization procedure requires a new normalization version.
+Missing/empty name or missing DOB must not produce a candidate. No imputation.
+
+The result is a **candidate entity link for human review**. It must never be described as proof or determination that two customer records represent the same person.
+
+For reproducibility and auditability, each candidate link must carry:
+* rule identifier
+* normalization version
+* the two source customer identifiers
+* matched fields
+
+This is the output contract for the computation-only first slice, not a persistence decision.
+
+Note: The current schema lacks additional identifier fields. This is a current schema limitation rather than an eternal domain property.
+
+Future fuzzy/learned approaches may remain explicitly deferred alternatives, but nothing in this ADR authorizes their implementation.
 
 D2. Source-data immutability must be strictly preserved. Entity resolution will not alter existing customer, account, or transaction records in the primary tables.
 
@@ -26,10 +64,24 @@ D3. GraphAgent will remain read-only. It will consume resolved entity links but 
 
 D4. Consistent with ADR-0005, we will not make evaluation claims for ER using the current synthetic generators (which lack planted near-duplicates or aliases). We must plant variant customer records in the fixture generation before we can evaluate ER performance.
 
-D5. OPEN: Storage of ER links. The maintainer must choose between:
-    - on-demand candidate links (computed at runtime in memory)
-    - the existing `graph_relationships` table (adding a new relationship type)
-    - a new persistence table dedicated to entity resolution
+D5. DEFERRED: Storage of ER links. The first ER slice:
+* computes candidates on demand
+* operates in memory
+* is read-only
+* does not persist ER links
+* does not modify `graph_relationships`
+* does not create a new persistence table
+* does not add a migration
+* does not wire ER into GraphAgent, evidence, reports, or UI
+
+The following remain open for a future explicit decision:
+* on-demand computation
+* existing `graph_relationships`
+* dedicated ER persistence
+
+Rationale for deferring persistence:
+* `graph_relationships` currently has no columns for a rule identifier, normalization version, or matched fields; it only has the existing relationship data/weight fields.
+* The graph loader in `src/meridian/agents/graph/subgraph.py` currently reads graph relationships without filtering by `relationship_type`.
 
 D6. We will adhere to the ADR-0002 architecture (PostgreSQL + NetworkX), ensuring ER edges can be seamlessly integrated into graph queries and NetworkX analysis.
 
@@ -40,10 +92,10 @@ D6. We will adhere to the ADR-0002 architecture (PostgreSQL + NetworkX), ensurin
 
 ## Consequences
 
-- If D1 is accepted, entity resolution would be highly transparent, auditable, and rule-based.
-- D5 remains OPEN and requires maintainer approval before any implementation work begins.
+- Entity resolution will be highly transparent, auditable, and rule-based.
+- D5 is DEFERRED. Persistent storage requires a separate future decision.
 - We cannot build ER until we first add new fixtures with aliases and variant records, ensuring we have data to test against without violating ADR-0005.
 
 ## PROHIBITED
-- Do not implement ER.
-- Do not close D5.
+- This ADR does not authorize ER code, ER fixtures, migrations, new tables, or any write to `graph_relationships` or any other table; each requires its own task.
+- Do not persist ER links or wire ER into GraphAgent, evidence, reports or the UI without a separate recorded decision on D5.
