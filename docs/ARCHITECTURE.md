@@ -105,12 +105,12 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Failure behavior:** If a required aggregate cannot be computed (e.g., insufficient history), return `UNKNOWN` for that signal, not an estimate.
 
 ### 4.3 GraphAgent
-- **Responsibility:** Build and analyze the transaction/entity graph around the alerted customer (community/centrality/pattern detection using NetworkX).
+- **Responsibility:** Build and analyze the transaction/entity graph around the alerted customer (community/centrality/pattern detection using NetworkX). Deterministic graph primitives (`structure_signals.py`) exist for cycle detection and chain depth, but are currently unwired.
 - **Inputs:** customer/account ID, hop-depth limit.
-- **Outputs:** Subgraph structure, flagged patterns (e.g., rapid pass-through), links to underlying transaction/relationship rows.
+- **Outputs:** Subgraph structure, flagged patterns (e.g., rapid pass-through, cycles, chains), links to underlying transaction/relationship rows. These are computation-only structural properties and do not assign risk scores or AML labels.
 - **Tools:** Read-only graph-construction queries over PostgreSQL (`graph_relationships`, `transactions`); in-process NetworkX analysis.
 - **Permissions:** Read-only.
-- **Failure behavior:** Bounded hop-depth and node-count limits to prevent runaway queries; on limit-exceeded, return a partial graph explicitly marked as partial.
+- **Failure behavior:** Bounded hop-depth and node-count limits to prevent runaway queries; on limit-exceeded, return a partial graph explicitly marked as partial (truncated).
 
 ### 4.4 PolicyAgent
 - **Responsibility:** Retrieve relevant internal AML policy / regulatory guidance passages for the case's alert pattern.

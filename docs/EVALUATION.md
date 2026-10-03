@@ -125,6 +125,13 @@ Signal directions were fixed before measurement:
 
 **Method:** synthetic data generation should include deliberately planted suspicious subgraphs (structuring rings, circular transfers, mule chains) with known ground truth, so GraphAgent output can be scored against a known answer, not just eyeballed.
 
+### Structure Signals Baseline (PROTOTYPE)
+
+**Disclaimer:** Deterministic structural graph primitives (e.g., cycle detection, chain depth) have been implemented as computation-only, read-only utilities. No threshold was selected. No calibration was performed. No risk-level mapping was derived. These primitives do not assign risk scores or AML labels. Their predictive utility for identifying suspicious behavior is currently unvalidated and unmeasured.
+
+**Metadata:**
+* **Methodology Tier:** PROTOTYPE
+
 ---
 
 ## 4. RAG Evaluation
