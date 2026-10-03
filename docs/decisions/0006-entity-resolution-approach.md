@@ -16,7 +16,7 @@ Before designing the approach, we must acknowledge the current repository state:
 - FACT: ADR-0002 mandates PostgreSQL and NetworkX for graph construction.
 - FACT: ADR-0005 prohibits performance claims from generator-defined evaluation relationships without independent validation.
 
-## Decision (Proposed)
+## Decision (Accepted 2026-10-04; D5 deferred)
 
 D1. ACCEPTED: We will adopt a **deterministic, rule-based entity-resolution approach** rather than an LLM-based generative approach. This aligns with F13 (explainability).
 
@@ -45,6 +45,15 @@ Any change to the normalization procedure requires a new normalization version.
 Missing/empty name or missing DOB must not produce a candidate. No imputation.
 
 The result is a **candidate entity link for human review**. It must never be described as proof or determination that two customer records represent the same person.
+
+For reproducibility and auditability, each candidate link must carry:
+* rule identifier
+* normalization version
+* the two source customer identifiers
+* matched fields
+
+This is the output contract for the computation-only first slice, not a persistence decision.
+
 Note: The current schema lacks additional identifier fields. This is a current schema limitation rather than an eternal domain property.
 
 Future fuzzy/learned approaches may remain explicitly deferred alternatives, but nothing in this ADR authorizes their implementation.
@@ -70,6 +79,10 @@ The following remain open for a future explicit decision:
 * existing `graph_relationships`
 * dedicated ER persistence
 
+Rationale for deferring persistence:
+* `graph_relationships` currently has no columns for a rule identifier, normalization version, or matched fields; it only has the existing relationship data/weight fields.
+* The graph loader in `src/meridian/agents/graph/subgraph.py` currently reads graph relationships without filtering by `relationship_type`.
+
 D6. We will adhere to the ADR-0002 architecture (PostgreSQL + NetworkX), ensuring ER edges can be seamlessly integrated into graph queries and NetworkX analysis.
 
 ## Alternatives Considered
@@ -84,4 +97,5 @@ D6. We will adhere to the ADR-0002 architecture (PostgreSQL + NetworkX), ensurin
 - We cannot build ER until we first add new fixtures with aliases and variant records, ensuring we have data to test against without violating ADR-0005.
 
 ## PROHIBITED
-- Do not implement ER.
+- This ADR does not authorize ER code, ER fixtures, migrations, new tables, or any write to `graph_relationships` or any other table; each requires its own task.
+- Do not persist ER links or wire ER into GraphAgent, evidence, reports or the UI without a separate recorded decision on D5.
