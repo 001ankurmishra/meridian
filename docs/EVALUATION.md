@@ -127,10 +127,28 @@ Signal directions were fixed before measurement:
 
 ### Structure Signals Baseline (PROTOTYPE)
 
+**Reproduction Command:**
+```bash
+export $(cat .env | xargs) && PYTHONPATH=$(pwd)/src .venv/bin/python -m meridian.fixtures.graph_structure_baseline
+```
+Note: The v0.4 evaluation fixture corpus is assumed to already exist in the database.
+You can load it by using the same test loading pattern used in the `tests/test_graph_structure_baseline.py` tests.
+
 **Disclaimer:** Deterministic structural graph primitives (e.g., cycle detection, chain depth) have been implemented as computation-only, read-only utilities. No threshold was selected. No calibration was performed. No risk-level mapping was derived. These primitives do not assign risk scores or AML labels. Their predictive utility for identifying suspicious behavior is currently unvalidated and unmeasured.
 
 **Metadata:**
 * **Methodology Tier:** PROTOTYPE
+* **Fixture Version:** 0.4
+* **Generator Version:** 0.4
+* **Seed:** baseline_seed
+
+**Metric Interpretation Note:**
+These signals measure deterministic structural fidelity against an oracle, not probabilistic predictive utility. Therefore ROC-AUC is mathematically inappropriate. Exact match rate and MAE are reported.
+
+**Observed Output (VERBATIM):**
+```json
+{"exclusions":{},"metadata":{"explicit_disclaimer":"No threshold was selected. No calibration was performed. No risk-level mapping was derived. These primitives do not assign risk scores. Their predictive utility for AML behavior remains uncalibrated.","fixture_version":"0.4","generator_version":"0.4","methodology_tier":"PROTOTYPE","metric_interpretation_note":"These signals measure deterministic structural fidelity against an oracle, not probabilistic predictive utility. Therefore ROC-AUC is mathematically inappropriate. Exact match rate and MAE are reported.","seed":"baseline_seed"},"signals":{"directed_cycle":{"per_scenario_statistics":{"circular_transfer/baseline":{"fn":0,"fp":0,"n":4,"n_found":4,"n_not_found":0,"n_truncated":0,"tn":0,"tp":4},"circular_transfer/elevated":{"fn":0,"fp":0,"n":4,"n_found":4,"n_not_found":0,"n_truncated":0,"tn":0,"tp":4},"clean_control/busy_legitimate":{"fn":0,"fp":0,"n":8,"n_found":0,"n_not_found":8,"n_truncated":0,"tn":8,"tp":0},"clean_control/large_legitimate":{"fn":0,"fp":0,"n":8,"n_found":0,"n_not_found":8,"n_truncated":0,"tn":8,"tp":0},"clean_control/typical":{"fn":0,"fp":0,"n":8,"n_found":0,"n_not_found":8,"n_truncated":0,"tn":8,"tp":0},"insufficient_history/baseline":{"fn":0,"fp":0,"n":1,"n_found":0,"n_not_found":1,"n_truncated":0,"tn":1,"tp":0},"mule_account_chain/baseline":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"mule_account_chain/elevated":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"rapid_movement/baseline":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"rapid_movement/elevated":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"structuring/baseline":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"structuring/elevated":{"fn":0,"fp":0,"n":4,"n_found":0,"n_not_found":4,"n_truncated":0,"tn":4,"tp":0},"worked_example/baseline":{"fn":0,"fp":0,"n":1,"n_found":0,"n_not_found":1,"n_truncated":0,"tn":1,"tp":0}},"structural_fidelity":{"confusion_matrix":{"FN":0,"FP":0,"TN":50,"TP":8},"exact_match_rate":1.0,"n_applicable":58,"n_exact_match":58,"truncation_rate":0.0}},"outbound_chain_depth":{"per_scenario_statistics":{"circular_transfer/baseline":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"circular_transfer/elevated":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"clean_control/busy_legitimate":{"exact_matches":8,"mean_absolute_error":0.0,"n":8,"n_computed":8,"n_truncated":0},"clean_control/large_legitimate":{"exact_matches":8,"mean_absolute_error":0.0,"n":8,"n_computed":8,"n_truncated":0},"clean_control/typical":{"exact_matches":8,"mean_absolute_error":0.0,"n":8,"n_computed":8,"n_truncated":0},"insufficient_history/baseline":{"exact_matches":1,"mean_absolute_error":0.0,"n":1,"n_computed":1,"n_truncated":0},"mule_account_chain/baseline":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"mule_account_chain/elevated":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"rapid_movement/baseline":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"rapid_movement/elevated":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"structuring/baseline":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"structuring/elevated":{"exact_matches":4,"mean_absolute_error":0.0,"n":4,"n_computed":4,"n_truncated":0},"worked_example/baseline":{"exact_matches":1,"mean_absolute_error":0.0,"n":1,"n_computed":1,"n_truncated":0}},"structural_fidelity":{"exact_match_rate":1.0,"mean_absolute_error":0.0,"n_applicable":58,"n_exact_match":58,"truncation_rate":0.0}}}}
+```
 
 ---
 
