@@ -50,6 +50,7 @@ What this makes easier, harder, or what it forecloses.
 | [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed — provider not yet locked in |
 | [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Proposed |
 | [ADR-0005](decisions/0005-risk-scoring-approach.md) | Risk-scoring approach (Phase 2) | Proposed |
+| [ADR-0006](decisions/0006-entity-resolution-approach.md) | Entity-resolution approach (Phase 2) | Proposed |
 
 Future ADRs (evidence model, orchestration-framework revisit, authentication model, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers.
 
