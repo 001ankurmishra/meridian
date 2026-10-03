@@ -45,6 +45,7 @@ To ensure exact byte-for-byte reproducibility across runs and environments, the 
 - No dependence on system entropy, `PYTHONHASHSEED`, or environmental timezone variations.
 - **Hard Negatives:** v0.2 includes `large_legitimate` clean controls to evaluate the system's ability to distinguish high-volume but structurally normal activity from actual suspicious patterns.
 - **Quota-based Independence (v0.3):** Introduces quota-based beneficiary distribution (20/40/40) and label-neutral alert types, ensuring these attributes are completely decoupled from scenario classes.
+- **Graph Structural Facts (v0.4):** Extends v0.3 by adding deterministic transaction-derived `TRANSACTED_WITH` relationships and calculating graph structural ground truth (directed cycle length, maximum outbound chain depth). Crucially, v0.4 is completely additive: it preserves all hand-authored relationships without modifying v0.1-v0.3 behavior, and introduces no new typologies or decoys.
 
 **Important:** This synthetic fixture corpus (v0.1, v0.2, and v0.3) is explicitly built for functional testing and orchestration pathways. It does NOT claim to represent real-world AML typologies and its detection performance on these fixtures does not constitute a real-world AML detection capability claim.
 
