@@ -169,19 +169,96 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ## 5. Entity Resolution Evaluation
 
-**Metrics:** structural fidelity against a deterministic planted evaluation corpus (Pair-wise True Positive Rate, False Positive Rate, Abstention Rate).
+### ER evaluation protocol (v0.5, FROZEN before any measurement)
 
-**Method:** Candidate ER links are evaluated against the planted v0.5 ER ground truth (37 customers, 15 true pairs, 5 negative categories).
+* evaluation-set version = 0.5
+* tier = PROTOTYPE
+* this is generator-defined structural fidelity, not real-world ER performance
+* a candidate link is not an identity determination
 
-### ER Evaluation Protocol (FROZEN before any measurement)
+### Evaluation universe
 
-- **Methodology Tier:** PROTOTYPE
-- **Fixture Version:** 0.5
-- **Scope Restriction:** Evaluation is strictly bounded by the accepted scope in ADR-0006 (exact normalized `customers.full_name` + exact `customers.date_of_birth`).
-- **Expected True Positives:** Planted true pairs inside the v1 scope (Group A: case, whitespace, NFKC compatibility, and casefold variants).
-- **Expected False Negatives (Abstentions):** Planted true pairs outside the v1 scope (Group B: punctuation, diacritics, token reordering, abbreviations, nicknames, typos; Group D: NULL fields). An abstention here is an expected constraint compliance, NOT a rule defect.
-- **Expected True Negatives:** Planted negative categories (Group C, D2, D3) and all background population cross-pairs. Accidental collisions in the background population are treated as True Negatives in ground truth, meaning an ER link on them would be a False Positive by definition of this synthetic corpus.
-- **Goal:** Validate structural fidelity and constraint adherence of the ER baseline, prior to any persistence or GraphAgent integration.
+The evaluation universe is every unordered pair of customers in the evaluated corpus.
+
+`true_match_pairs` from the v0.5 manifest are the positive ground-truth pairs.
+
+Every unordered customer pair not present in `true_match_pairs` is negative ground truth.
+
+### Metrics
+
+* TP = predicted candidate link and positive ground truth
+* FP = predicted candidate link and negative ground truth
+* FN = positive ground truth pair for which no candidate link is produced
+* TN = negative ground truth pair for which no candidate link is produced
+
+Precision:
+
+`TP / (TP + FP)`
+
+Recall:
+
+`TP / (TP + FN)`
+
+If a denominator is zero, report the metric as NULL.
+
+### Stratification
+
+Recall stratification is required by:
+
+1. `variant_transforms`
+2. `within_adr_v1_scope`
+
+* `variant_transform(s)` = how the identity relationship was constructed.
+* `within_adr_v1_scope` = whether the accepted ADR-0006 D1 rule is expected to resolve that relationship.
+
+### FP/FN reporting
+
+FP and FN listings with their fixture/category identifiers and applicable ground-truth category information are required.
+
+### Abstention accounting
+
+Customers ineligible for matching because of missing/empty required fields must be accounted for by reason.
+
+At minimum distinguish:
+
+* missing name
+* empty/whitespace-only normalized name
+* missing DOB
+
+### Accuracy and other metrics
+
+* accuracy MUST NOT be a headline metric because TN dominates the pairwise universe.
+* NO ROC-AUC.
+* NO F1.
+* NO thresholds.
+* NO aggregate risk score.
+* NO calibrated risk level.
+
+### Normalization interpretations
+
+I-1:
+A name that is empty after normalization, including `''` or whitespace-only input such as NBSP-only, counts as empty.
+
+I-2:
+Whitespace handling follows Python `str.split()` semantics. The intended implementation is:
+
+`" ".join(s.split())`
+
+Unicode whitespace recognized by Python splitting is collapsed to one ASCII space and leading/trailing whitespace is trimmed.
+
+I-3:
+Exactly:
+
+NFKC -> casefold -> collapse/trim
+
+No second NFKC pass.
+
+### Safety / interpretation
+
+* the corpus is synthetic;
+* the evaluation is not evidence of real-world AML/ER performance;
+* a candidate link is for human review;
+* a candidate link is never an identity determination.
 
 ---
 
