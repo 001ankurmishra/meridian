@@ -167,21 +167,39 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ---
 
-## 5. Agent Evaluation
+## 5. Entity Resolution Evaluation
 
-**Metrics:** task success rate, correct tool selection rate, invalid tool-call rate, investigation completeness, unsupported-claim rate, hallucination rate, cost/latency per investigation.
+**Metrics:** structural fidelity against a deterministic planted evaluation corpus (Pair-wise True Positive Rate, False Positive Rate, Abstention Rate).
 
-**Method:** run the full fixture set (§6) through the orchestrator end-to-end; for each run, check: did the right agents get dispatched, did tool calls succeed/validate, did any finding lack supporting evidence (unsupported-claim rate — this should be **zero** given the evidence-sufficiency gate; if it isn't, that's a defect, not a metric to accept), did the reasoning chain (Fact→Signal→Interpretation→Recommendation) stay intact.
+**Method:** Candidate ER links are evaluated against the planted v0.5 ER ground truth (37 customers, 15 true pairs, 5 negative categories).
+
+### ER Evaluation Protocol (FROZEN before any measurement)
+
+- **Methodology Tier:** PROTOTYPE
+- **Fixture Version:** 0.5
+- **Scope Restriction:** Evaluation is strictly bounded by the accepted scope in ADR-0006 (exact normalized `customers.full_name` + exact `customers.date_of_birth`).
+- **Expected True Positives:** Planted true pairs inside the v1 scope (Group A: case, whitespace, NFKC compatibility, and casefold variants).
+- **Expected False Negatives (Abstentions):** Planted true pairs outside the v1 scope (Group B: punctuation, diacritics, token reordering, abbreviations, nicknames, typos; Group D: NULL fields). An abstention here is an expected constraint compliance, NOT a rule defect.
+- **Expected True Negatives:** Planted negative categories (Group C, D2, D3) and all background population cross-pairs. Accidental collisions in the background population are treated as True Negatives in ground truth, meaning an ER link on them would be a False Positive by definition of this synthetic corpus.
+- **Goal:** Validate structural fidelity and constraint adherence of the ER baseline, prior to any persistence or GraphAgent integration.
 
 ---
 
-## 6. System Evaluation
+## 6. Agent Evaluation
+
+**Metrics:** task success rate, correct tool selection rate, invalid tool-call rate, investigation completeness, unsupported-claim rate, hallucination rate, cost/latency per investigation.
+
+**Method:** run the full fixture set (§7) through the orchestrator end-to-end; for each run, check: did the right agents get dispatched, did tool calls succeed/validate, did any finding lack supporting evidence (unsupported-claim rate — this should be **zero** given the evidence-sufficiency gate; if it isn't, that's a defect, not a metric to accept), did the reasoning chain (Fact→Signal→Interpretation→Recommendation) stay intact.
+
+---
+
+## 7. System Evaluation
 
 **Metrics:** reliability (successful-completion rate across the fixture set), latency (per investigation, per agent), throughput (investigations/hour under test load), failure recovery (does the system correctly reach `INCOMPLETE_INSUFFICIENT_EVIDENCE` / `FAILED` states rather than silently corrupting state), reproducibility (does re-running the same alert against the same data/model version produce materially the same findings).
 
 ---
 
-## 7. Human Evaluation
+## 8. Human Evaluation
 
 **Metrics:** analyst agreement (does a human reviewer agree with the AI's risk level and recommendation), evidence completeness (does the report surface everything a human would have found manually), report correctness, investigation-time reduction, usability.
 
@@ -189,7 +207,7 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ---
 
-## 8. Synthetic Fixture Set
+## 9. Synthetic Fixture Set
 
 The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures/generator.py`) produce deterministic evaluation sets.
 - **v0.1:** 20 explicitly labeled scenarios, used to verify code paths. Very rigid numeric values with no variance.
@@ -204,6 +222,7 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
   - v0.4 defines the first uniform transaction-derived augmentation rule.
   - v0.4 ground truth is generator-defined structural ground truth.
   - This task makes no performance claim. Task 10 is not measured by this task, and no community-detection or centrality evaluation is introduced.
+- **v0.5:** Adds the ER Evaluation Corpus. It appends exactly 37 new customers (15 true match pairs across 13 true groups, and 5 negative categories) designed strictly to evaluate ER structural fidelity and adherence to ADR-0006 v1 normalization boundaries. v0.5 is purely additive; it perfectly preserves byte-for-byte all prior rows, graph topology, and risk signals. It contains no ER logic itself.
 - **Explicit ground truth:** Each fixture explicitly declares its intended ground truth (e.g. `AML_STRUCTURING`, `CLEAN`) and evaluation target directly in its manifest.
 - **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly, along with the IDs of pattern members.
 - **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically via a hash-based assignment. A single pattern's data never crosses the split boundary.
@@ -211,7 +230,7 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 
 ---
 
-## 9. What Is Explicitly Disallowed
+## 10. What Is Explicitly Disallowed
 
 - Publishing a metric without stating its tier and evaluation-set version.
 - Publishing a resume/portfolio claim (e.g., "reduced investigation time by 90%") without a real measured basis (`PROJECT_BRIEF` §29).
@@ -220,6 +239,6 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 
 ---
 
-## 10. Related Documents
+## 11. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` §5 (confidence tiers used in reports), `docs/TESTING.md` (fixture reuse for regression), `docs/DATA_AND_DATASET_STRATEGY.md` (fixture generation), `docs/DECISIONS.md` (ADR needed if evaluation methodology changes materially).
