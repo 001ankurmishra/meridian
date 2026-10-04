@@ -2,7 +2,8 @@
 Deterministic Entity Resolution Computation
 
 - Uses a deterministic ER rule (exact normalized name + exact DOB).
-- I-1: Rejects as 'name_empty_after_normalization' if normalization leaves an empty string.
+- I-1: Rejects as 'name_empty_after_normalization' if normalization
+  leaves an empty string.
 - I-2: Uses Python split whitespace semantics (collapses all whitespace).
 - I-3: Exactly one NFKC -> casefold -> whitespace collapse/trim pass.
 - A candidate link is a candidate for human review, NOT an identity determination.

@@ -187,10 +187,14 @@ from meridian.entity_resolution import CustomerIdentityRecord, find_candidate_li
 
 records = [
     CustomerIdentityRecord(
-        uuid.UUID("00000000-0000-0000-0000-000000000001"), "John Doe", datetime.date(1980, 1, 1)
+        uuid.UUID("00000000-0000-0000-0000-000000000001"),
+        "John Doe",
+        datetime.date(1980, 1, 1),
     ),
     CustomerIdentityRecord(
-        uuid.UUID("00000000-0000-0000-0000-000000000002"), "JOHN DOE", datetime.date(1980, 1, 1)
+        uuid.UUID("00000000-0000-0000-0000-000000000002"),
+        "JOHN DOE",
+        datetime.date(1980, 1, 1),
     ),
 ]
 res = find_candidate_links(records)
@@ -330,15 +334,15 @@ def test_dob_is_actual_date() -> None:
     """Proves the matcher handles actual datetime.date objects deterministically."""
     d1 = datetime.date(1995, 5, 5)
     d2 = datetime.date(1995, 5, 5)
-    
+
     # Python date objects with same value but distinct instances
     # to prove identity hashing vs value hashing
     assert d1 == d2
     assert d1 is not d2 or True
-    
+
     c1 = CustomerIdentityRecord(uuid.uuid4(), "John", d1)
     c2 = CustomerIdentityRecord(uuid.uuid4(), "John", d2)
-    
+
     res = find_candidate_links([c1, c2])
     assert len(res.candidates) == 1
     assert res.candidates[0].customer_id_a in (c1.customer_id, c2.customer_id)

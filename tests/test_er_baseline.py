@@ -210,13 +210,16 @@ def test_baseline_measurement_failing_universe(superuser_engine: Engine) -> None
             "manifest": {
                 "er_ground_truth": {
                     "true_match_pairs": [],
-                    "designed_negative_pairs": []
+                    "designed_negative_pairs": [],
                 }
             }
         }
-        
+
         import pytest
-        with pytest.raises(RuntimeError, match="Database customers do not match manifest customers"):
+
+        with pytest.raises(
+            RuntimeError, match="Database customers do not match manifest customers"
+        ):
             measure_er_baseline(superuser_engine, manifest)
     finally:
         _clear_data(superuser_engine)
@@ -260,15 +263,15 @@ def test_baseline_unplanned_fp(superuser_engine: Engine) -> None:
         }
 
         report = measure_er_baseline(superuser_engine, manifest)
-        
+
         metrics = report["metrics"]
         assert metrics["fp"] == 1
         assert metrics["tp"] == 0
-        
+
         fp_list = report["fp_list"]
         assert len(fp_list) == 1
         assert fp_list[0]["category"] == "UNPLANNED"
-        
+
         triggers = report["investigation_triggers"]
         assert len(triggers["unplanned_fps"]) == 1
     finally:
