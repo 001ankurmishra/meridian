@@ -167,21 +167,184 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ---
 
-## 5. Agent Evaluation
+## 5. Entity Resolution Evaluation
 
-**Metrics:** task success rate, correct tool selection rate, invalid tool-call rate, investigation completeness, unsupported-claim rate, hallucination rate, cost/latency per investigation.
+### ER evaluation protocol (v0.5, FROZEN before any measurement)
 
-**Method:** run the full fixture set (§6) through the orchestrator end-to-end; for each run, check: did the right agents get dispatched, did tool calls succeed/validate, did any finding lack supporting evidence (unsupported-claim rate — this should be **zero** given the evidence-sufficiency gate; if it isn't, that's a defect, not a metric to accept), did the reasoning chain (Fact→Signal→Interpretation→Recommendation) stay intact.
+* evaluation-set version = 0.5
+* tier = PROTOTYPE
+* this is generator-defined structural fidelity, not real-world ER performance
+* a candidate link is not an identity determination
+
+### Evaluation universe
+
+The evaluation universe is every unordered pair of customers in the evaluated corpus.
+
+`true_match_pairs` from the v0.5 manifest are the positive ground-truth pairs.
+
+Every unordered customer pair not present in `true_match_pairs` is negative ground truth.
+
+### Metrics
+
+* TP = predicted candidate link and positive ground truth
+* FP = predicted candidate link and negative ground truth
+* FN = positive ground truth pair for which no candidate link is produced
+* TN = negative ground truth pair for which no candidate link is produced
+
+Precision:
+
+`TP / (TP + FP)`
+
+Recall:
+
+`TP / (TP + FN)`
+
+If a denominator is zero, report the metric as NULL.
+
+### Stratification
+
+Recall stratification is required by:
+
+1. `variant_transforms`
+2. `within_adr_v1_scope`
+
+* `variant_transform(s)` = how the identity relationship was constructed.
+* `within_adr_v1_scope` = whether the accepted ADR-0006 D1 rule is expected to resolve that relationship.
+
+### FP/FN reporting
+
+FP and FN listings with their fixture/category identifiers and applicable ground-truth category information are required.
+
+### Abstention accounting
+
+Customers ineligible for matching because of missing/empty required fields must be accounted for by reason.
+
+At minimum distinguish:
+
+* missing name
+* empty/whitespace-only normalized name
+* missing DOB
+
+### Accuracy and other metrics
+
+* accuracy MUST NOT be a headline metric because TN dominates the pairwise universe.
+* NO ROC-AUC.
+* NO F1.
+* NO thresholds.
+* NO aggregate risk score.
+* NO calibrated risk level.
+
+### Normalization interpretations
+
+I-1:
+A name that is empty after normalization, including `''` or whitespace-only input such as NBSP-only, counts as empty.
+
+I-2:
+Whitespace handling follows Python `str.split()` semantics. The intended implementation is:
+
+`" ".join(s.split())`
+
+Unicode whitespace recognized by Python splitting is collapsed to one ASCII space and leading/trailing whitespace is trimmed.
+
+I-3:
+Exactly:
+
+NFKC -> casefold -> collapse/trim
+
+No second NFKC pass.
+
+### Safety / interpretation
+
+* the corpus is synthetic;
+* the evaluation is not evidence of real-world AML/ER performance;
+* a candidate link is for human review;
+* a candidate link is never an identity determination.
+
+### ER baseline measurement (v0.5)
+
+* tier: `PROTOTYPE`
+* evaluation-set version: `0.5`
+* seed: `er_corpus_v0.5_freeze`
+* rule_id: `exact_norm_name_exact_dob_v1`
+* normalization_version: `v1`
+
+**Measured confusion counts:**
+* TP = 7
+* FP = 1
+* FN = 8
+* TN = 17,189
+
+**Universe:**
+all unordered customer pairs
+
+TN = every pair not contained in true_match_pairs and not predicted as a candidate link.
+
+**Precision:**
+7/8
+
+**Recall:**
+7/15
+
+**Recall stratification:**
+
+#### Within ADR v1 scope
+* case_variant + whitespace_variant: TP 1, FN 0
+* whitespace_variant: TP 2, FN 0
+* casefold_variant: TP 1, FN 0
+* case_variant: TP 2, FN 0
+* nfkc_variant: TP 1, FN 0
+
+#### Outside ADR v1 scope
+* dob_null: FN 1
+* token_reorder: FN 1
+* name_null: FN 1
+* punctuation: FN 1
+* typo: FN 1
+* abbreviation: FN 1
+* nickname: FN 1
+* diacritic: FN 1
+
+**FN Summary:**
+* within-v1-scope unexpected FN = 0
+* outside-v1-scope expected FN = 8
+
+**FP analysis:**
+* designed C3 homonym = 1
+* unplanned FP = 0
+
+**Abstention:**
+* dob_null = 6
+* name_empty_after_normalization = 2
+* name_null = 1
+
+**Limitations:**
+* synthetic literal name pool
+* outside-scope true identities are expected FN/abstentions, not rule defects
+* the homonym pair is a deliberately designed known-false-positive class
+* no transliteration coverage
+* no phonetic matching coverage
+* structural fidelity only
+* no real-world ER performance claim
+* candidate link is not an identity determination
+* accuracy is not a headline metric
 
 ---
 
-## 6. System Evaluation
+## 6. Agent Evaluation
+
+**Metrics:** task success rate, correct tool selection rate, invalid tool-call rate, investigation completeness, unsupported-claim rate, hallucination rate, cost/latency per investigation.
+
+**Method:** run the full fixture set (§7) through the orchestrator end-to-end; for each run, check: did the right agents get dispatched, did tool calls succeed/validate, did any finding lack supporting evidence (unsupported-claim rate — this should be **zero** given the evidence-sufficiency gate; if it isn't, that's a defect, not a metric to accept), did the reasoning chain (Fact→Signal→Interpretation→Recommendation) stay intact.
+
+---
+
+## 7. System Evaluation
 
 **Metrics:** reliability (successful-completion rate across the fixture set), latency (per investigation, per agent), throughput (investigations/hour under test load), failure recovery (does the system correctly reach `INCOMPLETE_INSUFFICIENT_EVIDENCE` / `FAILED` states rather than silently corrupting state), reproducibility (does re-running the same alert against the same data/model version produce materially the same findings).
 
 ---
 
-## 7. Human Evaluation
+## 8. Human Evaluation
 
 **Metrics:** analyst agreement (does a human reviewer agree with the AI's risk level and recommendation), evidence completeness (does the report surface everything a human would have found manually), report correctness, investigation-time reduction, usability.
 
@@ -189,7 +352,7 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 
 ---
 
-## 8. Synthetic Fixture Set
+## 9. Synthetic Fixture Set
 
 The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures/generator.py`) produce deterministic evaluation sets.
 - **v0.1:** 20 explicitly labeled scenarios, used to verify code paths. Very rigid numeric values with no variance.
@@ -204,6 +367,7 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
   - v0.4 defines the first uniform transaction-derived augmentation rule.
   - v0.4 ground truth is generator-defined structural ground truth.
   - This task makes no performance claim. Task 10 is not measured by this task, and no community-detection or centrality evaluation is introduced.
+- **v0.5:** Adds the ER Evaluation Corpus. It appends exactly 37 new customers (15 true match pairs across 13 true groups, and 5 negative categories) designed strictly to evaluate ER structural fidelity and adherence to ADR-0006 v1 normalization boundaries. v0.5 is purely additive; it perfectly preserves byte-for-byte all prior rows, graph topology, and risk signals. It contains no ER logic itself.
 - **Explicit ground truth:** Each fixture explicitly declares its intended ground truth (e.g. `AML_STRUCTURING`, `CLEAN`) and evaluation target directly in its manifest.
 - **Planted pattern metadata:** The specific synthetic behavior injected into the data is tracked exactly, along with the IDs of pattern members.
 - **Split / pattern atomicity:** Each fixture instance acts as a fully self-contained atomic scenario mapped strictly to either `train` or `eval` deterministically via a hash-based assignment. A single pattern's data never crosses the split boundary.
@@ -211,7 +375,7 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 
 ---
 
-## 9. What Is Explicitly Disallowed
+## 10. What Is Explicitly Disallowed
 
 - Publishing a metric without stating its tier and evaluation-set version.
 - Publishing a resume/portfolio claim (e.g., "reduced investigation time by 90%") without a real measured basis (`PROJECT_BRIEF` §29).
@@ -220,6 +384,6 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 
 ---
 
-## 10. Related Documents
+## 11. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` §5 (confidence tiers used in reports), `docs/TESTING.md` (fixture reuse for regression), `docs/DATA_AND_DATASET_STRATEGY.md` (fixture generation), `docs/DECISIONS.md` (ADR needed if evaluation methodology changes materially).

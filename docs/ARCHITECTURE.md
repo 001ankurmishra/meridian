@@ -78,6 +78,7 @@ All AI/DB/agent activity is written to the append-only audit log (`docs/OBSERVAB
 | `audit` | Append-only logging of agent/tool/human actions (`audit_events`, F8); read-only reconstruction of a case's full investigation history for display/audit (`get_case_audit_trail`, F9) | `audit_events` |
 | `identity` | AuthN/AuthZ, RBAC | users/roles (see `docs/DATABASE_SCHEMA.md`) |
 | `retrieval` | Hybrid retrieval (BM25 + vector) shared library used by `agents.policy` | — |
+| `entity_resolution` | Deterministic exact-match logic for customer identities (ADR-0006 D1) | — (reads `customers`) |
 
 Each module exposes a narrow internal interface; other modules must not reach into another module's tables directly except through its interface. This is enforced by code review discipline (documented here) rather than physical service separation, given the modular-monolith choice — **ASSUMPTION**: this discipline is sufficient at current project scale; revisit if the codebase grows past what one team can review effectively.
 
