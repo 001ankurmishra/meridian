@@ -479,7 +479,10 @@ def generate_fixtures_v05(seed: str = "default_seed") -> dict[str, Any]:
         "true_match_pairs": true_match_pairs,
         "designed_negative_pairs": designed_negative_pairs,
         "transform_scopes": copy.deepcopy(TRANSFORM_SCOPES),
-        "note": "generator-defined ground truth for structural fidelity, not real-world ER performance, and not an identity determination",
+        "note": (
+            "generator-defined ground truth for structural fidelity, "
+            "not real-world ER performance, and not an identity determination"
+        ),
     }
 
     return res
