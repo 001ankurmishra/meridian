@@ -7,7 +7,12 @@ from typing import Any
 
 from sqlalchemy import Engine, create_engine
 
-from meridian.entity_resolution import compute_er_candidates, MATCHED_FIELDS, NORMALIZATION_VERSION, RULE_ID
+from meridian.entity_resolution import (
+    MATCHED_FIELDS,
+    NORMALIZATION_VERSION,
+    RULE_ID,
+    compute_er_candidates,
+)
 from meridian.fixtures.generator_v05 import generate_fixtures_v05
 
 
@@ -93,7 +98,9 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
     tn = len(tn_pairs)
 
     if tp + fp + fn + tn != total_pairs:
-        raise RuntimeError(f"Pairs do not sum to total: {tp} + {fp} + {fn} + {tn} != {total_pairs}")
+        raise RuntimeError(
+            f"Pairs do not sum to total: {tp} + {fp} + {fn} + {tn} != {total_pairs}"
+        )
 
     abstentions: dict[str, int] = defaultdict(int)
     for inel in res.ineligible:
@@ -116,13 +123,15 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             "within_v1_scope": pair["within_adr_v1_scope"],
         }
 
-    stratified_counts: dict[str, dict[str, int]] = defaultdict(lambda: {"n_pairs": 0, "n_found": 0})
-    
+    stratified_counts: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"n_pairs": 0, "n_found": 0}
+    )
+
     for p, info in gt_pair_info.items():
         vscope = str(info["within_v1_scope"])
         vt = str(info["variant_transforms"])
         key = f"scope={vscope}, transforms={vt}"
-        
+
         stratified_counts[key]["n_pairs"] += 1
         if p in tp_pairs:
             stratified_counts[key]["n_found"] += 1
