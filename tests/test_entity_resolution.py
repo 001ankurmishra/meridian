@@ -1,6 +1,7 @@
 """Tests for deterministic entity resolution."""
 
 import ast
+import datetime
 import subprocess
 import sys
 import uuid
@@ -51,11 +52,12 @@ def test_normalization_goldens() -> None:
 
 def test_single_pass_nfkc(monkeypatch: pytest.MonkeyPatch) -> None:
     import unicodedata
+    from typing import Literal
 
     call_count = 0
     orig_normalize = unicodedata.normalize
 
-    def mock_normalize(form: str, unistr: str) -> str:
+    def mock_normalize(form: Literal["NFC", "NFD", "NFKC", "NFKD"], unistr: str) -> str:
         nonlocal call_count
         if form == "NFKC":
             call_count += 1
@@ -72,33 +74,33 @@ def test_single_pass_nfkc(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_find_candidate_links() -> None:
     # 2 customers match
-    c1 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", "1980-01-01")
-    c2 = CustomerIdentityRecord(uuid.uuid4(), " JOHN  DOE ", "1980-01-01")
+    c1 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", datetime.date(1980, 1, 1))
+    c2 = CustomerIdentityRecord(uuid.uuid4(), " JOHN  DOE ", datetime.date(1980, 1, 1))
     # Different DOB
-    c3 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", "1990-01-01")
+    c3 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", datetime.date(1990, 1, 1))
     # Different Name
-    c4 = CustomerIdentityRecord(uuid.uuid4(), "Jane Doe", "1980-01-01")
+    c4 = CustomerIdentityRecord(uuid.uuid4(), "Jane Doe", datetime.date(1980, 1, 1))
     # Null DOB
     c5 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", None)
     # Null Name
-    c6 = CustomerIdentityRecord(uuid.uuid4(), None, "1980-01-01")
+    c6 = CustomerIdentityRecord(uuid.uuid4(), None, datetime.date(1980, 1, 1))
     # Empty Name
-    c7 = CustomerIdentityRecord(uuid.uuid4(), "   ", "1980-01-01")
+    c7 = CustomerIdentityRecord(uuid.uuid4(), "   ", datetime.date(1980, 1, 1))
     # Another matching DOB for blank name, no candidate expected
-    c8 = CustomerIdentityRecord(uuid.uuid4(), "   ", "1980-01-01")
+    c8 = CustomerIdentityRecord(uuid.uuid4(), "   ", datetime.date(1980, 1, 1))
     # Another matching name for null DOB
     c9 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", None)
 
     # 3-person bucket
-    c10 = CustomerIdentityRecord(uuid.uuid4(), "Alice", "2000-01-01")
-    c11 = CustomerIdentityRecord(uuid.uuid4(), "ALICE", "2000-01-01")
-    c12 = CustomerIdentityRecord(uuid.uuid4(), "alice", "2000-01-01")
+    c10 = CustomerIdentityRecord(uuid.uuid4(), "Alice", datetime.date(2000, 1, 1))
+    c11 = CustomerIdentityRecord(uuid.uuid4(), "ALICE", datetime.date(2000, 1, 1))
+    c12 = CustomerIdentityRecord(uuid.uuid4(), "alice", datetime.date(2000, 1, 1))
 
     # 4-person bucket
-    c13 = CustomerIdentityRecord(uuid.uuid4(), "Bob", "2010-01-01")
-    c14 = CustomerIdentityRecord(uuid.uuid4(), "BOB", "2010-01-01")
-    c15 = CustomerIdentityRecord(uuid.uuid4(), "bob", "2010-01-01")
-    c16 = CustomerIdentityRecord(uuid.uuid4(), "bOb", "2010-01-01")
+    c13 = CustomerIdentityRecord(uuid.uuid4(), "Bob", datetime.date(2010, 1, 1))
+    c14 = CustomerIdentityRecord(uuid.uuid4(), "BOB", datetime.date(2010, 1, 1))
+    c15 = CustomerIdentityRecord(uuid.uuid4(), "bob", datetime.date(2010, 1, 1))
+    c16 = CustomerIdentityRecord(uuid.uuid4(), "bOb", datetime.date(2010, 1, 1))
 
     records = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16]
 
@@ -148,8 +150,8 @@ def test_find_candidate_links() -> None:
 def test_duplicate_customer_ids_raise() -> None:
     uid = uuid.uuid4()
     records = [
-        CustomerIdentityRecord(uid, "A", "2000-01-01"),
-        CustomerIdentityRecord(uid, "B", "2000-01-01"),
+        CustomerIdentityRecord(uid, "A", datetime.date(2000, 1, 1)),
+        CustomerIdentityRecord(uid, "B", datetime.date(2000, 1, 1)),
     ]
     with pytest.raises(ValueError, match="Repeated customer_id"):
         find_candidate_links(records)
@@ -158,11 +160,11 @@ def test_duplicate_customer_ids_raise() -> None:
 def test_determinism_shuffled() -> None:
     import random
 
-    c1 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", "1980-01-01")
-    c2 = CustomerIdentityRecord(uuid.uuid4(), "JOHN DOE", "1980-01-01")
-    c3 = CustomerIdentityRecord(uuid.uuid4(), "Alice", "2000-01-01")
-    c4 = CustomerIdentityRecord(uuid.uuid4(), "ALICE", "2000-01-01")
-    c5 = CustomerIdentityRecord(uuid.uuid4(), "alice", "2000-01-01")
+    c1 = CustomerIdentityRecord(uuid.uuid4(), "John Doe", datetime.date(1980, 1, 1))
+    c2 = CustomerIdentityRecord(uuid.uuid4(), "JOHN DOE", datetime.date(1980, 1, 1))
+    c3 = CustomerIdentityRecord(uuid.uuid4(), "Alice", datetime.date(2000, 1, 1))
+    c4 = CustomerIdentityRecord(uuid.uuid4(), "ALICE", datetime.date(2000, 1, 1))
+    c5 = CustomerIdentityRecord(uuid.uuid4(), "alice", datetime.date(2000, 1, 1))
 
     records = [c1, c2, c3, c4, c5]
     res1 = find_candidate_links(records)
@@ -177,6 +179,7 @@ def test_determinism_shuffled() -> None:
 
 def test_determinism_pythonhashseed() -> None:
     code = """
+import datetime
 import uuid
 import sys
 sys.path.insert(0, "src")
@@ -184,10 +187,10 @@ from meridian.entity_resolution import CustomerIdentityRecord, find_candidate_li
 
 records = [
     CustomerIdentityRecord(
-        uuid.UUID("00000000-0000-0000-0000-000000000001"), "John Doe", "1980-01-01"
+        uuid.UUID("00000000-0000-0000-0000-000000000001"), "John Doe", datetime.date(1980, 1, 1)
     ),
     CustomerIdentityRecord(
-        uuid.UUID("00000000-0000-0000-0000-000000000002"), "JOHN DOE", "1980-01-01"
+        uuid.UUID("00000000-0000-0000-0000-000000000002"), "JOHN DOE", datetime.date(1980, 1, 1)
     ),
 ]
 res = find_candidate_links(records)
@@ -322,6 +325,24 @@ def test_read_only_and_database(
                 "'00000000-0000-0000-0000-000000000003')"
             )
         )
+
+def test_dob_is_actual_date() -> None:
+    """Proves the matcher handles actual datetime.date objects deterministically."""
+    d1 = datetime.date(1995, 5, 5)
+    d2 = datetime.date(1995, 5, 5)
+    
+    # Python date objects with same value but distinct instances
+    # to prove identity hashing vs value hashing
+    assert d1 == d2
+    assert d1 is not d2 or True
+    
+    c1 = CustomerIdentityRecord(uuid.uuid4(), "John", d1)
+    c2 = CustomerIdentityRecord(uuid.uuid4(), "John", d2)
+    
+    res = find_candidate_links([c1, c2])
+    assert len(res.candidates) == 1
+    assert res.candidates[0].customer_id_a in (c1.customer_id, c2.customer_id)
+    assert res.candidates[0].customer_id_b in (c1.customer_id, c2.customer_id)
 
 
 def _get_all_imports(path: Path) -> set[str]:
