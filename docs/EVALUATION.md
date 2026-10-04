@@ -260,6 +260,74 @@ No second NFKC pass.
 * a candidate link is for human review;
 * a candidate link is never an identity determination.
 
+### ER baseline measurement (v0.5)
+
+* tier: `PROTOTYPE`
+* evaluation-set version: `0.5`
+* seed: `er_corpus_v0.5_freeze`
+* rule_id: `exact_norm_name_exact_dob_v1`
+* normalization_version: `v1`
+
+**Measured confusion counts:**
+* TP = 7
+* FP = 1
+* FN = 8
+* TN = 17,189
+
+**Universe:**
+all unordered customer pairs
+
+TN = every pair not contained in true_match_pairs and not predicted as a candidate link.
+
+**Precision:**
+7/8
+
+**Recall:**
+7/15
+
+**Recall stratification:**
+
+#### Within ADR v1 scope
+* case_variant + whitespace_variant: TP 1, FN 0
+* whitespace_variant: TP 2, FN 0
+* casefold_variant: TP 1, FN 0
+* case_variant: TP 2, FN 0
+* nfkc_variant: TP 1, FN 0
+
+#### Outside ADR v1 scope
+* dob_null: FN 1
+* token_reorder: FN 1
+* name_null: FN 1
+* punctuation: FN 1
+* typo: FN 1
+* abbreviation: FN 1
+* nickname: FN 1
+* diacritic: FN 1
+
+**FN Summary:**
+* within-v1-scope unexpected FN = 0
+* outside-v1-scope expected FN = 8
+
+**FP analysis:**
+* designed C3 homonym = 1
+* unplanned FP = 0
+
+**Abstention:**
+* dob_null = 6
+* name_empty_after_normalization = 2
+* name_null = 1
+
+**Limitations:**
+* synthetic literal name pool
+* outside-scope true identities are expected FN/abstentions, not rule defects
+* the homonym pair is a deliberately designed known-false-positive class
+* no transliteration coverage
+* no phonetic matching coverage
+* structural fidelity only
+* no real-world ER performance claim
+* candidate link is not an identity determination
+* accuracy is not a headline metric
+
 ---
 
 ## 6. Agent Evaluation

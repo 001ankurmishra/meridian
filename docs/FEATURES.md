@@ -86,7 +86,7 @@ Retrieves and summarizes (via RAG over a curated/synthetic corpus — **never li
 
 **Phase:** Phase 2 · **Module:** `agents.graph` (extended) / `retrieval`
 
-Improves graph quality by resolving near-duplicate entities (e.g., same person across slightly different records) within the synthetic dataset. Deferred; approach (rule-based vs. ML-based) to be decided via ADR at Phase 2 kickoff.
+Improves graph quality by resolving near-duplicate entities within the synthetic dataset. Deterministic computation (normalized-name + DOB) is implemented (ADR-0006 D1), but persistence and integration into graph/orchestration are deferred (ADR-0006 D5).
 
 ## F14. Improved Risk Scoring & Calibration
 
