@@ -131,3 +131,66 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # they rely on the database and explicit pairs.
     finally:
         _clear_data(superuser_engine)
+
+def test_undefined_precision_recall(superuser_engine: Engine) -> None:
+    _clear_data(superuser_engine)
+    try:
+        # Create 2 customers that do NOT match to ensure TP=0, FP=0, FN=0, TN=1
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO customers (
+                        customer_id, full_name, date_of_birth, kyc_risk_rating,
+                        source, onboarded_at, created_at, is_synthetic
+                    )
+                    VALUES
+                    (
+                        '00000000-0000-0000-0000-000000000001', 'Alice',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    ),
+                    (
+                        '00000000-0000-0000-0000-000000000002', 'Bob',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    )
+                    """
+                )
+            )
+
+        manifest = {
+            "manifest": {
+                "er_ground_truth": {
+                    "true_match_pairs": [],
+                    "designed_negative_pairs": []
+                }
+            }
+        }
+
+        report = measure_er_baseline(superuser_engine, manifest)
+
+        metrics = report["metrics"]
+        assert metrics["tp"] + metrics["fp"] == 0
+        assert metrics["tp"] + metrics["fn"] == 0
+
+        assert metrics["precision"] is None
+        assert metrics["recall"] is None
+    finally:
+        _clear_data(superuser_engine)
+
+def test_no_second_normalization_implementation() -> None:
+    import ast
+    from pathlib import Path
+
+    baseline_path = Path("src/meridian/fixtures/er_baseline.py")
+    content = baseline_path.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(baseline_path))
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for name in node.names:
+                assert name.name != "unicodedata"
+        elif isinstance(node, ast.ImportFrom):
+            assert node.module != "unicodedata"
+        elif isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute):
+                assert node.func.attr not in {"casefold", "normalize", "lower", "upper"}
