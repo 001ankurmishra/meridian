@@ -353,7 +353,8 @@ def test_dob_is_actual_date() -> None:
     # Python date objects with same value but distinct instances
     # to prove identity hashing vs value hashing
     assert d1 == d2
-    assert d1 is not d2 or True
+    assert d1 is not d2
+
 
     c1 = CustomerIdentityRecord(uuid.uuid4(), "John", d1)
     c2 = CustomerIdentityRecord(uuid.uuid4(), "John", d2)
@@ -380,6 +381,9 @@ def _get_all_imports(path: Path) -> set[str]:
                     imports.add(node.module.split(".")[0])
                     if node.module.startswith("meridian."):
                         imports.add(node.module)
+                    if node.module == "meridian":
+                        for name in node.names:
+                            imports.add(f"meridian.{name.name}")
                 elif node.level > 0:
                     # Capture the imported relative module part for checking
                     imports.add(f"meridian.{node.module}")
@@ -388,6 +392,32 @@ def _get_all_imports(path: Path) -> set[str]:
                 for name in node.names:
                     imports.add(f"meridian.{name.name}")
     return imports
+
+
+def test_get_all_imports_scanner(tmp_path: Path) -> None:
+    test_cases = [
+        "import meridian.entity_resolution.matching",
+        "import meridian.entity_resolution as er",
+        "from meridian import entity_resolution",
+        "from meridian import entity_resolution as er",
+        "from ..entity_resolution import f",
+        "from meridian.entity_resolution import f",
+        "from .. import entity_resolution",
+    ]
+    
+    for idx, code in enumerate(test_cases):
+        f = tmp_path / f"test_{idx}.py"
+        f.write_text(code, encoding="utf-8")
+        imports = _get_all_imports(f)
+        assert any("meridian.entity_resolution" in i for i in imports), f"Failed to detect in: {code}"
+        
+    # Syntax error case should raise SyntaxError, not be swallowed
+    bad_syntax = "import meridian..entity_resolution"
+    f = tmp_path / "bad.py"
+    f.write_text(bad_syntax, encoding="utf-8")
+    with pytest.raises(SyntaxError):
+        _get_all_imports(f)
+
 
 
 def test_architecture_guards() -> None:

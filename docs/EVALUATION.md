@@ -280,10 +280,42 @@ all unordered customer pairs
 TN = every pair not contained in true_match_pairs and not predicted as a candidate link.
 
 **Precision:**
-7/8
+```json
+{
+  "value": 0.875,
+  "numerator": 7,
+  "denominator": 8
+}
+```
 
 **Recall:**
-7/15
+```json
+{
+  "value": 0.4666666666666667,
+  "numerator": 7,
+  "denominator": 15
+}
+```
+
+**Recall by Scope:**
+```json
+{
+  "within_adr_v1_scope": {
+    "n_pairs": 7,
+    "n_found": 7,
+    "recall": 1.0,
+    "numerator": 7,
+    "denominator": 7
+  },
+  "outside_adr_v1_scope": {
+    "n_pairs": 8,
+    "n_found": 0,
+    "recall": 0.0,
+    "numerator": 0,
+    "denominator": 8
+  }
+}
+```
 
 **Recall stratification:**
 
@@ -298,11 +330,11 @@ TN = every pair not contained in true_match_pairs and not predicted as a candida
 * dob_null: FN 1
 * token_reorder: FN 1
 * name_null: FN 1
-* punctuation: FN 1
+* punctuation_variant: FN 1
 * typo: FN 1
 * abbreviation: FN 1
 * nickname: FN 1
-* diacritic: FN 1
+* diacritic_variant: FN 1
 
 **FN Summary:**
 * within-v1-scope unexpected FN = 0
