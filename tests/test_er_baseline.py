@@ -20,6 +20,7 @@ def _clear_data(engine: Engine) -> None:
             )
         )
 
+
 def test_er_baseline_determinism(tmp_path: Path, superuser_engine: Engine) -> None:
     res = generate_fixtures_v05("er_corpus_v0.5_freeze")
     _clear_data(superuser_engine)
@@ -101,7 +102,6 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # 2. Confusion-matrix conservation
         tp, fp, fn, tn = metrics["tp"], metrics["fp"], metrics["fn"], metrics["tn"]
         assert tp + fp + fn + tn == expected_total_pairs
-        assert tp > 0 and fp > 0 and fn > 0 and tn > 0
 
         # 3. Negative universe
         # 4. Designed negatives are not complete negative universe
@@ -134,6 +134,7 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # they rely on the database and explicit pairs.
     finally:
         _clear_data(superuser_engine)
+
 
 def test_undefined_precision_recall(superuser_engine: Engine) -> None:
     _clear_data(superuser_engine)
@@ -168,9 +169,9 @@ def test_undefined_precision_recall(superuser_engine: Engine) -> None:
             "manifest": {
                 "er_ground_truth": {
                     "true_match_pairs": [],
-                    "designed_negative_pairs": []
+                    "designed_negative_pairs": [],
                 }
-            }
+            },
         }
 
         report = measure_er_baseline(superuser_engine, manifest)
@@ -183,6 +184,7 @@ def test_undefined_precision_recall(superuser_engine: Engine) -> None:
         assert metrics["recall"]["value"] is None
     finally:
         _clear_data(superuser_engine)
+
 
 def test_no_second_normalization_implementation() -> None:
     import ast
@@ -202,6 +204,7 @@ def test_no_second_normalization_implementation() -> None:
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in {"casefold", "normalize", "lower", "upper"}
 
+
 def test_baseline_measurement_failing_universe(superuser_engine: Engine) -> None:
     _clear_data(superuser_engine)
     try:
@@ -215,7 +218,7 @@ def test_baseline_measurement_failing_universe(superuser_engine: Engine) -> None
                     "true_match_pairs": [],
                     "designed_negative_pairs": [],
                 }
-            }
+            },
         }
 
         import pytest
@@ -226,6 +229,7 @@ def test_baseline_measurement_failing_universe(superuser_engine: Engine) -> None
             measure_er_baseline(superuser_engine, manifest)
     finally:
         _clear_data(superuser_engine)
+
 
 def test_baseline_unplanned_fp(superuser_engine: Engine) -> None:
     _clear_data(superuser_engine)
@@ -260,9 +264,9 @@ def test_baseline_unplanned_fp(superuser_engine: Engine) -> None:
             "manifest": {
                 "er_ground_truth": {
                     "true_match_pairs": [],
-                    "designed_negative_pairs": []
+                    "designed_negative_pairs": [],
                 }
-            }
+            },
         }
 
         report = measure_er_baseline(superuser_engine, manifest)
@@ -277,5 +281,84 @@ def test_baseline_unplanned_fp(superuser_engine: Engine) -> None:
 
         triggers = report["investigation_triggers"]
         assert len(triggers["unplanned_fps"]) == 1
+    finally:
+        _clear_data(superuser_engine)
+
+
+def test_baseline_exact_nonzero_metrics(superuser_engine: Engine) -> None:
+    _clear_data(superuser_engine)
+    try:
+        # Construct a tiny universe of 6 customers. Total pairs = 15.
+        # Predicted pairs: (c1, c2), (c5, c6)
+        # True match pairs: (c1, c2), (c3, c4)
+        # Expected metrics:
+        # TP = 1 (c1, c2)
+        # FP = 1 (c5, c6)
+        # FN = 1 (c3, c4)
+        # TN = 12 (all remaining pairs)
+
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO customers (
+                        customer_id, full_name, date_of_birth, kyc_risk_rating,
+                        source, onboarded_at, created_at, is_synthetic
+                    )
+                    VALUES
+                    ('00000000-0000-0000-0000-000000000001', 'Alice', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000002', 'ALICE', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000003', 'Bob', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000004', 'Bob', '1990-01-02',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000005', 'Charlie', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000006', 'Charlie', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true)
+                    """
+                )
+            )
+
+        manifest = {
+            "customers": [
+                {"customer_id": f"00000000-0000-0000-0000-00000000000{i}"}
+                for i in range(1, 7)
+            ],
+            "manifest": {
+                "er_ground_truth": {
+                    "true_match_pairs": [
+                        {
+                            "customer_ids": [
+                                "00000000-0000-0000-0000-000000000001",
+                                "00000000-0000-0000-0000-000000000002",
+                            ],
+                            "variant_transforms": ["case_variant"],
+                            "within_adr_v1_scope": True,
+                        },
+                        {
+                            "customer_ids": [
+                                "00000000-0000-0000-0000-000000000003",
+                                "00000000-0000-0000-0000-000000000004",
+                            ],
+                            "variant_transforms": ["dob_variant"],
+                            "within_adr_v1_scope": False,
+                        },
+                    ],
+                    "designed_negative_pairs": [],
+                }
+            },
+        }
+
+        report = measure_er_baseline(superuser_engine, manifest)
+        metrics = report["metrics"]
+
+        assert metrics["tp"] == 1
+        assert metrics["fp"] == 1
+        assert metrics["fn"] == 1
+        assert metrics["tn"] == 12
+
     finally:
         _clear_data(superuser_engine)

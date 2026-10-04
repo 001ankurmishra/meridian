@@ -224,108 +224,126 @@ print([str(c.customer_id_a) for c in res.candidates])
 def test_read_only_and_database(
     superuser_engine: Engine, app_role_engine: Engine
 ) -> None:
-    with superuser_engine.begin() as conn:
-        conn.execute(
-            text(
-                "DELETE FROM customers WHERE customer_id IN "
-                "('00000000-0000-0000-0000-000000000001', "
-                "'00000000-0000-0000-0000-000000000002', "
-                "'00000000-0000-0000-0000-000000000003')"
-            )
-        )
-        conn.execute(
-            text(
-                """
-                INSERT INTO customers (
-                    customer_id, full_name, date_of_birth, kyc_risk_rating,
-                    source, onboarded_at, created_at, is_synthetic
+    try:
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "DELETE FROM customers WHERE customer_id IN "
+                    "('00000000-0000-0000-0000-000000000001', "
+                    "'00000000-0000-0000-0000-000000000002', "
+                    "'00000000-0000-0000-0000-000000000003')"
                 )
-                VALUES
-                (
-                    '00000000-0000-0000-0000-000000000001', 'Test Name',
-                    '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
-                ),
-                (
-                    '00000000-0000-0000-0000-000000000002', 'test name',
-                    '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
-                ),
-                (
-                    '00000000-0000-0000-0000-000000000003', NULL,
-                    '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+            )
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO customers (
+                        customer_id, full_name, date_of_birth, kyc_risk_rating,
+                        source, onboarded_at, created_at, is_synthetic
+                    )
+                    VALUES
+                    (
+                        '00000000-0000-0000-0000-000000000001', 'Test Name',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    ),
+                    (
+                        '00000000-0000-0000-0000-000000000002', 'test name',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    ),
+                    (
+                        '00000000-0000-0000-0000-000000000003', NULL,
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    )
+                    """
                 )
-                """
             )
-        )
-    # Store before count
-    with superuser_engine.connect() as conn:
-        before_count = conn.execute(
-            text("SELECT count(*) FROM graph_relationships")
-        ).scalar()
+        # Store before count
+        with superuser_engine.connect() as conn:
+            before_counts = {
+                "customers": conn.execute(
+                    text("SELECT count(*) FROM customers")
+                ).scalar(),
+                "accounts": conn.execute(
+                    text("SELECT count(*) FROM accounts")
+                ).scalar(),
+                "entities": conn.execute(
+                    text("SELECT count(*) FROM entities")
+                ).scalar(),
+                "graph_relationships": conn.execute(
+                    text("SELECT count(*) FROM graph_relationships")
+                ).scalar(),
+                "tables": conn.execute(
+                    text("SELECT count(*) FROM information_schema.tables")
+                ).scalar(),
+                "alembic": conn.execute(
+                    text("SELECT version_num FROM alembic_version LIMIT 1")
+                ).scalar(),
+            }
 
-    res = compute_er_candidates(app_role_engine)
+        res = compute_er_candidates(app_role_engine)
 
-    # Check candidates contains the pair we inserted
-    found_link = False
-    for link in res.candidates:
-        if link.customer_id_a == uuid.UUID(
-            "00000000-0000-0000-0000-000000000001"
-        ) and link.customer_id_b == uuid.UUID("00000000-0000-0000-0000-000000000002"):
-            found_link = True
-            break
-        if link.customer_id_a == uuid.UUID(
-            "00000000-0000-0000-0000-000000000002"
-        ) and link.customer_id_b == uuid.UUID("00000000-0000-0000-0000-000000000001"):
-            found_link = True
-            break
-    assert found_link, "Expected candidate link not found"
+        # Check candidates contains the pair we inserted
+        found_link = False
+        for link in res.candidates:
+            if link.customer_id_a == uuid.UUID(
+                "00000000-0000-0000-0000-000000000001"
+            ) and link.customer_id_b == uuid.UUID(
+                "00000000-0000-0000-0000-000000000002"
+            ):
+                found_link = True
+                break
+            if link.customer_id_a == uuid.UUID(
+                "00000000-0000-0000-0000-000000000002"
+            ) and link.customer_id_b == uuid.UUID(
+                "00000000-0000-0000-0000-000000000001"
+            ):
+                found_link = True
+                break
+        assert found_link, "Expected candidate link not found"
 
-    # Check ineligible contains the null name record
-    found_ineligible = False
-    for inel in res.ineligible:
-        if inel.customer_id == uuid.UUID("00000000-0000-0000-0000-000000000003"):
-            found_ineligible = True
-            break
-    assert found_ineligible, "Expected ineligible customer not found"
+        # Check ineligible contains the null name record
+        found_ineligible = False
+        for inel in res.ineligible:
+            if inel.customer_id == uuid.UUID("00000000-0000-0000-0000-000000000003"):
+                found_ineligible = True
+                break
+        assert found_ineligible, "Expected ineligible customer not found"
 
-    # Check candidates contains the pair we inserted
-    found_link = False
-    for link in res.candidates:
-        if link.customer_id_a == uuid.UUID(
-            "00000000-0000-0000-0000-000000000001"
-        ) and link.customer_id_b == uuid.UUID("00000000-0000-0000-0000-000000000002"):
-            found_link = True
-            break
-        if link.customer_id_a == uuid.UUID(
-            "00000000-0000-0000-0000-000000000002"
-        ) and link.customer_id_b == uuid.UUID("00000000-0000-0000-0000-000000000001"):
-            found_link = True
-            break
-    assert found_link, "Expected candidate link not found"
+        # Verify no writes occurred
+        with superuser_engine.connect() as conn:
+            after_counts = {
+                "customers": conn.execute(
+                    text("SELECT count(*) FROM customers")
+                ).scalar(),
+                "accounts": conn.execute(
+                    text("SELECT count(*) FROM accounts")
+                ).scalar(),
+                "entities": conn.execute(
+                    text("SELECT count(*) FROM entities")
+                ).scalar(),
+                "graph_relationships": conn.execute(
+                    text("SELECT count(*) FROM graph_relationships")
+                ).scalar(),
+                "tables": conn.execute(
+                    text("SELECT count(*) FROM information_schema.tables")
+                ).scalar(),
+                "alembic": conn.execute(
+                    text("SELECT version_num FROM alembic_version LIMIT 1")
+                ).scalar(),
+            }
+            assert before_counts == after_counts
 
-    # Check ineligible contains the null name record
-    found_ineligible = False
-    for inel in res.ineligible:
-        if inel.customer_id == uuid.UUID("00000000-0000-0000-0000-000000000003"):
-            found_ineligible = True
-            break
-    assert found_ineligible, "Expected ineligible customer not found"
-
-    # Verify no writes occurred to graph_relationships
-    with superuser_engine.connect() as conn:
-        after_count = conn.execute(
-            text("SELECT count(*) FROM graph_relationships")
-        ).scalar()
-        assert before_count == after_count
-
-    with superuser_engine.begin() as conn:
-        conn.execute(
-            text(
-                "DELETE FROM customers WHERE customer_id IN "
-                "('00000000-0000-0000-0000-000000000001', "
-                "'00000000-0000-0000-0000-000000000002', "
-                "'00000000-0000-0000-0000-000000000003')"
+    finally:
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "DELETE FROM customers WHERE customer_id IN "
+                    "('00000000-0000-0000-0000-000000000001', "
+                    "'00000000-0000-0000-0000-000000000002', "
+                    "'00000000-0000-0000-0000-000000000003')"
+                )
             )
-        )
+
 
 def test_dob_is_actual_date() -> None:
     """Proves the matcher handles actual datetime.date objects deterministically."""
@@ -386,11 +404,17 @@ def test_architecture_guards() -> None:
         "fuzzy",
         "rapidfuzz",
         "Levenshtein",
+        "jellyfish",
         "nltk",
         "spacy",
         "transformers",
+        "sentence_transformers",
         "torch",
         "sklearn",
+        "numpy",
+        "anthropic",
+        "openai",
+        "difflib",
     }
 
     for f in er_dir.rglob("*.py"):
