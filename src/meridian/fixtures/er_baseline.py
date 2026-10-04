@@ -7,7 +7,7 @@ from typing import Any
 
 from sqlalchemy import Engine, create_engine
 
-from meridian.entity_resolution import compute_er_candidates
+from meridian.entity_resolution import compute_er_candidates, MATCHED_FIELDS, NORMALIZATION_VERSION, RULE_ID
 from meridian.fixtures.generator_v05 import generate_fixtures_v05
 
 
@@ -19,6 +19,8 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
     er_gt = manifest.get("manifest", {}).get("er_ground_truth")
     if not er_gt:
         raise ValueError("Missing er_ground_truth in manifest")
+
+    manifest_customer_ids = {str(c["customer_id"]) for c in manifest["customers"]}
 
     true_match_pairs = er_gt["true_match_pairs"]
     designed_negative_pairs = er_gt["designed_negative_pairs"]
@@ -39,9 +41,16 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             ).fetchall()
         ]
 
+    db_customer_ids = set(c_ids)
+    if db_customer_ids != manifest_customer_ids:
+        raise RuntimeError("Database customers do not match manifest customers")
+
+    N = len(c_ids)
+    total_pairs = (N * (N - 1)) // 2
+
     all_unordered_pairs = set()
-    for i in range(len(c_ids)):
-        for j in range(i + 1, len(c_ids)):
+    for i in range(N):
+        for j in range(i + 1, N):
             c1, c2 = c_ids[i], c_ids[j]
             if c1 > c2:
                 c1, c2 = c2, c1
@@ -78,17 +87,20 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
     fn_pairs = positive_gt - predicted_pairs
     tn_pairs = negative_gt - predicted_pairs
 
+    tp = len(tp_pairs)
+    fp = len(fp_pairs)
+    fn = len(fn_pairs)
+    tn = len(tn_pairs)
+
+    if tp + fp + fn + tn != total_pairs:
+        raise RuntimeError(f"Pairs do not sum to total: {tp} + {fp} + {fn} + {tn} != {total_pairs}")
+
     abstentions: dict[str, int] = defaultdict(int)
     for inel in res.ineligible:
         reasons = list(inel.reasons)
         reasons.sort()
         key = "|".join(reasons)
         abstentions[key] += 1
-
-    tp = len(tp_pairs)
-    fp = len(fp_pairs)
-    fn = len(fn_pairs)
-    tn = len(tn_pairs)
 
     precision = (tp / (tp + fp)) if (tp + fp) > 0 else None
     recall = (tp / (tp + fn)) if (tp + fn) > 0 else None
@@ -104,41 +116,47 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             "within_v1_scope": pair["within_adr_v1_scope"],
         }
 
-    stratified: dict[str, dict[str, int]] = defaultdict(lambda: {"tp": 0, "fn": 0})
-    for p in tp_pairs:
-        info = gt_pair_info.get(p)
-        if info:
-            vscope = str(info["within_v1_scope"])
-            vt = str(info["variant_transforms"])
-            key = f"scope={vscope}, transforms={vt}"
-            stratified[key]["tp"] += 1
+    stratified_counts: dict[str, dict[str, int]] = defaultdict(lambda: {"n_pairs": 0, "n_found": 0})
+    
+    for p, info in gt_pair_info.items():
+        vscope = str(info["within_v1_scope"])
+        vt = str(info["variant_transforms"])
+        key = f"scope={vscope}, transforms={vt}"
+        
+        stratified_counts[key]["n_pairs"] += 1
+        if p in tp_pairs:
+            stratified_counts[key]["n_found"] += 1
 
-    for p in fn_pairs:
-        info = gt_pair_info.get(p)
-        if info:
-            vscope = str(info["within_v1_scope"])
-            vt = str(info["variant_transforms"])
-            key = f"scope={vscope}, transforms={vt}"
-            stratified[key]["fn"] += 1
+    stratified = {}
+    for key, counts in stratified_counts.items():
+        n_pairs = counts["n_pairs"]
+        n_found = counts["n_found"]
+        stratified[key] = {
+            "n_pairs": n_pairs,
+            "n_found": n_found,
+            "recall": (n_found / n_pairs) if n_pairs > 0 else None,
+            "numerator": n_found,
+            "denominator": n_pairs
+        }
 
-    planted_consistency = []
+    planted_consistency: list[dict[str, Any]] = []
     for p in tp_pairs:
-        info = gt_pair_info.get(p)
-        if info and not info["within_v1_scope"]:
+        p_info = gt_pair_info.get(p)
+        if p_info and not p_info["within_v1_scope"]:
             planted_consistency.append(
-                {"pair": list(p), "status": "TP_BUT_OUT_OF_SCOPE", "info": info}
+                {"pair": list(p), "status": "TP_BUT_OUT_OF_SCOPE", "info": p_info}
             )
 
     for p in fn_pairs:
-        info = gt_pair_info.get(p)
-        if info and info["within_v1_scope"]:
+        p_info = gt_pair_info.get(p)
+        if p_info and p_info["within_v1_scope"]:
             planted_consistency.append(
-                {"pair": list(p), "status": "FN_BUT_IN_SCOPE", "info": info}
+                {"pair": list(p), "status": "FN_BUT_IN_SCOPE", "info": p_info}
             )
 
-    fp_list = []
+    fp_list: list[dict[str, Any]] = []
     for p in fp_pairs:
-        cat = "UNKNOWN"
+        cat = "UNPLANNED"
         for dnp in designed_negative_pairs:
             c1, c2 = dnp["customer_ids"]
             c1, c2 = str(uuid.UUID(c1)), str(uuid.UUID(c2))
@@ -149,13 +167,10 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
                 break
         fp_list.append({"pair": list(p), "category": cat})
 
-    for p in unplanned_fp_pairs:
-        fp_list.append({"pair": list(p), "category": "UNPLANNED"})
-
-    fn_list = []
+    fn_list: list[dict[str, Any]] = []
     for p in fn_pairs:
-        info = gt_pair_info.get(p)
-        fn_list.append({"pair": list(p), "info": info})
+        p_info = gt_pair_info.get(p)
+        fn_list.append({"pair": list(p), "info": p_info})
 
     fp_list.sort(key=lambda x: str(x["pair"]))
     fn_list.sort(key=lambda x: str(x["pair"]))
@@ -165,6 +180,9 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
         "metadata": {
             "tier": "PROTOTYPE",
             "evaluation_set_version": "0.5",
+            "rule_id": RULE_ID,
+            "normalization_version": NORMALIZATION_VERSION,
+            "matched_fields": list(MATCHED_FIELDS),
             "explicit_disclaimer": (
                 "This is generator-defined structural fidelity, "
                 "not real-world ER performance. "
@@ -173,6 +191,8 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             ),
         },
         "metrics": {
+            "customers": N,
+            "total_unordered_pairs": total_pairs,
             "tp": tp,
             "fp": fp,
             "fn": fn,

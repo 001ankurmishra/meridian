@@ -158,6 +158,10 @@ def test_undefined_precision_recall(superuser_engine: Engine) -> None:
             )
 
         manifest = {
+            "customers": [
+                {"customer_id": "00000000-0000-0000-0000-000000000001"},
+                {"customer_id": "00000000-0000-0000-0000-000000000002"},
+            ],
             "manifest": {
                 "er_ground_truth": {
                     "true_match_pairs": [],
@@ -194,3 +198,78 @@ def test_no_second_normalization_implementation() -> None:
         elif isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in {"casefold", "normalize", "lower", "upper"}
+
+def test_baseline_measurement_failing_universe(superuser_engine: Engine) -> None:
+    _clear_data(superuser_engine)
+    try:
+        # DB has no customers, but manifest expects 1
+        manifest = {
+            "customers": [
+                {"customer_id": "00000000-0000-0000-0000-000000000001"},
+            ],
+            "manifest": {
+                "er_ground_truth": {
+                    "true_match_pairs": [],
+                    "designed_negative_pairs": []
+                }
+            }
+        }
+        
+        import pytest
+        with pytest.raises(RuntimeError, match="Database customers do not match manifest customers"):
+            measure_er_baseline(superuser_engine, manifest)
+    finally:
+        _clear_data(superuser_engine)
+
+def test_baseline_unplanned_fp(superuser_engine: Engine) -> None:
+    _clear_data(superuser_engine)
+    try:
+        # Create 2 customers that match perfectly but are not in true_match_pairs
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO customers (
+                        customer_id, full_name, date_of_birth, kyc_risk_rating,
+                        source, onboarded_at, created_at, is_synthetic
+                    )
+                    VALUES
+                    (
+                        '00000000-0000-0000-0000-000000000001', 'Alice',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    ),
+                    (
+                        '00000000-0000-0000-0000-000000000002', 'Alice',
+                        '1990-01-01', 'LOW', 'test', NOW(), NOW(), true
+                    )
+                    """
+                )
+            )
+
+        manifest = {
+            "customers": [
+                {"customer_id": "00000000-0000-0000-0000-000000000001"},
+                {"customer_id": "00000000-0000-0000-0000-000000000002"},
+            ],
+            "manifest": {
+                "er_ground_truth": {
+                    "true_match_pairs": [],
+                    "designed_negative_pairs": []
+                }
+            }
+        }
+
+        report = measure_er_baseline(superuser_engine, manifest)
+        
+        metrics = report["metrics"]
+        assert metrics["fp"] == 1
+        assert metrics["tp"] == 0
+        
+        fp_list = report["fp_list"]
+        assert len(fp_list) == 1
+        assert fp_list[0]["category"] == "UNPLANNED"
+        
+        triggers = report["investigation_triggers"]
+        assert len(triggers["unplanned_fps"]) == 1
+    finally:
+        _clear_data(superuser_engine)
