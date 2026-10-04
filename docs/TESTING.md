@@ -23,7 +23,7 @@
 | **End-to-end investigations** | Full alert → report → human decision flow | The worked example (`docs/PRODUCT_BRIEF.md` §5) runs start to finish and produces a report matching expected structure |
 | **Regression** | Previously fixed bugs / previously passing fixtures stay correct | Full fixture set (`docs/DATA_AND_DATASET_STRATEGY.md`) re-run on every significant change to agent logic |
 | **Data quality** | Synthetic data generator produces internally consistent data | No transaction references a non-existent account |
-| **Entity resolution** | Isolated, zero db calls, zero network | Deterministic candidate-link generation |
+| **Entity resolution** | Deterministic matcher tests are isolated/pure; baseline/integration tests use read-only PostgreSQL; no persistence is performed | Deterministic candidate-link generation |
 
 ---
 

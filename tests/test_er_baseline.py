@@ -136,7 +136,7 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # 9. Real-Corpus Metric Regression
         assert metrics["customers"] == 186
         assert metrics["total_unordered_pairs"] == 17205
-        
+
         scope = metrics["recall_by_scope"]
         assert scope["within_adr_v1_scope"] == {
             "n_pairs": 7,
@@ -414,7 +414,7 @@ def test_baseline_exact_nonzero_metrics(superuser_engine: Engine) -> None:
             "numerator": 0,
             "denominator": 1,
         }
-        
+
         strat = report["stratified_recall"]
         assert strat["case_variant"]["recall"] == 1.0
         assert strat["dob_variant"]["recall"] == 0.0
@@ -456,7 +456,10 @@ def test_baseline_two_label_transform(superuser_engine: Engine) -> None:
                                 "00000000-0000-0000-0000-000000000001",
                                 "00000000-0000-0000-0000-000000000002",
                             ],
-                            "variant_transforms": ["case_variant", "whitespace_variant"],
+                            "variant_transforms": [
+                                "case_variant",
+                                "whitespace_variant",
+                            ],
                             "within_adr_v1_scope": True,
                         }
                     ],
@@ -466,21 +469,21 @@ def test_baseline_two_label_transform(superuser_engine: Engine) -> None:
         }
 
         report = measure_er_baseline(superuser_engine, manifest)
-        
+
         # Verify it counts under both applicable transform labels
         strat = report["stratified_recall"]
         assert strat["case_variant"]["n_pairs"] == 1
         assert strat["whitespace_variant"]["n_pairs"] == 1
-        
+
         # Verify it is counted only once in the overall scope aggregate
         scope = report["metrics"]["recall_by_scope"]
         assert scope["within_adr_v1_scope"]["n_pairs"] == 1
-        
+
         # Verify sum of per-transform denominators exceeds scope denominator
         sum_transform_denominators = sum(s["denominator"] for s in strat.values())
         scope_denominator = scope["within_adr_v1_scope"]["denominator"]
         assert sum_transform_denominators > scope_denominator
-        
+
     finally:
         _clear_data(superuser_engine)
 

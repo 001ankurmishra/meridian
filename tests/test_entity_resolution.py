@@ -404,13 +404,15 @@ def test_get_all_imports_scanner(tmp_path: Path) -> None:
         "from meridian.entity_resolution import f",
         "from .. import entity_resolution",
     ]
-    
+
     for idx, code in enumerate(test_cases):
         f = tmp_path / f"test_{idx}.py"
         f.write_text(code, encoding="utf-8")
         imports = _get_all_imports(f)
-        assert any("meridian.entity_resolution" in i for i in imports), f"Failed to detect in: {code}"
-        
+        assert any("meridian.entity_resolution" in i for i in imports), (
+            f"Failed to detect in: {code}"
+        )
+
     # Syntax error case should raise SyntaxError, not be swallowed
     bad_syntax = "import meridian..entity_resolution"
     f = tmp_path / "bad.py"
