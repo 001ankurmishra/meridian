@@ -256,6 +256,11 @@ def test_read_only_and_database(
                 """
             )
         )
+    # Store before count
+    with superuser_engine.connect() as conn:
+        before_count = conn.execute(
+            text("SELECT count(*) FROM graph_relationships")
+        ).scalar()
 
     res = compute_er_candidates(app_role_engine)
 
@@ -305,20 +310,12 @@ def test_read_only_and_database(
             break
     assert found_ineligible, "Expected ineligible customer not found"
 
-    # Verify no writes occurred (count didn't increase from other tests)
+    # Verify no writes occurred to graph_relationships
     with superuser_engine.connect() as conn:
-        count = conn.execute(
-            text(
-                "SELECT count(*) FROM customers "
-                "WHERE customer_id IN (:id1, :id2, :id3)"
-            ),
-            {
-                "id1": "00000000-0000-0000-0000-000000000001",
-                "id2": "00000000-0000-0000-0000-000000000002",
-                "id3": "00000000-0000-0000-0000-000000000003",
-            }
+        after_count = conn.execute(
+            text("SELECT count(*) FROM graph_relationships")
         ).scalar()
-        assert count == 3
+        assert before_count == after_count
 
     with superuser_engine.begin() as conn:
         conn.execute(
@@ -351,21 +348,27 @@ def test_dob_is_actual_date() -> None:
 
 def _get_all_imports(path: Path) -> set[str]:
     imports: set[str] = set()
-    try:
-        content = path.read_text(encoding="utf-8")
-        tree = ast.parse(content, filename=str(path))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for name in node.names:
-                    imports.add(name.name.split(".")[0])
-            elif isinstance(node, ast.ImportFrom) and node.module:
+    content = path.read_text(encoding="utf-8")
+    tree = ast.parse(content, filename=str(path))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for name in node.names:
+                imports.add(name.name.split(".")[0])
+                if name.name.startswith("meridian."):
+                    imports.add(name.name)
+        elif isinstance(node, ast.ImportFrom):
+            if node.module:
                 if node.level == 0:
                     imports.add(node.module.split(".")[0])
-                    # Full path for meridian imports
                     if node.module.startswith("meridian."):
                         imports.add(node.module)
-    except Exception:
-        pass
+                elif node.level > 0:
+                    # Capture the imported relative module part for checking
+                    imports.add(f"meridian.{node.module}")
+            else:
+                # Handle `from .. import entity_resolution`
+                for name in node.names:
+                    imports.add(f"meridian.{name.name}")
     return imports
 
 
@@ -380,6 +383,14 @@ def test_architecture_guards() -> None:
         "meridian.agents",
         "meridian.orchestration",
         "meridian.risk_engine",
+        "fuzzy",
+        "rapidfuzz",
+        "Levenshtein",
+        "nltk",
+        "spacy",
+        "transformers",
+        "torch",
+        "sklearn",
     }
 
     for f in er_dir.rglob("*.py"):

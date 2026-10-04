@@ -101,6 +101,7 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # 2. Confusion-matrix conservation
         tp, fp, fn, tn = metrics["tp"], metrics["fp"], metrics["fn"], metrics["tn"]
         assert tp + fp + fn + tn == expected_total_pairs
+        assert tp > 0 and fp > 0 and fn > 0 and tn > 0
 
         # 3. Negative universe
         # 4. Designed negatives are not complete negative universe
@@ -117,8 +118,10 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
 
         # 6. Stratification preserves true-match categories
         stratified = report.get("stratified_recall", {})
-        assert any(k.startswith("scope=True") for k in stratified.keys())
-        assert any(k.startswith("scope=False") for k in stratified.keys())
+        assert any(
+            k in ["whitespace_variant", "case_variant", "nfkc_variant"]
+            for k in stratified.keys()
+        )
 
         # 7. Abstention accounting remains deterministic
         abstentions = report.get("abstention_reasons", {})
@@ -176,8 +179,8 @@ def test_undefined_precision_recall(superuser_engine: Engine) -> None:
         assert metrics["tp"] + metrics["fp"] == 0
         assert metrics["tp"] + metrics["fn"] == 0
 
-        assert metrics["precision"] is None
-        assert metrics["recall"] is None
+        assert metrics["precision"]["value"] is None
+        assert metrics["recall"]["value"] is None
     finally:
         _clear_data(superuser_engine)
 

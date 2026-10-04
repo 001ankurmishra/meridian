@@ -109,8 +109,16 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
         key = "|".join(reasons)
         abstentions[key] += 1
 
-    precision = (tp / (tp + fp)) if (tp + fp) > 0 else None
-    recall = (tp / (tp + fn)) if (tp + fn) > 0 else None
+    precision = {
+        "value": (tp / (tp + fp)) if (tp + fp) > 0 else None,
+        "numerator": tp,
+        "denominator": tp + fp
+    }
+    recall = {
+        "value": (tp / (tp + fn)) if (tp + fn) > 0 else None,
+        "numerator": tp,
+        "denominator": tp + fn
+    }
 
     gt_pair_info = {}
     for pair in true_match_pairs:
@@ -123,18 +131,35 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             "within_v1_scope": pair["within_adr_v1_scope"],
         }
 
+    recall_by_scope: dict[str, dict[str, Any]] = {
+        "within_adr_v1_scope": {"n_pairs": 0, "n_found": 0},
+        "outside_adr_v1_scope": {"n_pairs": 0, "n_found": 0},
+    }
+
     stratified_counts: dict[str, dict[str, int]] = defaultdict(
         lambda: {"n_pairs": 0, "n_found": 0}
     )
 
     for p, info in gt_pair_info.items():
-        vscope = str(info["within_v1_scope"])
-        vt = str(info["variant_transforms"])
-        key = f"scope={vscope}, transforms={vt}"
+        vscope = info["within_v1_scope"]
+        scope_key = "within_adr_v1_scope" if vscope else "outside_adr_v1_scope"
+        recall_by_scope[scope_key]["n_pairs"] += 1
 
-        stratified_counts[key]["n_pairs"] += 1
+        vts = info["variant_transforms"]
+        for vt in vts:
+            stratified_counts[vt]["n_pairs"] += 1
+
         if p in tp_pairs:
-            stratified_counts[key]["n_found"] += 1
+            recall_by_scope[scope_key]["n_found"] += 1
+            for vt in vts:
+                stratified_counts[vt]["n_found"] += 1
+
+    for key in ["within_adr_v1_scope", "outside_adr_v1_scope"]:
+        npairs = recall_by_scope[key]["n_pairs"]
+        nfound = recall_by_scope[key]["n_found"]
+        recall_by_scope[key]["recall"] = (nfound / npairs) if npairs > 0 else None
+        recall_by_scope[key]["numerator"] = nfound
+        recall_by_scope[key]["denominator"] = npairs
 
     stratified = {}
     for key, counts in stratified_counts.items():
@@ -208,6 +233,7 @@ def measure_er_baseline(engine: Engine, manifest: dict[str, Any]) -> dict[str, A
             "tn": tn,
             "precision": precision,
             "recall": recall,
+            "recall_by_scope": recall_by_scope,
         },
         "stratified_recall": dict(stratified),
         "abstention_reasons": dict(abstentions),
