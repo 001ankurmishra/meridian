@@ -132,6 +132,34 @@ def test_er_baseline_integration(superuser_engine: Engine) -> None:
         # 8. Baseline remains independent of fixture-construction implementation details
         # The tests do not inspect `manifest.planted_customers` directly to compute TN,
         # they rely on the database and explicit pairs.
+
+        # 9. Real-Corpus Metric Regression
+        assert metrics["customers"] == 186
+        assert metrics["total_unordered_pairs"] == 17205
+
+        scope = metrics["recall_by_scope"]
+        assert scope["within_adr_v1_scope"] == {
+            "n_pairs": 7,
+            "n_found": 7,
+            "recall": 1.0,
+            "numerator": 7,
+            "denominator": 7,
+        }
+        assert scope["outside_adr_v1_scope"] == {
+            "n_pairs": 8,
+            "n_found": 0,
+            "recall": 0.0,
+            "numerator": 0,
+            "denominator": 8,
+        }
+
+        assert stratified["case_variant"]["recall"] == 1.0
+        assert stratified["whitespace_variant"]["recall"] == 1.0
+        assert stratified["nfkc_variant"]["recall"] == 1.0
+        assert stratified["casefold_variant"]["recall"] == 1.0
+        assert stratified["punctuation_variant"]["recall"] == 0.0
+        assert stratified["dob_null"]["recall"] == 0.0
+
     finally:
         _clear_data(superuser_engine)
 
@@ -359,6 +387,102 @@ def test_baseline_exact_nonzero_metrics(superuser_engine: Engine) -> None:
         assert metrics["fp"] == 1
         assert metrics["fn"] == 1
         assert metrics["tn"] == 12
+
+        assert metrics["precision"] == {
+            "value": 0.5,
+            "numerator": 1,
+            "denominator": 2,
+        }
+        assert metrics["recall"] == {
+            "value": 0.5,
+            "numerator": 1,
+            "denominator": 2,
+        }
+
+        scope = metrics["recall_by_scope"]
+        assert scope["within_adr_v1_scope"] == {
+            "n_pairs": 1,
+            "n_found": 1,
+            "recall": 1.0,
+            "numerator": 1,
+            "denominator": 1,
+        }
+        assert scope["outside_adr_v1_scope"] == {
+            "n_pairs": 1,
+            "n_found": 0,
+            "recall": 0.0,
+            "numerator": 0,
+            "denominator": 1,
+        }
+
+        strat = report["stratified_recall"]
+        assert strat["case_variant"]["recall"] == 1.0
+        assert strat["dob_variant"]["recall"] == 0.0
+
+    finally:
+        _clear_data(superuser_engine)
+
+
+def test_baseline_two_label_transform(superuser_engine: Engine) -> None:
+    _clear_data(superuser_engine)
+    try:
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    """
+                    INSERT INTO customers (
+                        customer_id, full_name, date_of_birth, kyc_risk_rating,
+                        source, onboarded_at, created_at, is_synthetic
+                    )
+                    VALUES
+                    ('00000000-0000-0000-0000-000000000001', 'Alice', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true),
+                    ('00000000-0000-0000-0000-000000000002', 'ALICE ', '1990-01-01',
+                     'LOW', 'test', NOW(), NOW(), true)
+                    """
+                )
+            )
+
+        manifest = {
+            "customers": [
+                {"customer_id": "00000000-0000-0000-0000-000000000001"},
+                {"customer_id": "00000000-0000-0000-0000-000000000002"}
+            ],
+            "manifest": {
+                "er_ground_truth": {
+                    "true_match_pairs": [
+                        {
+                            "customer_ids": [
+                                "00000000-0000-0000-0000-000000000001",
+                                "00000000-0000-0000-0000-000000000002",
+                            ],
+                            "variant_transforms": [
+                                "case_variant",
+                                "whitespace_variant",
+                            ],
+                            "within_adr_v1_scope": True,
+                        }
+                    ],
+                    "designed_negative_pairs": [],
+                }
+            },
+        }
+
+        report = measure_er_baseline(superuser_engine, manifest)
+
+        # Verify it counts under both applicable transform labels
+        strat = report["stratified_recall"]
+        assert strat["case_variant"]["n_pairs"] == 1
+        assert strat["whitespace_variant"]["n_pairs"] == 1
+
+        # Verify it is counted only once in the overall scope aggregate
+        scope = report["metrics"]["recall_by_scope"]
+        assert scope["within_adr_v1_scope"]["n_pairs"] == 1
+
+        # Verify sum of per-transform denominators exceeds scope denominator
+        sum_transform_denominators = sum(s["denominator"] for s in strat.values())
+        scope_denominator = scope["within_adr_v1_scope"]["denominator"]
+        assert sum_transform_denominators > scope_denominator
 
     finally:
         _clear_data(superuser_engine)
