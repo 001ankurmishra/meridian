@@ -1,6 +1,6 @@
 # ADR-0003: LLM Provider Abstraction
 
-Status: Proposed — specific provider not yet locked in
+Status: Proposed — specific provider not yet locked in. Note (2026-10-05): as of main ba52a036 there is no LLM provider, LLM call or LLM dependency in the repository and the abstraction was not built; the provider decision is deferred until an LLM-assisted component is explicitly scoped, which requires an ADR update, prompt versioning and hallucination tests per docs/TESTING.md.
 Date: Initial documentation pass (project inception)
 
 ## Context

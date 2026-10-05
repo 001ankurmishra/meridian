@@ -1,6 +1,6 @@
 # ADR 0004: Embedding Model Selection (F5 Slice 1)
 
-Status: Proposed
+Status: Accepted (in use since F5 slice 1 (policy retrieval, vector(384)))
 
 ## Context
 Project Meridian requires semantic search over internal policies (F5 Slice 1). The system must securely embed policy chunks without relying on external APIs that might leak sensitive context or fail during outages.

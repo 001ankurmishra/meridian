@@ -66,6 +66,8 @@ RBAC roles (`docs/DATABASE_SCHEMA.md` §4.18):
 
 Enforced server-side on every case-mutating endpoint; the UI hiding a control is not a substitute for server-side enforcement.
 
+**Implementation status:** as of main ba52a036, the decision endpoint accepts actor_user_id from the request body without authentication. Role-based permission rules for the four decision actions are enforced in review/decisions.py against the claimed actor's stored role, but the actor's identity is not authenticated, and the rest of F15 (case visibility, admin functions) is not implemented. An authentication-model ADR is required. docs/AI_SAFETY_AND_GUARDRAILS.md §1 describes the target design, not current behavior.
+
 ---
 
 ## 4. Data Retention & Redaction
