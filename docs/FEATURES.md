@@ -66,9 +66,9 @@ Append-only logging of every agent run, tool call, and human decision (`docs/DAT
 
 ## F10. Basic Risk Scoring
 
-**Phase:** MVP (prototype tier) → Phase 2 (calibrated) · **Module:** `risk_engine`
+**Phase:** MVP (prototype tier) → Phase 2 (documented methodology plus per-signal evaluation, PROTOTYPE) · **Module:** `risk_engine`
 
-MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals (per `docs/EVALUATION.md` methodology labeling requirement — never presented as production-calibrated). Phase 2: replace with an experimentally validated model with documented methodology, evaluation, and thresholds.
+MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals (per `docs/EVALUATION.md` methodology labeling requirement — never presented as production-calibrated). Phase 2: per-signal evaluation only; any composite or calibrated model is gated on ADR-0005 G1.
 
 ## F11. Specialized Agents — Sanctions/Watchlist Screening
 

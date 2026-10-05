@@ -53,8 +53,9 @@ Scope (Features F11–F14):
 - Entity resolution
 - Stronger graph analytics (community detection, centrality)
 - Improved hybrid retrieval (reranking)
-- Calibrated risk scoring (replacing prototype weights) with documented methodology and evaluation
+- Risk scoring: documented methodology plus measured per-signal evaluation (PROTOTYPE); composite calibration gated on ADR-0005 G1.
 - React-based investigation workspace UI: DEFERRED.
+
 **Exit criteria:** Each new agent documented per `docs/ARCHITECTURE.md` §4 pattern before merge; risk scoring methodology and evaluation numbers published in `docs/EVALUATION.md` (not just claimed); ADRs recorded for entity-resolution approach and any retrieval architecture change.
 
 **Dependencies:** Phase 1 complete; risk-scoring calibration depends on having a labeled synthetic fixture set (`docs/DATA_AND_DATASET_STRATEGY.md`).
@@ -81,7 +82,7 @@ Scope (Features F11–F14):
 **Open decisions (unresolved as of this note).**
 - A/B resolved in favor of B (bounded): add deterministic signals already documented for the TransactionAgent (`docs/ARCHITECTURE.md` §4.2, `docs/FEATURES.md` F3) one slice at a time, then calibrate the expanded signal set; any calibration claim must name the signal-set version.
 - `orchestrator_version`: removed from `docs/DATABASE_SCHEMA.md` §4.10; no migration or code uses one. Revisit only with a concrete reproducibility requirement.
-- Risk-scoring approach: ADR-0005 (Proposed). Maintainer decision pending on its D4: re-scope the "Calibrated risk scoring" bullet to documented methodology plus measured per-signal evaluation (PROTOTYPE), or pursue an externally sourced labeled dataset now.
+- Risk-scoring approach: ADR-0005 Accepted; D4 decided option (a) (re-scoped to documented methodology plus measured per-signal evaluation, PROTOTYPE); composite calibration remains gated on ADR-0005 G1.
 - Entity-resolution approach: ADR-0006 (Accepted). D5 (persistent storage) is deferred. The immediate constraint remains that ER evaluation requires planted variants/ground truth.
 
 ### Phase 2 status and re-scoping (recorded 2026-10-05)
