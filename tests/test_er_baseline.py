@@ -486,4 +486,3 @@ def test_baseline_two_label_transform(superuser_engine: Engine) -> None:
 
     finally:
         _clear_data(superuser_engine)
-

@@ -319,22 +319,27 @@ TN = every pair not contained in true_match_pairs and not predicted as a candida
 
 **Recall stratification:**
 
-#### Within ADR v1 scope
-* case_variant + whitespace_variant: TP 1, FN 0
-* whitespace_variant: TP 2, FN 0
-* casefold_variant: TP 1, FN 0
-* case_variant: TP 2, FN 0
-* nfkc_variant: TP 1, FN 0
+A pair can carry more than one transform label; the case_variant+whitespace_variant pair is counted under both labels, so per-transform denominators sum to 16 while the positive pairs total 15. Scope-level recall counts each pair once (7/7 within scope, 0/8 outside).
 
-#### Outside ADR v1 scope
-* dob_null: FN 1
-* token_reorder: FN 1
-* name_null: FN 1
-* punctuation_variant: FN 1
-* typo: FN 1
-* abbreviation: FN 1
-* nickname: FN 1
-* diacritic_variant: FN 1
+### Within ADR v1 scope
+
+* case_variant: 3/3
+* whitespace_variant: 3/3
+* nfkc_variant: 1/1
+* casefold_variant: 1/1
+
+### Outside ADR v1 scope
+
+Each is 0/1:
+
+* dob_null: 0/1
+* name_null: 0/1
+* punctuation_variant: 0/1
+* token_reorder_variant: 0/1
+* typo_variant: 0/1
+* abbreviation_variant: 0/1
+* nickname_variant: 0/1
+* diacritic_variant: 0/1
 
 **FN Summary:**
 * within-v1-scope unexpected FN = 0
@@ -348,6 +353,12 @@ TN = every pair not contained in true_match_pairs and not predicted as a candida
 * dob_null = 6
 * name_empty_after_normalization = 2
 * name_null = 1
+
+**Reproduction Command:**
+```bash
+export $(cat .env | xargs) && PYTHONPATH=$(pwd)/src .venv/bin/python -m meridian.fixtures.er_baseline
+```
+Note: The v0.5 corpus with seed `er_corpus_v0.5_freeze` must already be loaded; loading the fixture is a SETUP database write; the baseline measurement itself is read-only.
 
 **Limitations:**
 * synthetic literal name pool
