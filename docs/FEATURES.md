@@ -92,7 +92,7 @@ Improves graph quality by resolving near-duplicate entities within the synthetic
 
 **Phase:** Phase 2/3 · **Module:** `risk_engine`
 
-Replaces prototype weights with a model trained/validated against labeled synthetic patterns (AMLSim/Elliptic labels where applicable), with documented methodology, calibration, and monitoring (`docs/EVALUATION.md`).
+Phase 2: documented methodology plus measured per-signal evaluation (PROTOTYPE). Composite calibration (replacing prototype weights) is gated on ADR-0005 G1 (an externally sourced labeled dataset).
 
 ## F15. RBAC & Authorization Hardening
 

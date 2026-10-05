@@ -66,6 +66,8 @@ RBAC roles (`docs/DATABASE_SCHEMA.md` §4.18):
 
 Enforced server-side on every case-mutating endpoint; the UI hiding a control is not a substitute for server-side enforcement.
 
+**Implementation status:** As of main ba52a036, the decision endpoint accepts `actor_user_id` from the request body without authentication. Enforced authentication and role checks (F15) are not yet implemented, and an authentication-model ADR is required.
+
 ---
 
 ## 4. Data Retention & Redaction

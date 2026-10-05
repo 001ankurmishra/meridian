@@ -1,6 +1,6 @@
 # ADR-0005: Risk-Scoring Approach (Phase 2)
 
-Status: Proposed
+Status: Accepted
 Date: 2026-10-03
 
 ## Context
@@ -30,9 +30,7 @@ D2. A composite score, fitted weights, or calibrated thresholds may be introduce
 D3. Bands or labels (for example LOW/MEDIUM/HIGH) are Interpretation, not signals. They require a documented rule and a tier label, must never be shown without the underlying signal values and
     evidence links, and must not state or imply an AML conclusion. The Observed Fact -> Derived Signal -> Interpretation -> Recommendation chain is preserved.
 
-D4. OPEN (maintainer decision; not decided by this ADR): the Phase 2 bullet "Calibrated risk scoring" cannot reach EXPERIMENTALLY_CALIBRATED on the current synthetic corpora. The maintainer
-    chooses between (a) re-scoping the bullet to "documented methodology plus measured per-signal evaluation (PROTOTYPE)", with composite calibration gated on G1; or (b) pursuing G1 now by
-    evaluating an externally sourced labeled dataset.
+D4. DECIDED (option a, recorded 2026-10-05): The Phase 2 bullet "Calibrated risk scoring" is re-scoped to "documented methodology plus measured per-signal evaluation (PROTOTYPE)". Composite, fitted or calibrated scores remain gated on G1. The per-signal baselines already published in `docs/EVALUATION.md` satisfy the bullet as re-scoped.
 
 ## Alternatives Considered
 
@@ -46,12 +44,6 @@ D4. OPEN (maintainer decision; not decided by this ADR): the Phase 2 bullet "Cal
 ## Consequences
 
 - Claims stay honest: no composite or calibrated score is presented on synthetic-only evidence, and F10 stays simple.
-- The Phase 2 "calibrated risk scoring" deliverable is not satisfiable as written until G1 is met; the D4 decision is required.
+- The Phase 2 "calibrated risk scoring" deliverable is satisfied as re-scoped (D4).
 - Foreclosed: presenting a composite score or calibrated thresholds on synthetic-only evidence.
-- Independent follow-ups, not part of this ADR: wiring the existing signals into evidence and reports per F3; the D4 decision; if D4(b), a separate dataset-evaluation task with EXTERNAL verification.
-
-## PROHIBITED
-- Any change to src/**, tests/**, alembic/**, ui/**, pyproject.toml, uv.lock, .github/**, docker/**, and any doc other than the three listed. No ADR other than 0005.
-- Changing docs/EVALUATION.md, docs/FEATURES.md, docs/ARCHITECTURE.md or docs/DATABASE_SCHEMA.md.
-- Marking the ADR Accepted, deciding D4, adding numbers not present in the repository, or adding any implementation plan beyond the follow-ups already listed.
-- Fixing unrelated issues (list them in the report instead).
+- Independent follow-ups, not part of this ADR: wiring the existing signals into evidence and reports per F3.

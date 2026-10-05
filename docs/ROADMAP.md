@@ -54,8 +54,7 @@ Scope (Features F11–F14):
 - Stronger graph analytics (community detection, centrality)
 - Improved hybrid retrieval (reranking)
 - Calibrated risk scoring (replacing prototype weights) with documented methodology and evaluation
-- React-based investigation workspace UI (superseding Streamlit interim), including the full graph view and timeline panels from `docs/DESIGN.md`
-
+- React-based investigation workspace UI: DEFERRED.
 **Exit criteria:** Each new agent documented per `docs/ARCHITECTURE.md` §4 pattern before merge; risk scoring methodology and evaluation numbers published in `docs/EVALUATION.md` (not just claimed); ADRs recorded for entity-resolution approach and any retrieval architecture change.
 
 **Dependencies:** Phase 1 complete; risk-scoring calibration depends on having a labeled synthetic fixture set (`docs/DATA_AND_DATASET_STRATEGY.md`).
@@ -81,9 +80,21 @@ Scope (Features F11–F14):
 
 **Open decisions (unresolved as of this note).**
 - A/B resolved in favor of B (bounded): add deterministic signals already documented for the TransactionAgent (`docs/ARCHITECTURE.md` §4.2, `docs/FEATURES.md` F3) one slice at a time, then calibrate the expanded signal set; any calibration claim must name the signal-set version.
-- `orchestrator_version`: add via migration, or remove from `docs/DATABASE_SCHEMA.md` §4.10. Unresolved.
+- `orchestrator_version`: removed from `docs/DATABASE_SCHEMA.md` §4.10; no migration or code uses one. Revisit only with a concrete reproducibility requirement.
 - Risk-scoring approach: ADR-0005 (Proposed). Maintainer decision pending on its D4: re-scope the "Calibrated risk scoring" bullet to documented methodology plus measured per-signal evaluation (PROTOTYPE), or pursue an externally sourced labeled dataset now.
 - Entity-resolution approach: ADR-0006 (Accepted). D5 (persistent storage) is deferred. The immediate constraint remains that ER evaluation requires planted variants/ground truth.
+
+### Phase 2 status and re-scoping (recorded 2026-10-05)
+
+- **What exists:** deterministic transaction signals (amount deviation wired; velocity and beneficiary age computation-only, unwired), graph structure signals (computation-only, unwired), ER first slice (ADR-0006 D1, computation-only, unwired, D5 deferred), per-signal baselines, ADR-0005/0006.
+- **Re-scoped/deferred:**
+  - Community detection and centrality DEFERRED (optional; no exit criterion depends on it; would need a new planted-community corpus).
+  - Retrieval reranking REPLACED by RAG evaluation (labeled query set plus calibration of the PolicyAgent threshold per docs/EVALUATION.md §4; reranking only if measurement shows a gap; any retrieval architecture change requires an ADR).
+  - Adverse-media agent (F12) DEFERRED (design TBD, corpus too small to evaluate).
+  - Sanctions/watchlist agent (F11) REMAINS IN SCOPE, synthetic watchlist only, design/ADR before code.
+  - React workspace DEFERRED: Streamlit remains the UI through Phase 3; React stays a documented option, not a scheduled item.
+  - Authentication hardening (F15): scheduled for implementation immediately after the transaction/graph signal-wiring tasks, flagged as an intentional pull-forward of a Phase 3 safety item (Cross-Phase Rule: raised and decided, not silently absorbed).
+- **Phase 3 applicability notes:** model monitoring N/A until a calibrated model exists; LLM retry/backoff N/A while no LLM exists; OpenTelemetry optional.
 
 ---
 

@@ -48,11 +48,11 @@ What this makes easier, harder, or what it forecloses.
 | [ADR-0001](decisions/0001-modular-monolith-vs-microservices.md) | Modular monolith vs. microservices | Accepted |
 | [ADR-0002](decisions/0002-postgresql-vs-separate-graph-database.md) | PostgreSQL (+pgvector, adjacency tables) vs. a separate graph database | Accepted |
 | [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed — provider not yet locked in |
-| [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Proposed |
-| [ADR-0005](decisions/0005-risk-scoring-approach.md) | Risk-scoring approach (Phase 2) | Proposed |
+| [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Accepted |
+| [ADR-0005](decisions/0005-risk-scoring-approach.md) | Risk-scoring approach (Phase 2) | Accepted |
 | [ADR-0006](decisions/0006-entity-resolution-approach.md) | Entity-resolution approach (Phase 2) | Accepted (D5 deferred) |
 
-Future ADRs (evidence model, orchestration-framework revisit, authentication model, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers.
+Future ADRs (evidence model, orchestration-framework revisit, authentication model, sanctions/watchlist screening design, event-driven-architecture reconsideration) should be added under `docs/decisions/` and listed here as they are written, following `docs/ROADMAP.md` phase triggers.
 
 ---
 
