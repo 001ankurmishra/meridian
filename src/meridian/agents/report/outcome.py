@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from meridian.agents.graph.subgraph import SubgraphResult
 from meridian.agents.policy.policy_agent import PolicyAgentResult
 from meridian.agents.transaction.amount_deviation import AmountDeviationResult
+from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeResult
+from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 
 
 @dataclass(frozen=True)
@@ -14,6 +16,8 @@ class TransactionOutcome:
 
     result: AmountDeviationResult
     agent_run_id: uuid.UUID
+    velocity_result: TransactionVelocityComputed | None = None
+    beneficiary_age_result: BeneficiaryAgeResult | None = None
 
 
 @dataclass(frozen=True)

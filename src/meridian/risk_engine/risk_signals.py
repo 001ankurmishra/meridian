@@ -29,6 +29,8 @@ from decimal import Decimal
 from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
+from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeComputed
+from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 
 
 @dataclass(frozen=True)
@@ -72,6 +74,32 @@ def compute_risk_score(signal: AmountDeviationComputed) -> RiskScoreResult:
     return RiskScoreResult(
         signal_type="amount_deviation",
         value=signal.deviation_multiple,
+        methodology="PROTOTYPE",
+    )
+
+
+def compute_velocity_risk_score(signal: TransactionVelocityComputed) -> RiskScoreResult:
+    return RiskScoreResult(
+        signal_type="transaction_velocity",
+        value=Decimal(signal.transaction_count),
+        methodology="PROTOTYPE",
+    )
+
+
+def compute_beneficiary_age_risk_score(
+    signal: BeneficiaryAgeComputed,
+) -> RiskScoreResult:
+    days = signal.beneficiary_age.days
+    seconds = signal.beneficiary_age.seconds
+    microseconds = signal.beneficiary_age.microseconds
+
+    total_sec = Decimal(days * 86400 + seconds) + Decimal(microseconds) / Decimal(
+        "1000000"
+    )
+
+    return RiskScoreResult(
+        signal_type="beneficiary_age",
+        value=total_sec,
         methodology="PROTOTYPE",
     )
 

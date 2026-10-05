@@ -11,10 +11,15 @@ from sqlalchemy import Connection, text
 from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 from meridian.agents.report.outcome import InvestigationOutcome
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
+from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeComputed
+from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 from meridian.evidence.evidence import (
     EVIDENCE_TYPE_ALERTED_TRANSACTION,
     EVIDENCE_TYPE_AMOUNT_DEVIATION_INPUT,
+    EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY,
     EVIDENCE_TYPE_POLICY_CHUNK,
+    EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION,
+    REFERENCE_TABLE_BENEFICIARIES,
     REFERENCE_TABLE_DOCUMENT_CHUNKS,
     REFERENCE_TABLE_TRANSACTIONS,
     record_evidence_with_connection,
@@ -31,6 +36,18 @@ INVESTIGATIVE_RECOMMENDATION_TEXT: Final[str] = (
     "A human analyst should review this finding and its cited evidence, "
     "including the alerted transaction and the historical transactions "
     "used for comparison, before any determination is made."
+)
+
+VELOCITY_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the transactions in the velocity window, "
+    "before any determination is made."
+)
+
+BENEFICIARY_AGE_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the matching beneficiary records, "
+    "before any determination is made."
 )
 
 PROTOTYPE_CONFIDENCE_FLOOR: Final[str] = "LOW"
@@ -175,6 +192,126 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
             )
         )
 
+    if (
+        outcome.transaction is not None
+        and outcome.transaction.velocity_result is not None
+        and isinstance(outcome.transaction.velocity_result, TransactionVelocityComputed)
+    ):
+        v_result = outcome.transaction.velocity_result
+        agent_run_id = outcome.transaction.agent_run_id
+
+        vel_evidence_keys = []
+        for src_id in sorted(v_result.source_transaction_ids):
+            key = f"vel_input_{src_id}"
+            evidence.append(
+                EvidenceDraft(
+                    key=key,
+                    evidence_type=EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION,
+                    reference_table=REFERENCE_TABLE_TRANSACTIONS,
+                    reference_id=src_id,
+                    agent_run_id=agent_run_id,
+                )
+            )
+            vel_evidence_keys.append(key)
+
+        observed_fact = (
+            f"Transaction velocity: {v_result.transaction_count} outgoing transaction(s) "  # noqa: E501
+            f"from the customer's accounts occurred in the {v_result.window_hours}-hour window "  # noqa: E501
+            f"ending at the alerted transaction."
+        )
+        interpretation = (
+            "This is a descriptive, deterministic count. No validated threshold "
+            "is being applied (PROTOTYPE), and this does not represent a conclusion "
+            "of suspicious or criminal activity."
+        )
+
+        findings.append(
+            FindingDraft(
+                category=FindingCategory.INVESTIGATIVE,
+                observed_fact=observed_fact,
+                derived_signal=None,
+                interpretation=interpretation,
+                evidence_keys=tuple(vel_evidence_keys),
+                confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+            )
+        )
+        recommendations.append(
+            RecommendationDraft(
+                finding_index=len(findings) - 1,
+                text=VELOCITY_RECOMMENDATION_TEXT,
+            )
+        )
+
+    if (
+        outcome.transaction is not None
+        and outcome.transaction.beneficiary_age_result is not None
+        and isinstance(
+            outcome.transaction.beneficiary_age_result, BeneficiaryAgeComputed
+        )
+    ):
+        b_result = outcome.transaction.beneficiary_age_result
+        agent_run_id = outcome.transaction.agent_run_id
+
+        ben_evidence_keys = []
+        for ben_id in sorted(b_result.beneficiary_ids):
+            key = f"ben_input_{ben_id}"
+            evidence.append(
+                EvidenceDraft(
+                    key=key,
+                    evidence_type=EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY,
+                    reference_table=REFERENCE_TABLE_BENEFICIARIES,
+                    reference_id=ben_id,
+                    agent_run_id=agent_run_id,
+                )
+            )
+            ben_evidence_keys.append(key)
+
+        total_seconds = int(b_result.beneficiary_age.total_seconds())
+        days, remainder = divmod(total_seconds, 86400)
+        hours, remainder = divmod(remainder, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        parts = []
+        if days > 0:
+            parts.append(f"{days} day(s)")
+        if hours > 0:
+            parts.append(f"{hours} hour(s)")
+        if minutes > 0:
+            parts.append(f"{minutes} minute(s)")
+        if seconds > 0 or not parts:
+            parts.append(f"{seconds} second(s)")
+        age_str = ", ".join(parts)
+
+        earliest_str = b_result.beneficiary_added_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        observed_fact = (
+            f"Beneficiary age: based on {len(b_result.beneficiary_ids)} matching beneficiary record(s) "  # noqa: E501
+            f"considered, the earliest recorded added_at timestamp is {earliest_str}, "
+            f"resulting in an elapsed age of {age_str} before the alerted transaction."
+        )
+        interpretation = (
+            "This calculation is descriptive and deterministic. No validated threshold "
+            "is being applied (PROTOTYPE), and this does not represent a conclusion "
+            "of suspicious or criminal activity."
+        )
+
+        findings.append(
+            FindingDraft(
+                category=FindingCategory.INVESTIGATIVE,
+                observed_fact=observed_fact,
+                derived_signal=None,
+                interpretation=interpretation,
+                evidence_keys=tuple(ben_evidence_keys),
+                confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+            )
+        )
+        recommendations.append(
+            RecommendationDraft(
+                finding_index=len(findings) - 1,
+                text=BENEFICIARY_AGE_RECOMMENDATION_TEXT,
+            )
+        )
+
     # Policy found outcome
     if (
         outcome.policy is not None
@@ -285,15 +422,23 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                 "Finding confidence violates prototype floor."
             )
 
-    inv_count = sum(1 for f in drafts.findings if f.category == FindingCategory.INVESTIGATIVE)  # noqa: E501
+    inv_count = sum(
+        1 for f in drafts.findings if f.category == FindingCategory.INVESTIGATIVE
+    )  # noqa: E501
     if len(drafts.recommendations) != inv_count:
-        raise AuthoringInvariantError("Exactly one recommendation must exist per INVESTIGATIVE finding.")  # noqa: E501
+        raise AuthoringInvariantError(
+            "Exactly one recommendation must exist per INVESTIGATIVE finding."
+        )  # noqa: E501
 
     for r in drafts.recommendations:
         if not (0 <= r.finding_index < len(drafts.findings)):
-            raise AuthoringInvariantError("Recommendation finding_index is out of bounds.")  # noqa: E501
+            raise AuthoringInvariantError(
+                "Recommendation finding_index is out of bounds."
+            )  # noqa: E501
         if drafts.findings[r.finding_index].category != FindingCategory.INVESTIGATIVE:
-            raise AuthoringInvariantError("Recommendation targets a non-INVESTIGATIVE finding.")  # noqa: E501
+            raise AuthoringInvariantError(
+                "Recommendation targets a non-INVESTIGATIVE finding."
+            )  # noqa: E501
 
     return drafts
 

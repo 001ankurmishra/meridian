@@ -21,13 +21,17 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationComputed,
     AmountDeviationUnknown,
 )
+from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeComputed
+from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 from meridian.orchestration.errors import InvestigationError
 from meridian.orchestration.graph_agent_dispatch import run_graph_agent
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.policy_agent_dispatch import run_policy_agent
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
 from meridian.risk_engine.risk_signals import (
+    compute_beneficiary_age_risk_score,
     compute_risk_score,
+    compute_velocity_risk_score,
     record_risk_signal_with_connection,
 )
 
@@ -92,7 +96,12 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
             tx_result = dispatch_result.result
             if isinstance(tx_result, AmountDeviationComputed):
                 has_tx_evidence = True
-            tx_outcome = TransactionOutcome(result=tx_result, agent_run_id=agent_run_id)
+            tx_outcome = TransactionOutcome(
+                result=tx_result,
+                agent_run_id=agent_run_id,
+                velocity_result=dispatch_result.velocity_result,
+                beneficiary_age_result=dispatch_result.beneficiary_age_result,
+            )
         except Exception as e:
             fatal_error = e
 
@@ -165,6 +174,40 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
                         customer_id=alert_row.customer_id,
                         transaction_id=alert_row.transaction_id,
                         result=risk_score_result,
+                    )
+                if (
+                    tx_outcome is not None
+                    and tx_outcome.velocity_result is not None
+                    and isinstance(
+                        tx_outcome.velocity_result, TransactionVelocityComputed
+                    )
+                ):
+                    vel_risk_score = compute_velocity_risk_score(
+                        tx_outcome.velocity_result
+                    )
+                    record_risk_signal_with_connection(
+                        conn=conn,
+                        investigation_run_id=inv_id,
+                        customer_id=alert_row.customer_id,
+                        transaction_id=alert_row.transaction_id,
+                        result=vel_risk_score,
+                    )
+                if (
+                    tx_outcome is not None
+                    and tx_outcome.beneficiary_age_result is not None
+                    and isinstance(
+                        tx_outcome.beneficiary_age_result, BeneficiaryAgeComputed
+                    )
+                ):
+                    ben_risk_score = compute_beneficiary_age_risk_score(
+                        tx_outcome.beneficiary_age_result
+                    )
+                    record_risk_signal_with_connection(
+                        conn=conn,
+                        investigation_run_id=inv_id,
+                        customer_id=alert_row.customer_id,
+                        transaction_id=alert_row.transaction_id,
+                        result=ben_risk_score,
                     )
                 conn.execute(
                     text(

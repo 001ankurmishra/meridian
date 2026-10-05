@@ -9,6 +9,14 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationResult,
     compute_amount_deviation,
 )
+from meridian.agents.transaction.beneficiary_age import (
+    BeneficiaryAgeResult,
+    compute_beneficiary_age,
+)
+from meridian.agents.transaction.transaction_velocity import (
+    TransactionVelocityComputed,
+    compute_transaction_velocity,
+)
 from meridian.orchestration.agent_run_tracking import record_agent_run
 
 # Coarse, per-agent-run tool-call summary for TransactionAgent (F9).
@@ -22,6 +30,8 @@ _TRANSACTION_AGENT_TOOL_CALLS = {
         "transactions: lookup alerted transaction by transaction_id",
         "accounts: resolve source_account_id to customer_id",
         "transactions: trailing 90-day historical outgoing amounts for customer",
+        "transactions: trailing 24-hour historical outgoing counts for customer",
+        "accounts: resolve destination_account_id to beneficiary record",
     ],
 }
 
@@ -32,6 +42,22 @@ class TransactionAgentDispatchResult:
 
     investigation_run_id: uuid.UUID
     result: AmountDeviationResult
+    velocity_result: TransactionVelocityComputed | None = None
+    beneficiary_age_result: BeneficiaryAgeResult | None = None
+
+
+def _run_all_transaction_computations(
+    engine: Engine, transaction_id: uuid.UUID
+) -> tuple[
+    AmountDeviationResult,
+    TransactionVelocityComputed | None,
+    BeneficiaryAgeResult | None,
+]:
+    # Amount deviation must execute first and preserve its current behavior
+    amt_result = compute_amount_deviation(engine, transaction_id)
+    vel_result = compute_transaction_velocity(engine, transaction_id)
+    ben_result = compute_beneficiary_age(engine, transaction_id)
+    return amt_result, vel_result, ben_result
 
 
 def run_transaction_agent(
@@ -55,7 +81,7 @@ def run_transaction_agent(
         engine,
         investigation_run_id,
         "TransactionAgent",
-        compute_amount_deviation,
+        _run_all_transaction_computations,
         engine,
         transaction_id,
         tool_calls=_TRANSACTION_AGENT_TOOL_CALLS,
@@ -64,5 +90,7 @@ def run_transaction_agent(
 
     return TransactionAgentDispatchResult(
         investigation_run_id=investigation_run_id,
-        result=result,
+        result=result[0],
+        velocity_result=result[1],
+        beneficiary_age_result=result[2],
     )

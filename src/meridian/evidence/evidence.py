@@ -21,10 +21,15 @@ class EvidenceRecord:
 
 EVIDENCE_TYPE_ALERTED_TRANSACTION: Final[str] = "alerted_transaction"
 EVIDENCE_TYPE_AMOUNT_DEVIATION_INPUT: Final[str] = "amount_deviation_input_transaction"
+EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION: Final[str] = "velocity_input_transaction"
+EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY: Final[str] = (
+    "beneficiary_age_input_beneficiary"
+)
 EVIDENCE_TYPE_POLICY_CHUNK: Final[str] = "DOCUMENT_REFERENCE"
 
 REFERENCE_TABLE_TRANSACTIONS: Final[str] = "transactions"
 REFERENCE_TABLE_DOCUMENT_CHUNKS: Final[str] = "document_chunks"
+REFERENCE_TABLE_BENEFICIARIES: Final[str] = "beneficiaries"
 
 
 def record_evidence_with_connection(
