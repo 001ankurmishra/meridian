@@ -17,6 +17,33 @@ from meridian.agents.transaction.amount_deviation import AmountDeviationUnknown
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from meridian.db.session import engine
 
+from tests.test_transaction_agent_dispatch import (
+    _seed_account,
+    _seed_customer,
+    _seed_transaction,
+)
+
+# We also need a seed for alert. Let's just define it here.
+def _seed_alert(superuser_engine: Engine, cid: uuid.UUID, tid: uuid.UUID) -> uuid.UUID:
+    with superuser_engine.begin() as conn:
+        aid = uuid.uuid4()
+        conn.execute(
+            text(
+                "INSERT INTO alerts (alert_id, customer_id, alert_type, transaction_id, created_at) "
+                "VALUES (:aid, :cid, 'TEST', :tid, now())"
+            ),
+            {"aid": aid, "cid": cid, "tid": tid},
+        )
+        case_id = uuid.uuid4()
+        conn.execute(
+            text(
+                "INSERT INTO cases (case_id, alert_id, status, opened_at, created_at) "
+                "VALUES (:cid, :aid, 'OPEN', now(), now())"
+            ),
+            {"cid": case_id, "aid": aid},
+        )
+    return case_id
+
 
 # Fixtures are assumed to be loaded via conftest or the existing testing setup.
 # We will mock the dispatch to return specific graph results for integration testing
@@ -25,50 +52,13 @@ from meridian.db.session import engine
 # Since we want to test atomicity and DB integration, we'll plant a test case.
 
 @pytest.fixture
-def investigation_setup(app_role_engine: Engine):
+def investigation_setup(superuser_engine: Engine):
     """Set up a test case in the database."""
-    case_id = uuid.uuid4()
-    alert_id = uuid.uuid4()
-    customer_id = uuid.uuid4()
-    tx_id = uuid.uuid4()
+    customer_id = _seed_customer(superuser_engine)
+    account_id = _seed_account(superuser_engine, customer_id)
+    tx_id = _seed_transaction(superuser_engine, account_id, Decimal("50.0"), 0)
+    case_id = _seed_alert(superuser_engine, customer_id, tx_id)
     
-    with app_role_engine.begin() as conn:
-        conn.execute(
-            text(
-                "INSERT INTO customers (customer_id, risk_rating, status) "
-                "VALUES (:c, 'LOW', 'ACTIVE')"
-            ),
-            {"c": customer_id}
-        )
-        conn.execute(
-            text(
-                "INSERT INTO accounts (account_id, customer_id, currency, status, balance) "
-                "VALUES (:a, :c, 'USD', 'ACTIVE', 100)"
-            ),
-            {"a": uuid.uuid4(), "c": customer_id}
-        )
-        conn.execute(
-            text(
-                "INSERT INTO transactions (transaction_id, source_account_id, target_account_id, amount, currency) "
-                "VALUES (:t, :a, :b, 50, 'USD')"
-            ),
-            {"t": tx_id, "a": uuid.uuid4(), "b": uuid.uuid4()}
-        )
-        conn.execute(
-            text(
-                "INSERT INTO alerts (alert_id, customer_id, transaction_id, alert_type, status) "
-                "VALUES (:a, :c, :t, 'test', 'NEW')"
-            ),
-            {"a": alert_id, "c": customer_id, "t": tx_id}
-        )
-        conn.execute(
-            text(
-                "INSERT INTO cases (case_id, alert_id, status) "
-                "VALUES (:c, :a, 'OPEN')"
-            ),
-            {"c": case_id, "a": alert_id}
-        )
-        
     return case_id, customer_id, tx_id
 
 
