@@ -111,7 +111,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Outputs:** Subgraph structure, flagged patterns (e.g., rapid pass-through, cycles, chains), links to underlying transaction/relationship rows. These are computation-only structural properties and do not assign risk scores or AML labels.
 - **Tools:** Read-only graph-construction queries over PostgreSQL (`graph_relationships`, `transactions`); in-process NetworkX analysis.
 - **Permissions:** Read-only.
-- **Failure behavior:** Bounded hop-depth and node-count limits to prevent runaway queries; on limit-exceeded, return a partial graph explicitly marked as partial (truncated).
+- **Failure behavior:** Bounded hop-depth and node-count limits to prevent runaway queries; on limit-exceeded, return a partial graph explicitly marked as partial (truncated). Note: Graph structure signals (cycle detection, chain depth) execute with their own deterministic traversal limits (`MAX_CYCLE_HOPS`, `MAX_CHAIN_HOPS`), which are independent of the LLM-driven or interactive GraphAgent subgraph depth limit. An incomplete/truncated subgraph retrieval resulting from either limit MUST NOT be presented as a definitive graph finding (it must be suppressed or flagged as partial).
 
 ### 4.4 PolicyAgent
 - **Responsibility:** Retrieve relevant internal AML policy / regulatory guidance passages for the case's alert pattern.
