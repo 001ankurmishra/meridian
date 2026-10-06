@@ -9,6 +9,8 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy import Engine, text
 
+from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleNotFound
+from meridian.agents.graph.subgraph import SubgraphResult
 from meridian.agents.policy.policy_agent import (
     PolicyCitation,
     PolicyEvidenceFound,
@@ -19,6 +21,7 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationUnknown,
 )
 from meridian.agents.transaction.errors import InvalidTransactionError
+from meridian.orchestration.graph_agent_dispatch import GraphAgentDispatchResult
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from tests.db_cleanup import clean_investigation_run_dependencies
 
@@ -42,13 +45,21 @@ def _seed_case_and_alert(
             {"cid": customer_id},
         )
         if transaction_id is not None:
+            account_id = uuid.uuid4()
+            conn.execute(
+                text(
+                    "INSERT INTO accounts (account_id, customer_id, status, created_at) "
+                    "VALUES (:aid, :cid, 'active', now())"
+                ),
+                {"aid": account_id, "cid": customer_id},
+            )
             conn.execute(
                 text(
                     "INSERT INTO transactions "
-                    "(transaction_id, amount, currency, occurred_at, created_at) "
-                    "VALUES (:tid, 100, 'INR', now(), now())"
+                    "(transaction_id, source_account_id, amount, currency, occurred_at, created_at) "
+                    "VALUES (:tid, :aid, 100, 'INR', now(), now())"
                 ),
-                {"tid": transaction_id},
+                {"tid": transaction_id, "aid": account_id},
             )
         conn.execute(
             text(
@@ -123,7 +134,21 @@ def test_all_evidence_found(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(
         citations=[
             PolicyCitation(
@@ -182,7 +207,21 @@ def test_policy_evidence_insufficient(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceInsufficient()
 
     status = orchestrate_investigation(app_role_engine, case_id)
@@ -329,7 +368,21 @@ def test_policy_agent_hard_failure(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.side_effect = RuntimeError("Policy Boom")
 
     with pytest.raises(RuntimeError, match="Policy Boom"):
@@ -365,7 +418,21 @@ def test_21_provenance(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     status = orchestrate_investigation(app_role_engine, case_id)
@@ -424,7 +491,21 @@ def test_22_authoring_failure(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     import meridian.orchestration.investigation_orchestrator as orchestrator
@@ -502,7 +583,21 @@ def test_24_policy_agent_hard_failure(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.side_effect = RuntimeError("Policy Boom")
 
     with pytest.raises(RuntimeError, match="Policy Boom"):
@@ -533,7 +628,21 @@ def test_25_incomplete_path_only_supported_findings(
     mock_compute.return_value = AmountDeviationUnknown(
         alerted_transaction_id=tid, source_account_id=uuid.uuid4(), reason="no history"
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(
         citations=[
             PolicyCitation(
@@ -588,7 +697,21 @@ def test_26_second_incomplete_path(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = None
 
     status = orchestrate_investigation(app_role_engine, case_id)
@@ -648,7 +771,21 @@ def test_27_end_to_end_worked_example(
         assert res is not None
         case_id = res[0]
 
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(
         citations=[
             PolicyCitation(
@@ -691,13 +828,13 @@ def test_27_end_to_end_worked_example(
             {"rid": inv_run_id},
         ).fetchall()
 
-    assert len(findings) == 2
+    assert len(findings) == 3
 
     policy_evidence = [e for e in evidence if e[0] == "DOCUMENT_REFERENCE"]
     non_policy = [e for e in evidence if e[0] != "DOCUMENT_REFERENCE"]
 
     assert len(policy_evidence) == 1
-    assert len(non_policy) == 4  # 1 alerted + 3 historical
+    assert len(non_policy) == 5  # 1 alerted + 3 historical amount + 1 velocity
 
     signals = [f[1] for f in findings]
     has_target_signal = any(

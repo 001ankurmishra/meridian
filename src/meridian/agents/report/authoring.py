@@ -18,14 +18,14 @@ from meridian.evidence.evidence import (
     EVIDENCE_TYPE_ALERTED_TRANSACTION,
     EVIDENCE_TYPE_AMOUNT_DEVIATION_INPUT,
     EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY,
+    EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP,
+    EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP,
     EVIDENCE_TYPE_POLICY_CHUNK,
     EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION,
-    EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP,
-    EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP,
     REFERENCE_TABLE_BENEFICIARIES,
     REFERENCE_TABLE_DOCUMENT_CHUNKS,
-    REFERENCE_TABLE_TRANSACTIONS,
     REFERENCE_TABLE_GRAPH_RELATIONSHIPS,
+    REFERENCE_TABLE_TRANSACTIONS,
     record_evidence_with_connection,
 )
 from meridian.findings.findings import (
@@ -332,7 +332,9 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
     if outcome.graph is not None:
         agent_run_id = outcome.graph.agent_run_id
 
-        if outcome.graph.cycle_result is not None and isinstance(outcome.graph.cycle_result, CycleFound):
+        if outcome.graph.cycle_result is not None and isinstance(
+            outcome.graph.cycle_result, CycleFound
+        ):
             cycle_ev_keys = []
             for rel_id in sorted(outcome.graph.cycle_result.cycle_relationship_ids):
                 key = f"cycle_rel_{rel_id}"
@@ -346,16 +348,21 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                     )
                 )
                 cycle_ev_keys.append(key)
-            
+
+            num_rels = len(outcome.graph.cycle_result.cycle_relationship_ids)
             observed_fact = (
-                f"Graph cycle: {len(outcome.graph.cycle_result.cycle_relationship_ids)} "
-                "directed TRANSACTED_WITH relationship(s) form a cycle through the account."
+                f"Graph cycle: {num_rels} directed TRANSACTED_WITH "
+                "relationship(s) form a cycle through the account."
             )
-            derived_signal = "A cyclic sequence of transactions exists starting and ending at the account."
+            derived_signal = (
+                "A cyclic sequence of transactions exists starting and "
+                "ending at the account."
+            )
             interpretation = (
-                "This is a descriptive, deterministic structural property. No validated threshold "
-                "is being applied (PROTOTYPE), and this does not represent a conclusion "
-                "of suspicious or criminal activity."
+                "This is a descriptive, deterministic structural property. "
+                "No validated threshold is being applied (PROTOTYPE), and "
+                "this does not represent a conclusion of suspicious or "
+                "criminal activity."
             )
             findings.append(
                 FindingDraft(
@@ -374,7 +381,11 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                 )
             )
 
-        if outcome.graph.chain_result is not None and isinstance(outcome.graph.chain_result, ChainDepthComputed) and outcome.graph.chain_result.depth >= 1:
+        if (
+            outcome.graph.chain_result is not None
+            and isinstance(outcome.graph.chain_result, ChainDepthComputed)
+            and outcome.graph.chain_result.depth >= 1
+        ):
             chain_ev_keys = []
             for rel_id in sorted(outcome.graph.chain_result.chain_relationship_ids):
                 key = f"chain_rel_{rel_id}"
@@ -388,16 +399,19 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                     )
                 )
                 chain_ev_keys.append(key)
-            
+
             observed_fact = (
-                f"Graph chain: a directed TRANSACTED_WITH outbound chain of depth "
+                "Graph chain: a directed TRANSACTED_WITH outbound chain of depth "
                 f"{outcome.graph.chain_result.depth} was found from the account."
             )
-            derived_signal = "An outbound sequence of transactions extends from the account."
+            derived_signal = (
+                "An outbound sequence of transactions extends from the account."
+            )
             interpretation = (
-                "This is a descriptive, deterministic structural property. No validated threshold "
-                "is being applied (PROTOTYPE), and this does not represent a conclusion "
-                "of suspicious or criminal activity."
+                "This is a descriptive, deterministic structural property. "
+                "No validated threshold is being applied (PROTOTYPE), and "
+                "this does not represent a conclusion of suspicious or "
+                "criminal activity."
             )
             findings.append(
                 FindingDraft(

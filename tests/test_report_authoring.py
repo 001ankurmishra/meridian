@@ -246,11 +246,25 @@ def test_14_graph_ignored() -> None:
 
     # Build with some graph outcome (it is typed as Any or we just pass a string
     # since it's ignored)
+    from meridian.agents.graph.subgraph import SubgraphResult
+    from meridian.agents.report.outcome import GraphOutcome
+
     outcome_with_graph = InvestigationOutcome(
         investigation_run_id=outcome_no_graph.investigation_run_id,
         alert_type="test",
         transaction=tx_outcome,
-        graph="some_graph_result",  # type: ignore
+        graph=GraphOutcome(
+            result=SubgraphResult(
+                start_entity_id=uuid.uuid4(),
+                max_hops=3,
+                node_entity_ids=(uuid.uuid4(),),
+                relationship_ids=(uuid.uuid4(),),
+                truncated=False,
+            ),
+            agent_run_id=uuid.uuid4(),
+            cycle_result=None,
+            chain_result=None,
+        ),
         policy=PolicyOutcome(
             result=PolicyEvidenceInsufficient(), agent_run_id=uuid.uuid4()
         ),

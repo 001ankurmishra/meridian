@@ -5,16 +5,16 @@ from dataclasses import dataclass
 
 from sqlalchemy import Engine
 
+from meridian.agents.graph.structure_signals import (
+    ChainDepthResult,
+    CycleResult,
+    compute_cycle_through_account,
+    compute_outbound_chain_depth,
+)
 from meridian.agents.graph.subgraph import (
     SubgraphResult,
     get_bounded_subgraph,
     get_entity_id_for_account,
-)
-from meridian.agents.graph.structure_signals import (
-    CycleResult,
-    ChainDepthResult,
-    compute_cycle_through_account,
-    compute_outbound_chain_depth,
 )
 from meridian.orchestration.agent_run_tracking import record_agent_run
 

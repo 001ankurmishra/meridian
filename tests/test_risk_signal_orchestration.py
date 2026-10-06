@@ -8,6 +8,8 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy import Engine, text
 
+from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleNotFound
+from meridian.agents.graph.subgraph import SubgraphResult
 from meridian.agents.policy.policy_agent import (
     PolicyEvidenceFound,
 )
@@ -15,6 +17,7 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationComputed,
     AmountDeviationUnknown,
 )
+from meridian.orchestration.graph_agent_dispatch import GraphAgentDispatchResult
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from tests.db_cleanup import clean_investigation_run_dependencies
 
@@ -39,13 +42,23 @@ def _seed_case_and_alert(
             {"cid": customer_id},
         )
         if transaction_id is not None:
+            account_id = uuid.uuid4()
+            conn.execute(
+                text(
+                    "INSERT INTO accounts "
+                    "(account_id, customer_id, status, created_at) "
+                    "VALUES (:aid, :cid, 'active', now())"
+                ),
+                {"aid": account_id, "cid": customer_id},
+            )
             conn.execute(
                 text(
                     "INSERT INTO transactions "
-                    "(transaction_id, amount, currency, occurred_at, created_at) "
-                    "VALUES (:tid, 100, 'INR', now(), now())"
+                    "(transaction_id, source_account_id, amount, currency, "
+                    "occurred_at, created_at) "
+                    "VALUES (:tid, :aid, 100, 'INR', now(), now())"
                 ),
-                {"tid": transaction_id},
+                {"tid": transaction_id, "aid": account_id},
             )
         conn.execute(
             text(
@@ -113,7 +126,21 @@ def test_r1_happy_path_risk_signal_persisted(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     from meridian.risk_engine.risk_signals import RiskScoreResult
@@ -159,7 +186,21 @@ def test_r1_happy_path_risk_signal_persisted_real(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     with patch(
@@ -189,7 +230,7 @@ def test_r1_happy_path_risk_signal_persisted_real(
 
     assert status == "COMPLETE"
     mock_crs.assert_called_once()
-    mock_rrs.assert_called_once()
+    assert mock_rrs.call_count == 2
 
     with superuser_engine.connect() as conn:
         rows = conn.execute(
@@ -202,8 +243,9 @@ def test_r1_happy_path_risk_signal_persisted_real(
             {"case_id": case_id},
         ).fetchall()
 
-    assert len(rows) == 1
-    assert rows[0][0] == Decimal("10")
+    assert len(rows) == 2
+    values = {r[0] for r in rows}
+    assert values == {Decimal("10"), Decimal("1")}
 
 
 @patch("meridian.orchestration.policy_agent_dispatch.retrieve_policy_evidence")
@@ -225,7 +267,21 @@ def test_r2_no_risk_signal_on_unknown(
         source_account_id=uuid.uuid4(),
         reason="No history",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     status = orchestrate_investigation(app_role_engine, case_id)
@@ -234,7 +290,7 @@ def test_r2_no_risk_signal_on_unknown(
     with superuser_engine.connect() as conn:
         count = conn.execute(text("SELECT count(*) FROM risk_signals")).scalar()
 
-    assert count == 0
+    assert count == 1
 
 
 @patch("meridian.orchestration.policy_agent_dispatch.retrieve_policy_evidence")
@@ -286,7 +342,21 @@ def test_r4_true_atomicity_rollback(
         source_transaction_ids=(uuid.uuid4(),),
         currency="INR",
     )
-    mock_run_graph.return_value = None
+    mock_run_graph.return_value = GraphAgentDispatchResult(
+        investigation_run_id=uuid.uuid4(),
+        result=SubgraphResult(
+            start_entity_id=uuid.uuid4(),
+            max_hops=3,
+            node_entity_ids=(uuid.uuid4(),),
+            relationship_ids=(uuid.uuid4(),),
+            truncated=False,
+        ),
+        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
+        chain_result=ChainDepthComputed(
+            account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
+                chain_relationship_ids=(),
+        ),
+    )
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
     import meridian.orchestration.investigation_orchestrator as orchestrator

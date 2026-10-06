@@ -3,14 +3,13 @@
 import uuid
 from dataclasses import dataclass
 
+from meridian.agents.graph.structure_signals import ChainDepthResult, CycleResult
 from meridian.agents.graph.subgraph import SubgraphResult
 from meridian.agents.policy.policy_agent import PolicyAgentResult
 from meridian.agents.transaction.amount_deviation import AmountDeviationResult
 from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeResult
 from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 
-
-from meridian.agents.graph.structure_signals import ChainDepthResult, CycleResult
 
 @dataclass(frozen=True)
 class TransactionOutcome:
