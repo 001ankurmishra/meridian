@@ -28,6 +28,7 @@ from decimal import Decimal
 
 from sqlalchemy import Connection, Engine, text
 
+from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleFound
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
 from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeComputed
 from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
@@ -100,6 +101,22 @@ def compute_beneficiary_age_risk_score(
     return RiskScoreResult(
         signal_type="beneficiary_age",
         value=total_sec,
+        methodology="PROTOTYPE",
+    )
+
+
+def compute_cycle_risk_score(signal: CycleFound) -> RiskScoreResult:
+    return RiskScoreResult(
+        signal_type="graph_cycle_length",
+        value=Decimal(len(signal.cycle_relationship_ids)),
+        methodology="PROTOTYPE",
+    )
+
+
+def compute_chain_risk_score(signal: ChainDepthComputed) -> RiskScoreResult:
+    return RiskScoreResult(
+        signal_type="graph_outbound_chain_depth",
+        value=Decimal(signal.depth),
         methodology="PROTOTYPE",
     )
 

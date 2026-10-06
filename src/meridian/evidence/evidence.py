@@ -26,10 +26,13 @@ EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY: Final[str] = (
     "beneficiary_age_input_beneficiary"
 )
 EVIDENCE_TYPE_POLICY_CHUNK: Final[str] = "DOCUMENT_REFERENCE"
+EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP: Final[str] = "graph_cycle_relationship"
+EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP: Final[str] = "graph_chain_relationship"
 
 REFERENCE_TABLE_TRANSACTIONS: Final[str] = "transactions"
 REFERENCE_TABLE_DOCUMENT_CHUNKS: Final[str] = "document_chunks"
 REFERENCE_TABLE_BENEFICIARIES: Final[str] = "beneficiaries"
+REFERENCE_TABLE_GRAPH_RELATIONSHIPS: Final[str] = "graph_relationships"
 
 
 def record_evidence_with_connection(

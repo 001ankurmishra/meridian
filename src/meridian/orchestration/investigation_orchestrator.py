@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Engine, text
 
+from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleFound
 from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 from meridian.agents.report.authoring import author_investigation_records
 from meridian.agents.report.outcome import (
@@ -30,6 +31,8 @@ from meridian.orchestration.policy_agent_dispatch import run_policy_agent
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
 from meridian.risk_engine.risk_signals import (
     compute_beneficiary_age_risk_score,
+    compute_chain_risk_score,
+    compute_cycle_risk_score,
     compute_risk_score,
     compute_velocity_risk_score,
     record_risk_signal_with_connection,
@@ -117,7 +120,10 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
                 agent_run_id=agent_run_id,
             )
             graph_outcome = GraphOutcome(
-                result=graph_dispatch_result.result, agent_run_id=agent_run_id
+                result=graph_dispatch_result.result,
+                agent_run_id=agent_run_id,
+                cycle_result=graph_dispatch_result.cycle_result,
+                chain_result=graph_dispatch_result.chain_result,
             )
         except Exception:
             # GraphAgent failure does NOT determine final investigation status
@@ -209,6 +215,35 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
                         transaction_id=alert_row.transaction_id,
                         result=ben_risk_score,
                     )
+                if graph_outcome is not None:
+                    if graph_outcome.cycle_result is not None and isinstance(
+                        graph_outcome.cycle_result, CycleFound
+                    ):
+                        cycle_risk_score = compute_cycle_risk_score(
+                            graph_outcome.cycle_result
+                        )
+                        record_risk_signal_with_connection(
+                            conn=conn,
+                            investigation_run_id=inv_id,
+                            customer_id=alert_row.customer_id,
+                            transaction_id=alert_row.transaction_id,
+                            result=cycle_risk_score,
+                        )
+                    if (
+                        graph_outcome.chain_result is not None
+                        and isinstance(graph_outcome.chain_result, ChainDepthComputed)
+                        and graph_outcome.chain_result.depth >= 1
+                    ):
+                        chain_risk_score = compute_chain_risk_score(
+                            graph_outcome.chain_result
+                        )
+                        record_risk_signal_with_connection(
+                            conn=conn,
+                            investigation_run_id=inv_id,
+                            customer_id=alert_row.customer_id,
+                            transaction_id=alert_row.transaction_id,
+                            result=chain_risk_score,
+                        )
                 conn.execute(
                     text(
                         "UPDATE investigation_runs SET status = :status, "

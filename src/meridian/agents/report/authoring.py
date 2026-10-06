@@ -8,6 +8,7 @@ from typing import Final
 
 from sqlalchemy import Connection, text
 
+from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleFound
 from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 from meridian.agents.report.outcome import InvestigationOutcome
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
@@ -19,9 +20,12 @@ from meridian.evidence.evidence import (
     EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY,
     EVIDENCE_TYPE_POLICY_CHUNK,
     EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION,
+    EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP,
+    EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP,
     REFERENCE_TABLE_BENEFICIARIES,
     REFERENCE_TABLE_DOCUMENT_CHUNKS,
     REFERENCE_TABLE_TRANSACTIONS,
+    REFERENCE_TABLE_GRAPH_RELATIONSHIPS,
     record_evidence_with_connection,
 )
 from meridian.findings.findings import (
@@ -47,6 +51,18 @@ VELOCITY_RECOMMENDATION_TEXT: Final[str] = (
 BENEFICIARY_AGE_RECOMMENDATION_TEXT: Final[str] = (
     "A human analyst should review this finding and its cited evidence, "
     "including the matching beneficiary records, "
+    "before any determination is made."
+)
+
+CYCLE_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the cycle relationships, "
+    "before any determination is made."
+)
+
+CHAIN_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the chain relationships, "
     "before any determination is made."
 )
 
@@ -311,6 +327,94 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
                 text=BENEFICIARY_AGE_RECOMMENDATION_TEXT,
             )
         )
+
+    # Graph outcomes
+    if outcome.graph is not None:
+        agent_run_id = outcome.graph.agent_run_id
+
+        if outcome.graph.cycle_result is not None and isinstance(outcome.graph.cycle_result, CycleFound):
+            cycle_ev_keys = []
+            for rel_id in sorted(outcome.graph.cycle_result.cycle_relationship_ids):
+                key = f"cycle_rel_{rel_id}"
+                evidence.append(
+                    EvidenceDraft(
+                        key=key,
+                        evidence_type=EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP,
+                        reference_table=REFERENCE_TABLE_GRAPH_RELATIONSHIPS,
+                        reference_id=rel_id,
+                        agent_run_id=agent_run_id,
+                    )
+                )
+                cycle_ev_keys.append(key)
+            
+            observed_fact = (
+                f"Graph cycle: {len(outcome.graph.cycle_result.cycle_relationship_ids)} "
+                "directed TRANSACTED_WITH relationship(s) form a cycle through the account."
+            )
+            derived_signal = "A cyclic sequence of transactions exists starting and ending at the account."
+            interpretation = (
+                "This is a descriptive, deterministic structural property. No validated threshold "
+                "is being applied (PROTOTYPE), and this does not represent a conclusion "
+                "of suspicious or criminal activity."
+            )
+            findings.append(
+                FindingDraft(
+                    category=FindingCategory.INVESTIGATIVE,
+                    observed_fact=observed_fact,
+                    derived_signal=derived_signal,
+                    interpretation=interpretation,
+                    evidence_keys=tuple(cycle_ev_keys),
+                    confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+                )
+            )
+            recommendations.append(
+                RecommendationDraft(
+                    finding_index=len(findings) - 1,
+                    text=CYCLE_RECOMMENDATION_TEXT,
+                )
+            )
+
+        if outcome.graph.chain_result is not None and isinstance(outcome.graph.chain_result, ChainDepthComputed) and outcome.graph.chain_result.depth >= 1:
+            chain_ev_keys = []
+            for rel_id in sorted(outcome.graph.chain_result.chain_relationship_ids):
+                key = f"chain_rel_{rel_id}"
+                evidence.append(
+                    EvidenceDraft(
+                        key=key,
+                        evidence_type=EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP,
+                        reference_table=REFERENCE_TABLE_GRAPH_RELATIONSHIPS,
+                        reference_id=rel_id,
+                        agent_run_id=agent_run_id,
+                    )
+                )
+                chain_ev_keys.append(key)
+            
+            observed_fact = (
+                f"Graph chain: a directed TRANSACTED_WITH outbound chain of depth "
+                f"{outcome.graph.chain_result.depth} was found from the account."
+            )
+            derived_signal = "An outbound sequence of transactions extends from the account."
+            interpretation = (
+                "This is a descriptive, deterministic structural property. No validated threshold "
+                "is being applied (PROTOTYPE), and this does not represent a conclusion "
+                "of suspicious or criminal activity."
+            )
+            findings.append(
+                FindingDraft(
+                    category=FindingCategory.INVESTIGATIVE,
+                    observed_fact=observed_fact,
+                    derived_signal=derived_signal,
+                    interpretation=interpretation,
+                    evidence_keys=tuple(chain_ev_keys),
+                    confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+                )
+            )
+            recommendations.append(
+                RecommendationDraft(
+                    finding_index=len(findings) - 1,
+                    text=CHAIN_RECOMMENDATION_TEXT,
+                )
+            )
 
     # Policy found outcome
     if (

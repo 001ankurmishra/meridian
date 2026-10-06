@@ -10,6 +10,8 @@ from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeResult
 from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
 
 
+from meridian.agents.graph.structure_signals import ChainDepthResult, CycleResult
+
 @dataclass(frozen=True)
 class TransactionOutcome:
     """Outcome of the transaction agent."""
@@ -26,6 +28,8 @@ class GraphOutcome:
 
     result: SubgraphResult
     agent_run_id: uuid.UUID
+    cycle_result: CycleResult | None = None
+    chain_result: ChainDepthResult | None = None
 
 
 @dataclass(frozen=True)
