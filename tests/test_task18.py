@@ -1,8 +1,6 @@
 """Task 18 graph structure signal authoring unit tests."""
 
 import uuid
-from decimal import Decimal
-import pytest
 
 from meridian.agents.graph.structure_signals import (
     ChainDepthComputed,
@@ -11,14 +9,15 @@ from meridian.agents.graph.structure_signals import (
     CycleIncompleteTruncated,
     CycleNotFound,
 )
+from meridian.agents.policy.policy_agent import (
+    PolicyEvidenceInsufficient,
+)
 from meridian.agents.report.authoring import build_authoring_drafts
 from meridian.agents.report.outcome import (
     GraphOutcome,
     InvestigationOutcome,
     PolicyOutcome,
-    TransactionOutcome,
 )
-from meridian.agents.policy.policy_agent import PolicyAgentResult, PolicyEvidenceInsufficient
 
 
 def _make_dummy_outcome(
@@ -29,7 +28,9 @@ def _make_dummy_outcome(
         alert_type="test",
         transaction=None,
         graph=graph_outcome,
-        policy=PolicyOutcome(result=PolicyEvidenceInsufficient(), agent_run_id=uuid.uuid4()),
+        policy=PolicyOutcome(
+            result=PolicyEvidenceInsufficient(), agent_run_id=uuid.uuid4()
+        ),
     )
 
 
@@ -68,16 +69,20 @@ def test_authoring_authors_cycle_found():
         ),
     )
     drafts = build_authoring_drafts(_make_dummy_outcome(graph_outcome))
-    
+
     # Verify evidence
-    cycle_ev = [e for e in drafts.evidence if e.evidence_type == "graph_cycle_relationship"]
+    cycle_ev = [
+        e for e in drafts.evidence if e.evidence_type == "graph_cycle_relationship"
+    ]
     assert len(cycle_ev) == 2
     assert {e.reference_id for e in cycle_ev} == set(rel_ids)
-    
+
     # Verify finding
     cycle_finding = [f for f in drafts.findings if "Graph cycle:" in f.observed_fact]
     assert len(cycle_finding) == 1
-    assert "2 directed TRANSACTED_WITH relationship(s)" in cycle_finding[0].observed_fact
+    assert (
+        "2 directed TRANSACTED_WITH relationship(s)" in cycle_finding[0].observed_fact
+    )
     assert "PROTOTYPE" in cycle_finding[0].interpretation
 
 
@@ -127,12 +132,14 @@ def test_authoring_authors_chain_depth_1_plus():
         ),
     )
     drafts = build_authoring_drafts(_make_dummy_outcome(graph_outcome))
-    
+
     # Verify evidence
-    chain_ev = [e for e in drafts.evidence if e.evidence_type == "graph_chain_relationship"]
+    chain_ev = [
+        e for e in drafts.evidence if e.evidence_type == "graph_chain_relationship"
+    ]
     assert len(chain_ev) == 2
     assert {e.reference_id for e in chain_ev} == set(rel_ids)
-    
+
     # Verify finding
     chain_finding = [f for f in drafts.findings if "Graph chain:" in f.observed_fact]
     assert len(chain_finding) == 1
