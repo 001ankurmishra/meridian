@@ -3,7 +3,7 @@ import os
 import sys
 import uuid
 
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine, text
 
 from meridian.identity.tokens import (
     issue_token,
@@ -12,7 +12,7 @@ from meridian.identity.tokens import (
 )
 
 
-def get_engine():
+def get_engine() -> Engine:
     db_url = os.environ.get("APP_DATABASE_URL")
     if not db_url:
         print(
@@ -23,14 +23,14 @@ def get_engine():
     return create_engine(db_url)
 
 
-def cmd_issue(args):
+def cmd_issue(args: argparse.Namespace) -> None:
     engine = get_engine()
 
     # lookup user by email
     with engine.begin() as conn:
         user_row = conn.execute(
-            "SELECT user_id FROM users WHERE email = %s",
-            (args.email,)
+            text("SELECT user_id FROM users WHERE email = :email"),
+            {"email": args.email}
         ).fetchone()
 
     if not user_row:
@@ -52,7 +52,7 @@ def cmd_issue(args):
         sys.exit(1)
 
 
-def cmd_revoke(args):
+def cmd_revoke(args: argparse.Namespace) -> None:
     engine = get_engine()
     try:
         token_id = uuid.UUID(args.token_id)
@@ -68,13 +68,13 @@ def cmd_revoke(args):
         sys.exit(1)
 
 
-def cmd_revoke_all(args):
+def cmd_revoke_all(args: argparse.Namespace) -> None:
     engine = get_engine()
 
     with engine.begin() as conn:
         user_row = conn.execute(
-            "SELECT user_id FROM users WHERE email = %s",
-            (args.email,)
+            text("SELECT user_id FROM users WHERE email = :email"),
+            {"email": args.email}
         ).fetchone()
 
     if not user_row:
@@ -86,7 +86,7 @@ def cmd_revoke_all(args):
     print(f"Revoked {count} tokens for user {args.email}.")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Meridian API Token CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
