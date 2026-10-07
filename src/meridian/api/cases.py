@@ -16,6 +16,16 @@ from meridian.case_management.alert_intake import (
     create_alert_and_case,
 )
 from meridian.case_management.errors import AlertValidationError
+from meridian.identity.access import (
+    CREATE_CASE_ROLES,
+    INVESTIGATE_CASE_ROLES,
+    VIEW_AUDIT_ROLES,
+    VIEW_REPORT_ROLES,
+    enforce_case_visibility,
+    enforce_route_role,
+)
+from meridian.identity.authentication import get_current_user
+from meridian.identity.tokens import TokenInfo
 from meridian.orchestration.errors import InvestigationError
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from meridian.review.decisions import record_human_decision
@@ -63,15 +73,17 @@ class InvestigateResponse(BaseModel):
 
 
 class DecisionRequest(BaseModel):
-    actor_user_id: uuid.UUID
     action: str
     reason: Optional[str] = None
 
 
 @router.post("", response_model=CaseCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_case(
-    request: CaseCreateRequest, engine: Engine = Depends(get_engine)
+    request: CaseCreateRequest,
+    engine: Engine = Depends(get_engine),
+    current_user: TokenInfo = Depends(get_current_user)
 ) -> Any:
+    enforce_route_role(current_user, CREATE_CASE_ROLES)
     try:
         result = create_alert_and_case(
             engine=engine,
@@ -89,8 +101,14 @@ def create_case(
 
 
 @router.post("/{case_id}/investigate", response_model=InvestigateResponse)
-def investigate_case(case_id: uuid.UUID, engine: Engine = Depends(get_engine)) -> Any:
+def investigate_case(
+    case_id: uuid.UUID,
+    engine: Engine = Depends(get_engine),
+    current_user: TokenInfo = Depends(get_current_user)
+) -> Any:
     try:
+        enforce_case_visibility(engine, current_user, case_id)
+        enforce_route_role(current_user, INVESTIGATE_CASE_ROLES)
         result_status = orchestrate_investigation(engine=engine, case_id=case_id)
         return {"status": result_status}
     except InvestigationError as e:
@@ -105,8 +123,14 @@ def investigate_case(case_id: uuid.UUID, engine: Engine = Depends(get_engine)) -
 
 
 @router.get("/{case_id}/report")
-def get_report(case_id: uuid.UUID, engine: Engine = Depends(get_engine)) -> Any:
+def get_report(
+    case_id: uuid.UUID,
+    engine: Engine = Depends(get_engine),
+    current_user: TokenInfo = Depends(get_current_user)
+) -> Any:
     try:
+        enforce_case_visibility(engine, current_user, case_id)
+        enforce_route_role(current_user, VIEW_REPORT_ROLES)
         trail = get_case_audit_trail(engine=engine, case_id=case_id)
     except CaseNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -144,12 +168,14 @@ def record_decision(
     case_id: uuid.UUID,
     request: DecisionRequest,
     engine: Engine = Depends(get_engine),
+    current_user: TokenInfo = Depends(get_current_user)
 ) -> Any:
     try:
+        enforce_case_visibility(engine, current_user, case_id)
         result = record_human_decision(
             engine=engine,
             case_id=case_id,
-            actor_user_id=request.actor_user_id,
+            actor_user_id=current_user.user_id,
             action=request.action,
             reason=request.reason,
         )
@@ -169,13 +195,19 @@ def record_decision(
         )
     except UnauthorizedDecisionError as e:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e)
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
         )
 
 
 @router.get("/{case_id}/audit-trail")
-def get_audit_trail(case_id: uuid.UUID, engine: Engine = Depends(get_engine)) -> Any:
+def get_audit_trail(
+    case_id: uuid.UUID,
+    engine: Engine = Depends(get_engine),
+    current_user: TokenInfo = Depends(get_current_user)
+) -> Any:
     try:
+        enforce_case_visibility(engine, current_user, case_id)
+        enforce_route_role(current_user, VIEW_AUDIT_ROLES)
         trail = get_case_audit_trail(engine=engine, case_id=case_id)
         return trail
     except CaseNotFoundError as e:

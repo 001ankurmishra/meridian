@@ -9,24 +9,21 @@ st.set_page_config(page_title="Meridian Phase 1 UI", layout="wide")
 
 API_BASE = os.environ.get("MERIDIAN_API_BASE_URL", "http://localhost:8000")
 
-# Pre-computed deterministic UUIDs
-DEV_ANALYST_ID = uuid.UUID("e26bbc72-e869-50f5-b62b-f1e51703ddc5")
-DEV_SENIOR_ANALYST_ID = uuid.UUID("e54f2839-b7bb-5e8f-bc41-67b7f97451a0")
-RAHUL_SHARMA_ID = str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma"))
+st.sidebar.header("Authentication")
+api_token = st.sidebar.text_input("API Bearer Token", type="password", key="api_token_input")
 
-USER_OPTIONS = {
-    "Dev Analyst 1 (analyst)": DEV_ANALYST_ID,
-    "Dev Senior Analyst 1 (senior_analyst)": DEV_SENIOR_ANALYST_ID,
-}
+if not api_token:
+    st.warning("Please enter an API token in the sidebar to continue.")
+    st.stop()
 
-st.warning("Development identities only — not an authentication system.")
+headers = {"Authorization": f"Bearer {api_token}"}
 
 st.title("Meridian: Phase 1 Human-Approval UI")
 
 # --- CASE CREATION ---
 st.header("1. Case Creation")
 with st.form("case_create_form"):
-    cust_id = st.text_input("Customer ID (UUID)", value=RAHUL_SHARMA_ID)
+    cust_id = st.text_input("Customer ID (UUID)", value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")))
     alert_type = st.text_input("Alert Type", value="suspicious_transfer")
     alert_reasons_str = st.text_area(
         "Alert Reasons (JSON)",
@@ -46,7 +43,7 @@ with st.form("case_create_form"):
             if txn_id.strip():
                 payload["transaction_id"] = txn_id.strip()
 
-            resp = requests.post(f"{API_BASE}/cases", json=payload)
+            resp = requests.post(f"{API_BASE}/cases", json=payload, headers=headers)
             if resp.status_code == 201:
                 data = resp.json()
                 st.success("Case created successfully!")
@@ -76,7 +73,7 @@ st.header("2. Investigation")
 if st.button("Investigate"):
     with st.spinner("Investigating..."):
         try:
-            resp = requests.post(f"{API_BASE}/cases/{case_id_input}/investigate")
+            resp = requests.post(f"{API_BASE}/cases/{case_id_input}/investigate", headers=headers)
             if resp.status_code == 200:
                 st.success(
                     f"Investigation complete. Status: {resp.json().get('status')}"
@@ -92,7 +89,7 @@ st.divider()
 st.header("3. Report")
 if st.button("Fetch Report"):
     try:
-        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/report")
+        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/report", headers=headers)
         if resp.status_code == 200:
             report = resp.json()
             st.subheader("Summary")
@@ -170,7 +167,7 @@ st.divider()
 st.header("4. Audit Trail")
 if st.button("Fetch Audit Trail"):
     try:
-        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/audit-trail")
+        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/audit-trail", headers=headers)
         if resp.status_code == 200:
             trail = resp.json()
 
@@ -220,9 +217,6 @@ st.divider()
 # --- HUMAN DECISION ---
 st.header("5. Human Decision")
 with st.form("decision_form"):
-    selected_identity = st.selectbox(
-        "Acting Identity", options=list(USER_OPTIONS.keys()), key="acting_identity"
-    )
     action = st.selectbox(
         "Action",
         options=["APPROVE", "REJECT", "ESCALATE", "REQUEST_MORE_INFO"],
@@ -235,9 +229,7 @@ with st.form("decision_form"):
         if action in ["REJECT", "REQUEST_MORE_INFO"] and not reason.strip():
             st.error(f"A reason is required for {action}.")
         else:
-            actor_id = USER_OPTIONS[selected_identity]
             payload = {
-                "actor_user_id": str(actor_id),
                 "action": action,
             }
             if reason.strip():
@@ -245,12 +237,12 @@ with st.form("decision_form"):
 
             try:
                 resp = requests.post(
-                    f"{API_BASE}/cases/{case_id_input}/decision", json=payload
+                    f"{API_BASE}/cases/{case_id_input}/decision", json=payload, headers=headers
                 )
                 if resp.status_code == 200:
                     st.success("Decision submitted successfully.")
                     st.write(f"**New Status**: {resp.json().get('new_status')}")
-                elif resp.status_code == 422:
+                elif resp.status_code in [422, 403]:
                     st.error(f"{resp.json().get('detail')}")
                 else:
                     st.error(f"Decision failed. HTTP {resp.status_code}: {resp.text}")

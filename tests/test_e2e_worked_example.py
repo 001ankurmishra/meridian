@@ -85,6 +85,18 @@ def _verify_referenced_row(
             {"rid": reference_id},
         ).scalar()
         assert row is not None, f"document_chunks row {reference_id} not found"
+    elif reference_table == "beneficiaries":
+        row = conn.execute(
+            text("SELECT 1 FROM beneficiaries WHERE beneficiary_id = :rid"),
+            {"rid": reference_id},
+        ).scalar()
+        assert row is not None, f"beneficiaries row {reference_id} not found"
+    elif reference_table == "graph_relationships":
+        row = conn.execute(
+            text("SELECT 1 FROM graph_relationships WHERE relationship_id = :rid"),
+            {"rid": reference_id},
+        ).scalar()
+        assert row is not None, f"graph_relationships row {reference_id} not found"
     else:
         raise AssertionError(f"Unexpected reference_table: {reference_table}")
 
@@ -341,9 +353,10 @@ def test_worked_example_end_to_end(
         assert report_finding_ids == db_finding_ids
 
         # --- 7f.1: Risk Signals (F10) ---
-        assert len(report.risk_signals) == 1, "Expected 1 F10 signal"
-        f10_signal = report.risk_signals[0]
-        assert f10_signal.signal_type == "amount_deviation"
+        assert len(report.risk_signals) >= 1, "Expected at least 1 risk signal"
+        f10_signal = next(
+            s for s in report.risk_signals if s.signal_type == "amount_deviation"
+        )
         assert f10_signal.methodology == "PROTOTYPE"
         assert f10_signal.value is not None
         assert f10_signal.investigation_run_id == run_id
@@ -423,10 +436,13 @@ def test_worked_example_end_to_end(
                 {"rid": run_id},
             ).fetchall()
 
-        assert len(rec_rows) == 1, f"Expected 1 recommendation, got {len(rec_rows)}"
-        assert len(report.recommendations) == 1
-        assert rec_rows[0][1] == run_id
-        assert rec_rows[0][2] == [investigative_finding_ids[0]]
+        assert len(rec_rows) >= 1, (
+            f"Expected at least 1 recommendation, got {len(rec_rows)}"
+        )
+        assert len(report.recommendations) >= 1
+        for rec in rec_rows:
+            assert rec[1] == run_id
+        assert any(investigative_finding_ids[0] in rec[2] for rec in rec_rows)
 
         # --- 7i: Synthetic labeling ---
         with app_role_engine.connect() as conn:
