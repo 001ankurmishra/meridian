@@ -10,7 +10,9 @@ st.set_page_config(page_title="Meridian Phase 1 UI", layout="wide")
 API_BASE = os.environ.get("MERIDIAN_API_BASE_URL", "http://localhost:8000")
 
 st.sidebar.header("Authentication")
-api_token = st.sidebar.text_input("API Bearer Token", type="password", key="api_token_input")
+api_token = st.sidebar.text_input(
+    "API Bearer Token", type="password", key="api_token_input"
+)
 
 if not api_token:
     st.warning("Please enter an API token in the sidebar to continue.")
@@ -23,7 +25,10 @@ st.title("Meridian: Phase 1 Human-Approval UI")
 # --- CASE CREATION ---
 st.header("1. Case Creation")
 with st.form("case_create_form"):
-    cust_id = st.text_input("Customer ID (UUID)", value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")))
+    cust_id = st.text_input(
+        "Customer ID (UUID)",
+        value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")),
+    )
     alert_type = st.text_input("Alert Type", value="suspicious_transfer")
     alert_reasons_str = st.text_area(
         "Alert Reasons (JSON)",
@@ -73,7 +78,9 @@ st.header("2. Investigation")
 if st.button("Investigate"):
     with st.spinner("Investigating..."):
         try:
-            resp = requests.post(f"{API_BASE}/cases/{case_id_input}/investigate", headers=headers)
+            resp = requests.post(
+                f"{API_BASE}/cases/{case_id_input}/investigate", headers=headers
+            )
             if resp.status_code == 200:
                 st.success(
                     f"Investigation complete. Status: {resp.json().get('status')}"
@@ -167,7 +174,9 @@ st.divider()
 st.header("4. Audit Trail")
 if st.button("Fetch Audit Trail"):
     try:
-        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/audit-trail", headers=headers)
+        resp = requests.get(
+            f"{API_BASE}/cases/{case_id_input}/audit-trail", headers=headers
+        )
         if resp.status_code == 200:
             trail = resp.json()
 
@@ -237,7 +246,9 @@ with st.form("decision_form"):
 
             try:
                 resp = requests.post(
-                    f"{API_BASE}/cases/{case_id_input}/decision", json=payload, headers=headers
+                    f"{API_BASE}/cases/{case_id_input}/decision",
+                    json=payload,
+                    headers=headers,
                 )
                 if resp.status_code == 200:
                     st.success("Decision submitted successfully.")

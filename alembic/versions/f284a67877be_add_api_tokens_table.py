@@ -7,9 +7,9 @@ Create Date: 2026-10-07 02:16:00.426083
 """
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'f284a67877be'
@@ -46,8 +46,12 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.user_id"]),
         sa.PrimaryKeyConstraint("token_id"),
         sa.UniqueConstraint("token_hash", name="uq_api_tokens_token_hash"),
-        sa.CheckConstraint("octet_length(token_hash) = 32", name="ck_api_tokens_hash_length"),
-        sa.CheckConstraint("expires_at > created_at", name="ck_api_tokens_expires_at_after_created_at")
+        sa.CheckConstraint(
+            "octet_length(token_hash) = 32", name="ck_api_tokens_hash_length"
+        ),
+        sa.CheckConstraint(
+            "expires_at > created_at", name="ck_api_tokens_expires_at_after_created_at"
+        ),
     )
     op.create_index("ix_api_tokens_user_id", "api_tokens", ["user_id"])
 
