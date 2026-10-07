@@ -92,7 +92,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 
 - **Responsibility:** Determine investigation state; decide which agents/tools are necessary for a given alert; enforce evidence-sufficiency and permission rules; handle agent failures; prevent report generation on incomplete/unsupported investigations; maintain traceability.
 - **Inputs:** Alert record, case state.
-- **Outputs:** `investigation_run` record, dispatch instructions to agents, final gating decision on whether a report may be generated.
+- **Outputs:** `investigation_run` record, dispatch instructions to agents, persisted `risk_signals` (via `record_risk_signal_with_connection`), authored evidence and findings (via `author_investigation_records`), and final gating decision on whether a report may be generated.
 - **Tools:** Read access to `cases`/`alerts`; write access to `investigation_runs`/`agent_runs`.
 - **Failure behavior:** On repeated agent failure, terminate the workflow and flag the case for human triage rather than producing a partial/unsupported report.
 - **Design intent:** does not blindly invoke every agent for every case — it selects agents based on alert type and evolving evidence (**PROPOSAL** — selection logic to be implemented incrementally starting with a simple rule-based dispatch table in the MVP, revisited for LLM-assisted planning in Phase 2).
@@ -100,15 +100,15 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 ### 4.2 TransactionAgent
 - **Responsibility:** Analyze the alerted customer's transaction history for anomalies (amount deviation, velocity, new counterparties).
 - **Inputs:** customer ID, account ID(s), alert transaction ID.
-- **Outputs:** Derived signals (e.g., "16.3× historical average") with links to source transaction rows.
+- **Outputs:** Derived signals (amount deviation, transaction velocity, beneficiary age) returned as outcome objects to the orchestrator. Signals explicitly handle UNKNOWN states (e.g. missing target accounts or insufficient history) rather than fabricating values.
 - **Tools:** Read-only SQL query tool scoped to `transactions`, `accounts`, `customers`, `beneficiaries` (parameterized queries only — no free-form SQL execution from LLM output; see `docs/SECURITY.md`).
 - **Permissions:** Read-only.
 - **Failure behavior:** If a required aggregate cannot be computed (e.g., insufficient history), return `UNKNOWN` for that signal, not an estimate.
 
 ### 4.3 GraphAgent
-- **Responsibility:** Build and analyze the transaction/entity graph around the alerted customer (community/centrality/pattern detection using NetworkX). Deterministic graph primitives (`structure_signals.py`) exist for cycle detection and chain depth, but are currently unwired.
+- **Responsibility:** Build and analyze the transaction/entity graph around the alerted customer (community/centrality/pattern detection using NetworkX). Deterministic graph primitives (`structure_signals.py`) for cycle detection and chain depth are wired into the orchestrator.
 - **Inputs:** customer/account ID, hop-depth limit.
-- **Outputs:** Subgraph structure, flagged patterns (e.g., rapid pass-through, cycles, chains), links to underlying transaction/relationship rows. These are computation-only structural properties and do not assign risk scores or AML labels.
+- **Outputs:** Subgraph structure, flagged patterns (cycle detection, outbound chain depth). Graph structure signals execute deterministic traversals and return factual structural properties, truncated to depth 0 or boolean anomalies without inherent AML risk labels. These outcomes are returned to the orchestrator.
 - **Tools:** Read-only graph-construction queries over PostgreSQL (`graph_relationships`, `transactions`); in-process NetworkX analysis.
 - **Permissions:** Read-only.
 - **Failure behavior:** Bounded hop-depth and node-count limits to prevent runaway queries; on limit-exceeded, return a partial graph explicitly marked as partial (truncated). Note: Graph structure signals (cycle detection, chain depth) execute with their own deterministic traversal limits (`MAX_CYCLE_HOPS`, `MAX_CHAIN_HOPS`), which are independent of the LLM-driven or interactive GraphAgent subgraph depth limit. An incomplete/truncated subgraph retrieval resulting from either limit MUST NOT be presented as a definitive graph finding (it must be suppressed or flagged as partial).
@@ -119,7 +119,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Outputs:** Retrieved chunks with source document ID, version, and relevance/confidence score.
 - **Tools:** Hybrid retrieval (PostgreSQL FTS + pgvector cosine distance, fused via Reciprocal Rank Fusion) read-only. Embedding model: BAAI/bge-small-en-v1.5 (per ADR-0004).
 - **Permissions:** Read-only.
-- **Failure behavior:** If retrieval confidence is below threshold, return no policy citation rather than a low-confidence guess (`docs/EVALUATION.md` defines the threshold methodology).
+- **Failure behavior:** If retrieval confidence is below the hardcoded threshold (`0.01`), returns no policy citation rather than a low-confidence guess (`docs/EVALUATION.md` defines the threshold methodology).
 
 ### 4.5 ReportAgent
 - **Responsibility:** Synthesize findings from other agents into the structured Fact→Signal→Interpretation→Recommendation report; enforce the no-unsupported-conclusions rule.
@@ -145,14 +145,15 @@ Deferred to Phase 2. Will follow the same documentation pattern above once desig
 
 ```
 1. Receive alert → create investigation_run
-2. If alert has a transaction_id → run TransactionAgent
-3. If TransactionAgent successfully computes an amount deviation → run GraphAgent using the transaction's source_account_id
-4. Always run: PolicyAgent (every investigation needs applicable-policy context)
-5. Evaluate evidence sufficiency:
-   - If TransactionAgent and PolicyAgent both returned usable evidence → status COMPLETE
-   - If critical evidence missing (e.g., TransactionAgent returned UNKNOWN or was skipped) → status INCOMPLETE_INSUFFICIENT_EVIDENCE
-6. ReportAgent synthesizes findings; if no findings meet evidence bar → report states "insufficient evidence," not a fabricated conclusion
-7. Route to human review queue
+2. If alert has a transaction_id → run TransactionAgent. Amount deviation, transaction velocity, and beneficiary age are evaluated and persisted as `risk_signals` using `record_risk_signal_with_connection`.
+3. Run GraphAgent using the transaction's source_account_id via `record_agent_run`. Graph cycle length and outbound chain depth are evaluated and persisted as `risk_signals`.
+4. Always run: PolicyAgent (every investigation needs applicable-policy context).
+5. Evidence and Findings generation: `author_investigation_records` translates the signal outcomes into standard Evidence and Finding records.
+6. Evaluate evidence sufficiency:
+   - If critical evidence missing (e.g. TransactionAgent returned UNKNOWN or was skipped) → status INCOMPLETE_INSUFFICIENT_EVIDENCE
+   - Else → status COMPLETE
+7. ReportAgent synthesizes findings; if no findings meet evidence bar → report states "insufficient evidence," not a fabricated conclusion.
+8. Route to human review queue.
 ```
 
 This is intentionally simple for MVP (rule-based dispatch) rather than a free-form LLM planner, per `CLAUDE.md` §10 ("do not over-engineer the MVP"). LLM-assisted dynamic planning is a Phase 2+ candidate, to be justified via ADR before implementation.

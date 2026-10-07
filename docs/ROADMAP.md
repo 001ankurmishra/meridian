@@ -87,14 +87,16 @@ Scope (Features F11–F14):
 
 ### Phase 2 status and re-scoping (recorded 2026-10-05)
 
-- **What exists:** deterministic transaction signals (amount deviation wired; velocity and beneficiary age computation-only, unwired), graph structure signals (computation-only, unwired), ER first slice (ADR-0006 D1, computation-only, unwired, D5 deferred), per-signal baselines, ADR-0005/0006.
+- **What exists:** deterministic transaction signals (amount deviation, transaction velocity, and beneficiary age wired), graph structure signals (graph cycle length and outbound chain depth wired), ER first slice (ADR-0006 D1, computation-only, unwired, D5 deferred), per-signal baselines, ADR-0005/0006/0007.
+- **Branch status:** Tasks 17–20 sit on `feature/phase2-task18-graph-signal-wiring` (verified tip: `0289b95`); not merged.
+- **Maintainer decision (Post-Task 21 order):** F11 sanctions/watchlist design/ADR first, then F11 implementation, then RAG evaluation.
 - **Re-scoped/deferred:**
   - Community detection and centrality DEFERRED (optional; no exit criterion depends on it; would need a new planted-community corpus).
   - Retrieval reranking REPLACED by RAG evaluation (labeled query set plus calibration of the PolicyAgent threshold per docs/EVALUATION.md §4; reranking only if measurement shows a gap; any retrieval architecture change requires an ADR).
   - Adverse-media agent (F12) DEFERRED (design TBD, corpus too small to evaluate).
   - Sanctions/watchlist agent (F11) REMAINS IN SCOPE, synthetic watchlist only, design/ADR before code.
   - React workspace DEFERRED: Streamlit remains the UI through Phase 3; React stays a documented option, not a scheduled item.
-  - Authentication hardening (F15): scheduled for implementation immediately after the transaction/graph signal-wiring tasks, flagged as an intentional pull-forward of a Phase 3 safety item (Cross-Phase Rule: raised and decided, not silently absorbed).
+  - Authentication hardening (F15): pulled forward and implemented at DEMO grade (opaque bearer tokens), not production IAM.
 - **Phase 3 applicability notes:** model monitoring N/A until a calibrated model exists; LLM retry/backoff N/A while no LLM exists; OpenTelemetry optional.
 
 ---

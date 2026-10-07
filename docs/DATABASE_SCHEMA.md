@@ -138,7 +138,7 @@ Deferred until entity-resolution / shared-device signals are implemented (`docs/
 | `case_id` | UUID PK | human-readable code also stored, e.g. AML-48291 |
 | `alert_id` | UUID FK → alerts | |
 | `status` | text | OPEN / IN_REVIEW / ESCALATED / CLOSED_APPROVED / CLOSED_REJECTED / CLOSED_MORE_INFO |
-| `assigned_analyst_id` | UUID FK → users, nullable | |
+| `assigned_analyst_id` | UUID FK → users, nullable | remains unused in production code; no assignment mechanism exists |
 | `opened_at` | timestamptz | |
 | `closed_at` | timestamptz, nullable | represents the current review/decision-cycle closure timestamp; cleared if re-opened/escalated |
 | `deleted_at` | timestamptz, nullable | soft delete |
@@ -177,7 +177,7 @@ meridian_app has SELECT, INSERT only on this table; UPDATE/DELETE are not grante
 |---|---|---|
 | `evidence_id` | UUID PK | |
 | `investigation_run_id` | UUID FK → investigation_runs | |
-| `evidence_type` | text | Implemented values (constants in meridian.evidence.evidence): alerted_transaction, amount_deviation_input_transaction, DOCUMENT_REFERENCE (policy chunk). beneficiary, graph and risk_signal evidence are PLANNED, not yet authored. |
+| `evidence_type` | text | Implemented values (constants in meridian.evidence.evidence): alerted_transaction, amount_deviation_input_transaction, velocity_input_transaction, beneficiary_age_input_beneficiary, DOCUMENT_REFERENCE (policy chunk), graph_cycle_relationship, graph_chain_relationship. |
 | `reference_table` | text | which source table this points to |
 | `reference_id` | UUID | polymorphic reference (application-enforced) |
 | `produced_by_agent_run_id` | UUID FK → agent_runs | |
@@ -228,7 +228,7 @@ In the MVP, recommendations are authored deterministically by the F2 authoring s
 | `created_at` timestamptz | |
 
 ### 4.16 `risk_signals`
-**Status:** Implemented (F10). Currently writes exactly one `signal_type` (`amount_deviation`) with a pass-through formula (`value = deviation_multiple`). Provenance is limited to `investigation_run_id` + `customer_id` + `transaction_id` + `created_at` — there is no `created_by` or `agent_runs` linkage for this MVP.
+**Status:** Implemented (F10). Currently writes `amount_deviation`, `transaction_velocity`, `beneficiary_age`, `graph_cycle_length`, and `graph_outbound_chain_depth`. Provenance is limited to `investigation_run_id` + `customer_id` + `transaction_id` + `created_at` — there is no `created_by` or `agent_runs` linkage for this MVP.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -236,7 +236,7 @@ In the MVP, recommendations are authored deterministically by the F2 authoring s
 | `investigation_run_id` | UUID FK → investigation_runs, nullable | nullable to allow standalone batch scoring |
 | `customer_id` | UUID FK → customers | |
 | `transaction_id` | UUID FK → transactions, nullable | |
-| `signal_type` | text | amount_deviation/velocity/new_counterparty/etc. |
+| `signal_type` | text | amount_deviation / transaction_velocity / beneficiary_age / graph_cycle_length / graph_outbound_chain_depth |
 | `value` | numeric, nullable | raw computed value |
 | `model_version` | text, nullable | for ML-derived signals |
 | `methodology` | text | PROTOTYPE / EXPERIMENTALLY_CALIBRATED / PRODUCTION_APPROVED (see `docs/EVALUATION.md`) |
@@ -266,6 +266,19 @@ No `UPDATE`/`DELETE` permitted on this table at the application-role level; enfo
 | `created_at` timestamptz | |
 
 Fine-grained permission mapping (which role can approve/escalate/close) documented in `docs/SECURITY.md` §"Authorization Model."
+
+### 4.19 `api_tokens`
+| Column | Type | Notes |
+|---|---|---|
+| `token_id` | UUID PK | |
+| `user_id` | UUID FK → users | `NO ACTION` on delete |
+| `token_hash` | bytea | 32-byte SHA-256 hash |
+| `created_at` | timestamptz | |
+| `expires_at` | timestamptz | must be > created_at |
+| `revoked_at` | timestamptz, nullable | |
+| `label` | text, nullable | |
+
+Constraints: `token_hash` must be exactly 32 bytes (enforced via CHECK). `token_hash` is UNIQUE. `app_role` has `SELECT` only; `INSERT`/`UPDATE`/`DELETE` are revoked.
 
 ---
 

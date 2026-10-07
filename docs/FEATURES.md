@@ -24,15 +24,15 @@ Runs the rule-based dispatch described in `docs/ARCHITECTURE.md` §5: creates an
 
 Computes, via SQL against `transactions`/`accounts`, the alerted transaction's deviation from the customer's historical behavior (e.g., multiple of trailing average, velocity of recent transactions, presence of a newly created beneficiary). Every computed signal links to the specific source rows used. Amount comparison is performed only when the alerted transaction and every qualifying historical transaction have an established (non-blank) currency and all currencies are identical (exact string match, no normalization); otherwise the result is `UNKNOWN` (`AmountDeviationUnknown`) with a currency-specific reason.
 
-Velocity is now IMPLEMENTED as a computation-only signal (`src/meridian/agents/transaction/transaction_velocity.py`). It uses a 24-hour window as a PROTOTYPE definition parameter, counts the customer's outgoing transactions including the alerted one, links to source rows, and has no Unknown state. It is NOT yet wired into dispatch, evidence, F10 scoring or the report.
+Velocity is IMPLEMENTED and wired into dispatch, evidence, F10 scoring, and the report. It uses a 24-hour window as a PROTOTYPE definition parameter, counts the customer's outgoing transactions including the alerted one, links to source rows, and has no Unknown state.
 
-The beneficiary-age signal is also IMPLEMENTED as a computation-only signal (`src/meridian/agents/transaction/beneficiary_age.py`). Beneficiary matching strictly requires the same customer and the alerted transaction's destination account. It computes the beneficiary age by subtracting the earliest non-null `added_at` from the transaction's `occurred_at`. It documents precise Unknown reasons (e.g., missing destination account, no beneficiary record, all missing `added_at`). It strictly returns the factual age with NO "new" threshold or classification applied. It is NOT yet wired into dispatch, orchestration, evidence, F10 scoring, or reports.
+The beneficiary-age signal is IMPLEMENTED and wired into dispatch, evidence, F10 scoring, and the report. Beneficiary matching strictly requires the same customer and the alerted transaction's destination account. It computes the beneficiary age by subtracting the earliest non-null `added_at` from the transaction's `occurred_at`. It documents precise Unknown reasons. It strictly returns the factual age with NO "new" threshold or classification applied.
 
 ## F4. Basic Transaction Graph
 
 **Phase:** MVP · **Module:** `agents.graph`
 
-Builds a bounded-depth subgraph around the alerted customer/account from `graph_relationships`/`transactions`, runs basic NetworkX analysis (e.g., path detection for rapid pass-through patterns like the worked example: Customer A → Account B → Account C). Phase 2 adds community detection and centrality scoring (`docs/ROADMAP.md`).
+Builds a bounded-depth subgraph around the alerted customer/account from `graph_relationships`/`transactions`, runs basic NetworkX analysis. Cycle detection and outbound chain depth signals are IMPLEMENTED and wired. Depth 0 is suppressed (returns Unknown). They return factual depth/cycle indicators and are mapped to boolean anomalies without inherent risk levels. Phase 2 adds community detection and centrality scoring (`docs/ROADMAP.md`).
 
 ## F5. Policy Retrieval (RAG)
 
@@ -98,7 +98,7 @@ Phase 2: documented methodology plus measured per-signal evaluation (PROTOTYPE).
 
 **Phase:** Phase 3 · **Module:** `identity`
 
-Full role-based access control across case visibility, approval authority, and admin functions (`docs/SECURITY.md` §"Authorization Model").
+Full role-based access control across case visibility, approval authority, and admin functions (`docs/SECURITY.md` §"Authorization Model"). Task 20 pulled forward a DEMO grade authentication implementation (opaque bearer tokens), but production IAM remains a Phase 3 task.
 
 ## F16. Observability Stack (OpenTelemetry, dashboards)
 

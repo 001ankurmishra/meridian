@@ -66,7 +66,7 @@ Current decision rules to preserve:
 
 **Case Creation / Investigation:**
 The product direction treats alert intake as system-originated, but the current four-role users table does not contain a service identity. We will not invent a fifth role for this.
-*OPEN UNCERTAINTY:* The exact authentication policy for system-originated actions (like case creation/investigation via API) is deferred to future work. For now, the smallest defensible authenticated-human policy will be used without adding a new service identity.
+*Implementation Status (Task 21 reconciliation):* The exact authentication policy for system-originated actions (like case creation/investigation via API) remains deferred to future work. The implementation requires authenticated-human credentials for these endpoints without adding a new service identity.
 
 ### D5: Case Visibility
 
