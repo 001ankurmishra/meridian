@@ -91,7 +91,7 @@ F11 is a supplementary screening signal designed as an additive candidate-genera
 - **Controlled F11 Abstention (`NOT_PERFORMED`):** Occurs when screening cannot be performed due to known conditions (e.g., customer name unavailable, customer name normalizes to empty, configured/pinned watchlist unavailable). This is a SUCCESS outcome conceptually distinct from technical failure. Its explicit screening outcome is `NOT_PERFORMED`. This state must be explicitly disclosed to the human investigator and must never be presented as a `NO_CANDIDATE_MATCH` or clearance.
 - **Technical F11 Failure:** A runtime failure (e.g., database failure, watchlist integrity failure, normalization-version mismatch, unexpected matcher exception, or agent-run failure). Unlike primary agents, an F11 technical failure does not by itself terminate the overall investigation workflow. This exception is granted *provided* that the resulting unavailable/failed screening state is explicitly disclosed to the human investigator and is never represented as a successful no-match, clearance, or completed screening.
 
-This is not a general supplementary-agent policy. Any other agent failure continues to terminate the investigation per the general rule.
+This exception governs only the investigation-level consequence of an F11 failure; it does not change the unresolved retry-count policy in §6 or the §3 sufficiency gate. This is not a general supplementary-agent policy. Any other agent failure continues to terminate the investigation per the general rule.
 
 ---
 
