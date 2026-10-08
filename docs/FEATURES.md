@@ -74,7 +74,19 @@ MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals 
 
 **Phase:** Phase 2 · **Module:** `agents.sanctions` (new)
 
-Screens customer/counterparty names against a synthetic/public watchlist dataset. Read-only. Follows the same agent documentation pattern as `docs/ARCHITECTURE.md` §4. Not built until Phase 2 — do not scaffold prematurely.
+F11 is a Phase 2 sanctions/watchlist screening capability designed by ADR-0008 and is NOT IMPLEMENTED.
+
+The planned implementation introduces a SanctionsAgent that screens the alert customer against a pinned, versioned synthetic watchlist.
+
+Candidate generation uses exact normalized-name matching via the existing normalization behavior and matching rule `exact_norm_name_v1`.
+
+DOB is a candidate comparison attribute, not an identity gate.
+
+A match is a candidate for human review and must never be represented as an identity confirmation, sanctions determination, or autonomous AML conclusion.
+
+The scope is customer screening only. Do not describe beneficiary names, counterparty names, account names, device names, or merchant names as supported screening inputs.
+
+Implementation is sequenced after ADR-0008 acceptance.
 
 ## F12. Adverse Media Analysis
 

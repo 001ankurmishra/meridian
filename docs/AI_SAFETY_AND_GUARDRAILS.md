@@ -83,6 +83,16 @@ MVP risk scoring is PROTOTYPE-tier by design (`docs/FEATURES.md` F10) and must b
 | Agent repeatedly fails (defined as: fails validation or throws on retry — retry count **REQUIRES VERIFICATION**/decision at implementation time, default proposal: 2 retries) | Terminate the investigation workflow for that run and notify the analyst; do not present a partial result as if complete |
 | Unsupported conclusion detected by the evidence-sufficiency gate | Block report generation for that finding; never suppress the gate to "make the report look complete" |
 
+### 6.1 F11-Specific Safety Exception (Sanctions/Watchlist Screening)
+
+F11 is a supplementary screening signal designed as an additive candidate-generation step. To legitimately satisfy ADR-0008, the following narrow, deliberate, and bounded exception applies exclusively to F11 when it is operationally wired (Task 24):
+
+- **Successful F11 Outcomes (CANDIDATE_MATCHES_FOUND, NO_CANDIDATE_MATCH):** Normal operation; these do not terminate the investigation workflow.
+- **Controlled F11 Abstention (`NOT_PERFORMED`):** Occurs when screening cannot be performed due to known conditions (e.g., customer name unavailable, customer name normalizes to empty, configured/pinned watchlist unavailable). This is a SUCCESS outcome conceptually distinct from technical failure. Its explicit screening outcome is `NOT_PERFORMED`. This state must be explicitly disclosed to the human investigator and must never be presented as a `NO_CANDIDATE_MATCH` or clearance.
+- **Technical F11 Failure:** A runtime failure (e.g., database failure, watchlist integrity failure, normalization-version mismatch, unexpected matcher exception, or agent-run failure). Unlike primary agents, an F11 technical failure does not by itself terminate the overall investigation workflow. This exception is granted *provided* that the resulting unavailable/failed screening state is explicitly disclosed to the human investigator and is never represented as a successful no-match, clearance, or completed screening.
+
+This is not a general supplementary-agent policy. Any other agent failure continues to terminate the investigation per the general rule.
+
 ---
 
 ## 7. Testing Obligations Tied to This Document

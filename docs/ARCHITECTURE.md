@@ -71,6 +71,7 @@ All AI/DB/agent activity is written to the append-only audit log (`docs/OBSERVAB
 | `agents.transaction` | Transaction anomaly/behavioral analysis (read-only SQL) | — (reads `transactions`, `accounts`) |
 | `agents.graph` | Entity/transaction graph construction & analysis (read-only) | — (reads `transactions`, `entities`, `graph_relationships`) |
 | `agents.policy` | Policy/regulatory retrieval via RAG (read-only) | — (reads `documents`, `document_chunks`) |
+| `agents.sanctions` | Deterministic customer/watchlist candidate screening against a pinned synthetic watchlist. Designed by ADR-0008 (NOT IMPLEMENTED). Must not autonomously determine sanctions/AML guilt. | — (reads `customers`, `watchlist_entries`) |
 | `agents.report` | Evidence-backed report synthesis; enforces no-unsupported-conclusions rule | `findings`, `recommendations` |
 | `risk_engine` | ML-based anomaly/risk scoring (batch and on-demand) | `risk_signals` |
 | `evidence` | Canonical evidence records linking findings to source data | `evidence` |
@@ -134,7 +135,18 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Tools:** Controlled write access to `case_notes` — writes always attributed to and confirmed by the human analyst; the agent never writes autonomously without a human-confirmed action.
 - **Permissions:** Write, but only via a human-confirmed action, never silently.
 
-### 4.7 Sanctions/Watchlist and Adverse-Media Agents (Phase 2, PROPOSAL)
+### 4.7 Sanctions/Watchlist Screening
+
+- **Responsibility:** Screen the alerted customer against a pinned, versioned synthetic watchlist to generate candidates for human review. It must not autonomously determine sanctions/AML guilt.
+- **Inputs:** Alert customer ID.
+- **Outputs:** Candidates with a DOB comparison attribute (not an identity gate), or explicit outcomes (controlled `NOT_PERFORMED` vs technical failure). A match is a candidate for human review, not an identity/sanctions determination.
+- **Tools:** Read-only exact normalized-name candidate matching (`exact_norm_name_v1`), reusing the existing `normalize_full_name()` and normalization version. No fuzzy, phonetic, transliteration, token-reorder, nickname, typo, embedding, ML, or LLM matching.
+- **Permissions:** Read-only.
+- **Failure behavior:** Differentiates between controlled abstention (`NOT_PERFORMED`) and technical failure.
+- **Status:** Designed by ADR-0008; NOT IMPLEMENTED.
+
+### 4.8 Adverse Media
+
 Deferred to Phase 2. Will follow the same documentation pattern above once designed; not implemented in MVP. Do not build ahead of `docs/ROADMAP.md`.
 
 ---
