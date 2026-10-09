@@ -1,6 +1,6 @@
 # ADR-0008: Sanctions/Watchlist Screening Approach (F11)
 
-Status: Proposed
+Status: Accepted
 Date: 2026-10-08
 
 ## Context
@@ -15,7 +15,7 @@ Date: 2026-10-08
 - FACT: ADR-0005 forbids presenting scores or thresholds fitted to generator-defined data. ADR-0006 defers persistence and wiring of entity-resolution links and defines identity-candidate semantics that differ from screening semantics. ADR-0007 (Proposed) covers authentication and is not changed by this ADR.
 - Consequence: F11 needs (a) a structured, resolvable watchlist, (b) one authoritative record of the screening outcome that does not depend on absence or presence of other rows, and (c) a persistence model that is honest about the two independent commits that exist today.
 
-## Decision (Proposed)
+## Decision (Accepted 2026-10-09)
 
 ### D1. Scope
 
