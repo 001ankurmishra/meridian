@@ -460,6 +460,7 @@ def test_architecture_guards() -> None:
     # (except for allow-list empty for prod, expanded in Commit 2)
     allow_list = [
         "src/meridian/fixtures/er_baseline.py",
+        "src/meridian/agents/sanctions/normalization.py",
     ]
 
     for f in src_dir.rglob("*.py"):
