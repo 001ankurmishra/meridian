@@ -280,6 +280,43 @@ Fine-grained permission mapping (which role can approve/escalate/close) document
 
 Constraints: `token_hash` must be exactly 32 bytes (enforced via CHECK). `token_hash` is UNIQUE. `app_role` has `SELECT` only; `INSERT`/`UPDATE`/`DELETE` are revoked.
 
+### 4.20 `watchlist_entries`
+**Status:** Implemented (migration `4573f3e20e1c`, ADR-0008 D5). Synthetic-only listed names for F11 deterministic candidate generation.
+
+| Column | Type | Notes |
+|---|---|---|
+| `entry_id` | UUID PK | Deterministic `uuid5` derived from natural key |
+| `watchlist_name` | text | Pinned watchlist identifier (NOT NULL) |
+| `watchlist_version` | text | Pinned watchlist version string (NOT NULL) |
+| `subject_key` | text | Grouping key for subject entity (NOT NULL) |
+| `name_type` | text | CHECK in (`primary`, `alias`) |
+| `listed_name` | text | CHECK non-blank: `length(trim(listed_name)) > 0` |
+| `date_of_birth` | date, nullable | Attribute for candidate comparison |
+| `is_synthetic` | boolean | CHECK `is_synthetic = true` |
+| `source` | text | Origin dataset string (NOT NULL) |
+| `created_at` | timestamptz | NOT NULL DEFAULT `now()` |
+
+Constraints:
+- Primary Key: `watchlist_entries_pkey` on `(entry_id)`.
+- Unique Natural Key: `uq_watchlist_entries_natural_key` on `(watchlist_name, watchlist_version, subject_key, name_type, listed_name)`.
+- Check constraints: `ck_watchlist_entries_is_synthetic`, `ck_watchlist_entries_listed_name_non_blank`, `ck_watchlist_entries_name_type`.
+- Indexes: `ix_watchlist_entries_name_version` on `(watchlist_name, watchlist_version)`.
+- Triggers: none.
+
+Role Privileges:
+- `app_role`: `SELECT` only; `INSERT`, `UPDATE`, `DELETE`, and `TRUNCATE` revoked.
+- `loader_role`: `SELECT` and `INSERT` only; `UPDATE`, `DELETE`, and `TRUNCATE` revoked.
+
+Deterministic ID Definition:
+`entry_id` is a deterministic RFC 4122 namespace UUID (uuid5 using `NAMESPACE_OID`) generated from:
+`f"{watchlist_name}:{watchlist_version}:{subject_key}:{name_type}:{listed_name}"`.
+
+Version Immutability:
+Enforced via privileged loader validation and database role permissions, not database triggers or a versions table. The privileged loader validates entire version structures prior to insert. An identical reload is an idempotent no-op returning `already_existed=True`; conflicting data under an existing version raises `WatchlistVersionConflict`.
+
+Integration Note:
+The companion table `screening_results` (ADR-0008 D7) is NOT implemented; its implementation and wiring belong to Task 24.
+
 ---
 
 ## 5. Denormalization Notes

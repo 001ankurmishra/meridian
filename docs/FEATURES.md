@@ -74,9 +74,9 @@ MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals 
 
 **Phase:** Phase 2 · **Module:** `agents.sanctions` (new)
 
-F11 is a Phase 2 sanctions/watchlist screening capability designed by ADR-0008 and is NOT IMPLEMENTED.
+F11 deterministic watchlist data and computation foundation is implemented (Task 23, ADR-0008), but UNWIRED.
 
-The planned implementation introduces a SanctionsAgent that screens the alert customer against a pinned, versioned synthetic watchlist.
+The data layer (`watchlist_entries` table), atomic version loader, read-only reader, exact normalized-name matcher (`exact_norm_name_v1`), synthetic corpus, and synthetic candidate-generation fidelity baseline are implemented. `SanctionsAgent`, `screening_results`, dispatch, orchestrator wiring, report/authoring, and UI integration are not implemented (Task 24 scope).
 
 Candidate generation uses exact normalized-name matching via the existing normalization behavior and matching rule `exact_norm_name_v1`.
 
@@ -85,8 +85,6 @@ DOB is a candidate comparison attribute, not an identity gate.
 A match is a candidate for human review and must never be represented as an identity confirmation, sanctions determination, or autonomous AML conclusion.
 
 The scope is customer screening only. Do not describe beneficiary names, counterparty names, account names, device names, or merchant names as supported screening inputs.
-
-Implementation is sequenced after ADR-0008 acceptance.
 
 ## F12. Adverse Media Analysis
 

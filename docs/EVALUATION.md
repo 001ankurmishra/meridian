@@ -371,6 +371,555 @@ Note: The v0.5 corpus with seed `er_corpus_v0.5_freeze` must already be loaded; 
 * candidate link is not an identity determination
 * accuracy is not a headline metric
 
+### Sanctions Candidate-Generation Fidelity Baseline (PROTOTYPE, synthetic)
+
+#### Protocol & Identity
+* Protocol identifier: `synthetic_candidate_generation_fidelity_v1`
+* Tier: `PROTOTYPE`
+* Matching rule ID: `exact_norm_name_v1`
+* Normalization version: `v1`
+* Watchlist name: `meridian_synthetic_watchlist`
+* Watchlist version: `v1`
+* Evaluation corpus: `meridian.fixtures.sanctions_eval_corpus`
+* Frozen protocol: Evaluation cases, review pairs, candidate review table, and expected counts were frozen prior to baseline measurement.
+
+#### Pair Semantics & Evaluation Universe
+The evaluation universe comprises the full Cartesian product of the 8 frozen evaluation cases and the 5 synthetic watchlist subjects, yielding exactly 40 review pairs:
+* Positive ground truth: 4 pairs
+* Negative ground truth: 36 pairs
+* Expected candidate pairs: 4 pairs
+* Measured candidate pairs: 4 pairs
+
+Each pair is evaluated individually by running the live candidate matching implementation (`match_customer_against_watchlist`) against the synthetic watchlist entries and comparing the resulting candidate set against the hand-declared expected candidate keys and review records.
+
+#### Evaluation Case Inventory & Review Mapping
+* **CASE-SYNTH-001** (`IN_SCOPE_PRIMARY_POSITIVE`): Customer `"Aurelius Vance"`, DOB `1980-05-15`, planted `SUBJ-SYNTH-001`, expected candidates `{"SUBJ-SYNTH-001"}`, outcome `CANDIDATE_MATCHES_FOUND`. (5 pairs: TP=1 on `SUBJ-SYNTH-001`, TN=4).
+* **CASE-SYNTH-002** (`IN_SCOPE_ALIAS_POSITIVE`): Customer `"  kaz   drake  "`, DOB `1992-08-04`, planted `SUBJ-SYNTH-004`, expected candidates `{"SUBJ-SYNTH-004"}`, outcome `CANDIDATE_MATCHES_FOUND`. Exact alias match after whitespace collapse and case-folding. (5 pairs: TP=1 on `SUBJ-SYNTH-004`, TN=4).
+* **CASE-SYNTH-003** (`HOMONYM_POSITIVE_AND_FALSE_POSITIVE`): Customer `"Elena Rostova"`, DOB `1985-03-20`, planted `SUBJ-SYNTH-002`, expected candidates `{"SUBJ-SYNTH-002", "SUBJ-SYNTH-003"}`, outcome `CANDIDATE_MATCHES_FOUND`. Designed homonym where `SUBJ-SYNTH-002` (DOB 1985-03-20) is the planted target and `SUBJ-SYNTH-003` (DOB 1972-11-10) is a distinct entity sharing the primary listed name. (5 pairs: TP=1 on planted `SUBJ-SYNTH-002`, FP=1 on homonym `SUBJ-SYNTH-003`, TN=3).
+* **CASE-SYNTH-004** (`UNRELATED_NEGATIVE`): Customer `"Zephyr Nightingale"`, DOB `1990-01-01`, planted `None`, expected candidates `set()`, outcome `NO_CANDIDATE_MATCH`. (5 pairs: TN=5).
+* **CASE-SYNTH-005** (`DOB_ONLY_OVERLAP_NEGATIVE`): Customer `"Marcus Thorne"`, DOB `1980-05-15`, planted `None`, expected candidates `set()`, outcome `NO_CANDIDATE_MATCH`. Shares DOB with `SUBJ-SYNTH-001`, verifying DOB attribute never generates candidates when names differ. (5 pairs: TN=5).
+* **CASE-SYNTH-006** (`PLANTED_POSITIVE_ABSTENTION_OUTSIDE_MATCHER_SCOPE`): Customer `None`, DOB `1980-05-15`, planted `SUBJ-SYNTH-001`, expected candidates `set()`, outcome `NOT_PERFORMED` (`CUSTOMER_NAME_MISSING`). Controlled abstention suppresses candidate generation while retaining positive ground truth. (5 pairs: FN=1 on planted `SUBJ-SYNTH-001`, TN=4).
+* **CASE-SYNTH-007** (`ABSTENTION_EMPTY_AFTER_NORMALIZATION_NEGATIVE`): Customer `"\u00a0\u00a0"` (non-breaking spaces), DOB `None`, planted `None`, expected candidates `set()`, outcome `NOT_PERFORMED` (`CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION`). (5 pairs: TN=5).
+* **CASE-SYNTH-008** (`EXCLUDED_TYPO_NEAR_MISS_NEGATIVE`): Customer `"Aurelius Vancx"`, DOB `1980-05-15`, planted `None`, expected candidates `set()`, outcome `NO_CANDIDATE_MATCH`. Typographical variant excluded by exact matching rule. (5 pairs: TN=5).
+
+#### Stratification Breakdown (Recomputed from Frozen Review Table)
+Stratification across all 8 case categories confirms the exact distribution of the 40 review pairs:
+* **In-Scope Primary Positive** (5 pairs): TP=1, FP=0, FN=0, TN=4 (`CASE-SYNTH-001`)
+* **In-Scope Alias Positive** (5 pairs): TP=1, FP=0, FN=0, TN=4 (`CASE-SYNTH-002`)
+* **Homonym Positive & False Positive** (5 pairs): TP=1, FP=1, FN=0, TN=3 (`CASE-SYNTH-003`)
+* **Unrelated Negative Control** (5 pairs): TP=0, FP=0, FN=0, TN=5 (`CASE-SYNTH-004`)
+* **DOB-Only Overlap Negative Control** (5 pairs): TP=0, FP=0, FN=0, TN=5 (`CASE-SYNTH-005`)
+* **Planted Positive Abstention (Missing Name)** (5 pairs): TP=0, FP=0, FN=1, TN=4 (`CASE-SYNTH-006`)
+* **Negative Abstention (Empty Post-Normalization)** (5 pairs): TP=0, FP=0, FN=0, TN=5 (`CASE-SYNTH-007`)
+* **Excluded Typo Near-Miss Negative** (5 pairs): TP=0, FP=0, FN=0, TN=5 (`CASE-SYNTH-008`)
+* **Aggregate Totals** (40 pairs): TP=3, FP=1, FN=1, TN=35
+
+#### Confusion Accounting & Abstentions
+* True Positives (TP = 3):
+  * `(CASE-SYNTH-001, SUBJ-SYNTH-001)`: Exact primary name match ("Aurelius Vance").
+  * `(CASE-SYNTH-002, SUBJ-SYNTH-004)`: Exact alias match ("Kaz Drake").
+  * `(CASE-SYNTH-003, SUBJ-SYNTH-002)`: Primary name match ("Elena Rostova" planted target).
+* False Positives (FP = 1):
+  * `(CASE-SYNTH-003, SUBJ-SYNTH-003)`: Designed homonym sharing listed primary name "Elena Rostova" but with divergent non-matching date of birth (1972-11-10 vs 1985-03-20); correctly generated as a candidate at the name-screening stage.
+* False Negatives (FN = 1):
+  * `(CASE-SYNTH-006, SUBJ-SYNTH-001)`: Missing customer name triggers controlled abstention (`NOT_PERFORMED`, `CUSTOMER_NAME_MISSING`), generating zero candidates while retaining planted positive ground truth.
+* True Negatives (TN = 35): Non-matching names across negative test cases, non-breaking whitespace customer name abstention (`CASE-SYNTH-007`, `CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION`), and typo near-miss (`CASE-SYNTH-008`).
+
+#### In-Scope vs Out-of-Scope Variants
+* In-scope: Exact normalized-name equality under rule `exact_norm_name_v1` and normalizer `v1` (NFKC, casefold, whitespace collapse).
+* Out-of-scope: Typographical variants (`CASE-SYNTH-008` "Aurelius Vancx"), phonetic matches, nicknames, transliterations, and reordered tokens are expected misses under the narrow rule, not defects.
+
+#### Disclaimers & Not Claimable
+* The evaluation measures synthetic candidate generation fidelity only.
+* Candidates are generated exclusively for human review and must never be represented as an identity confirmation or sanctions determination.
+* Exact matching can be trivially evaded by simple typographical or structural variants.
+* NOT CLAIMABLE:
+  * Real-world screening effectiveness
+  * Regulatory screening compliance
+  * Production detection performance
+  * ROC-AUC
+  * Thresholds, calibration, risk levels, or aggregate scores
+
+#### Reproduction Command
+```bash
+PYTHONPATH=src uv run python -m meridian.fixtures.sanctions_baseline
+```
+Output SHA-256: `30ddd37022b7c5990a31e25bea0148d5ea26068d1ca5736d35178052081b537b` (15,730 bytes).
+
+#### Complete Baseline Output (Verbatim)
+```json
+{
+  "baseline_protocol": "synthetic_candidate_generation_fidelity_v1",
+  "expected_candidates": 4,
+  "fidelity_confusion_matrix": {
+    "false_negatives": 1,
+    "false_positives": 1,
+    "true_negatives": 35,
+    "true_positives": 3
+  },
+  "frozen_counts_match": true,
+  "ground_truth_negatives": 36,
+  "ground_truth_positives": 4,
+  "matching_rule_id": "exact_norm_name_v1",
+  "measured_candidates": 4,
+  "mismatches": [],
+  "normalization_version": "v1",
+  "per_case_results": [
+    {
+      "case_id": "CASE-SYNTH-001",
+      "case_matches_expected": true,
+      "case_type": "IN_SCOPE_PRIMARY_POSITIVE",
+      "customer_dob": "1980-05-15",
+      "customer_name": "Aurelius Vance",
+      "expected_candidate_subject_keys": [
+        "SUBJ-SYNTH-001"
+      ],
+      "measured_candidate_subject_keys": [
+        "SUBJ-SYNTH-001"
+      ],
+      "outcome": "CANDIDATE_MATCHES_FOUND",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "EQUAL",
+          "expected_candidate": true,
+          "fidelity_classification": "TRUE_POSITIVE",
+          "ground_truth": "POSITIVE",
+          "measured_candidate": true,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": "SUBJ-SYNTH-001",
+      "reason_code": null
+    },
+    {
+      "case_id": "CASE-SYNTH-002",
+      "case_matches_expected": true,
+      "case_type": "IN_SCOPE_ALIAS_POSITIVE",
+      "customer_dob": "1992-08-04",
+      "customer_name": "  kaz   drake  ",
+      "expected_candidate_subject_keys": [
+        "SUBJ-SYNTH-004"
+      ],
+      "measured_candidate_subject_keys": [
+        "SUBJ-SYNTH-004"
+      ],
+      "outcome": "CANDIDATE_MATCHES_FOUND",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "EQUAL",
+          "expected_candidate": true,
+          "fidelity_classification": "TRUE_POSITIVE",
+          "ground_truth": "POSITIVE",
+          "measured_candidate": true,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": "SUBJ-SYNTH-004",
+      "reason_code": null
+    },
+    {
+      "case_id": "CASE-SYNTH-003",
+      "case_matches_expected": true,
+      "case_type": "HOMONYM_POSITIVE_AND_FALSE_POSITIVE",
+      "customer_dob": "1985-03-20",
+      "customer_name": "Elena Rostova",
+      "expected_candidate_subject_keys": [
+        "SUBJ-SYNTH-002",
+        "SUBJ-SYNTH-003"
+      ],
+      "measured_candidate_subject_keys": [
+        "SUBJ-SYNTH-002",
+        "SUBJ-SYNTH-003"
+      ],
+      "outcome": "CANDIDATE_MATCHES_FOUND",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "EQUAL",
+          "expected_candidate": true,
+          "fidelity_classification": "TRUE_POSITIVE",
+          "ground_truth": "POSITIVE",
+          "measured_candidate": true,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "EQUAL",
+          "expected_candidate": true,
+          "fidelity_classification": "FALSE_POSITIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": true,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": "SUBJ-SYNTH-002",
+      "reason_code": null
+    },
+    {
+      "case_id": "CASE-SYNTH-004",
+      "case_matches_expected": true,
+      "case_type": "UNRELATED_NEGATIVE",
+      "customer_dob": "1990-01-01",
+      "customer_name": "Zephyr Nightingale",
+      "expected_candidate_subject_keys": [],
+      "measured_candidate_subject_keys": [],
+      "outcome": "NO_CANDIDATE_MATCH",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": null,
+      "reason_code": null
+    },
+    {
+      "case_id": "CASE-SYNTH-005",
+      "case_matches_expected": true,
+      "case_type": "DOB_ONLY_OVERLAP_NEGATIVE",
+      "customer_dob": "1980-05-15",
+      "customer_name": "Marcus Thorne",
+      "expected_candidate_subject_keys": [],
+      "measured_candidate_subject_keys": [],
+      "outcome": "NO_CANDIDATE_MATCH",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": null,
+      "reason_code": null
+    },
+    {
+      "case_id": "CASE-SYNTH-006",
+      "case_matches_expected": true,
+      "case_type": "PLANTED_POSITIVE_ABSTENTION_OUTSIDE_MATCHER_SCOPE",
+      "customer_dob": "1980-05-15",
+      "customer_name": null,
+      "expected_candidate_subject_keys": [],
+      "measured_candidate_subject_keys": [],
+      "outcome": "NOT_PERFORMED",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "FALSE_NEGATIVE",
+          "ground_truth": "POSITIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": "SUBJ-SYNTH-001",
+      "reason_code": "CUSTOMER_NAME_MISSING"
+    },
+    {
+      "case_id": "CASE-SYNTH-007",
+      "case_matches_expected": true,
+      "case_type": "ABSTENTION_EMPTY_AFTER_NORMALIZATION_NEGATIVE",
+      "customer_dob": null,
+      "customer_name": "\u00a0\u00a0",
+      "expected_candidate_subject_keys": [],
+      "measured_candidate_subject_keys": [],
+      "outcome": "NOT_PERFORMED",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NO_CANDIDATE_ABSTENTION",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": null,
+      "reason_code": "CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION"
+    },
+    {
+      "case_id": "CASE-SYNTH-008",
+      "case_matches_expected": true,
+      "case_type": "EXCLUDED_TYPO_NEAR_MISS_NEGATIVE",
+      "customer_dob": "1980-05-15",
+      "customer_name": "Aurelius Vancx",
+      "expected_candidate_subject_keys": [],
+      "measured_candidate_subject_keys": [],
+      "outcome": "NO_CANDIDATE_MATCH",
+      "per_subject_pairs": [
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-001"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-002"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-003"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-004"
+        },
+        {
+          "equality_decision": "NOT_EQUAL",
+          "expected_candidate": false,
+          "fidelity_classification": "TRUE_NEGATIVE",
+          "ground_truth": "NEGATIVE",
+          "measured_candidate": false,
+          "subject_key": "SUBJ-SYNTH-005"
+        }
+      ],
+      "planted_subject_key": null,
+      "reason_code": null
+    }
+  ],
+  "total_evaluation_cases": 8,
+  "total_review_pairs": 40,
+  "total_subjects": 5,
+  "watchlist_name": "meridian_synthetic_watchlist",
+  "watchlist_version": "v1"
+}
+```
+
 ---
 
 ## 6. Agent Evaluation

@@ -88,7 +88,7 @@ Scope (Features F11–F14):
 ### Phase 2 status and re-scoping (recorded 2026-10-05)
 
 - **What exists:** deterministic transaction signals (amount deviation, transaction velocity, and beneficiary age wired), graph structure signals (graph cycle length and outbound chain depth wired), ER first slice (ADR-0006 D1, computation-only, unwired, D5 deferred), per-signal baselines, ADR-0005/0006/0007.
-- **Branch status:** Tasks 17–20 sit on `feature/phase2-task18-graph-signal-wiring` (verified tip: `0289b95`); not merged.
+- **Branch status:** Tasks 17–20 merged to `main` (verified tip: `0289b95`).
 - **Maintainer decision (Post-Task 21 order):** F11 sanctions/watchlist design/ADR first, then F11 implementation, then RAG evaluation.
 - **Re-scoped/deferred:**
   - Community detection and centrality DEFERRED (optional; no exit criterion depends on it; would need a new planted-community corpus).
@@ -98,6 +98,14 @@ Scope (Features F11–F14):
   - React workspace DEFERRED: Streamlit remains the UI through Phase 3; React stays a documented option, not a scheduled item.
   - Authentication hardening (F15): pulled forward and implemented at DEMO grade (opaque bearer tokens), not production IAM.
 - **Phase 3 applicability notes:** model monitoring N/A until a calibrated model exists; LLM retry/backoff N/A while no LLM exists; OpenTelemetry optional.
+
+### Phase 2 status update (recorded 2026-10-10)
+
+- **ADR-0008 and Task 23 foundation:** ADR-0008 accepted. The deterministic synthetic-watchlist foundation (Task 23) is implemented: schema migration `4573f3e20e1c` (`watchlist_entries`), atomic privileged loader, read-only version reader, exact normalized-name candidate matcher (`exact_norm_name_v1`), in-memory synthetic corpus, and candidate-generation fidelity baseline (PROTOTYPE).
+- **Status is UNWIRED:** The foundation remains unwired into runtime pipelines. Not done: `screening_results` table, `SanctionsAgent` dispatch, orchestrator wiring, report/authoring, audit-trail extension, and UI integration.
+- **Task sequencing:** ADR-0008 implementation sequencing references Task 24 as a non-binding guide, not an authorization to begin. The post-Task 21 maintainer order is preserved: F11 implementation, then RAG evaluation.
+- **Contract status:** The exception-based reader and matcher API shape is provisionally accepted pending a maintainer decision on the typed-result contract.
+- **Regression evidence:** Full database-enabled test suite verified with zero skips (472 passed, 0 skipped, 0 failed), superseding earlier offline results with missing database environment variables.
 
 ---
 

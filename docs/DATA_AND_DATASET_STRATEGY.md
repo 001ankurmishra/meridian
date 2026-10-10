@@ -64,7 +64,13 @@ A four-document synthetic internal-policy corpus v1 now exists. Documents are lo
 
 ---
 
-## 5. Data Governance
+## 5. Synthetic Watchlist Corpus
+
+A 10-entry synthetic watchlist corpus (`SYNTHETIC_WATCHLIST_CORPUS`) exists under `src/meridian/loader/watchlist_corpus.py`. It uses watchlist name `"meridian_synthetic_watchlist"`, version `"v1"`, and source `"meridian_synthetic_v1"`, spanning 5 synthetic subjects (`SUBJ-SYNTH-001` through `SUBJ-SYNTH-005`) with primary and alias names. The corpus is synthetic-only (`is_synthetic = True`), containing no real persons, entities, or external government/public lists. It is ingested into `watchlist_entries` exclusively by the privileged loader (`meridian.loader.watchlist_ingest.ingest_watchlist_version`) under single-transaction whole-version validation. The watchlist loader is not invoked by `src/meridian/loader/main.py`.
+
+---
+
+## 6. Data Governance
 
 - No real PII is ever ingested into this system, under any circumstance, including "just for testing."
 - Dataset provenance (source, version, license note) is tracked per import (`docs/DATABASE_SCHEMA.md` `source` columns).
@@ -72,7 +78,7 @@ A four-document synthetic internal-policy corpus v1 now exists. Documents are lo
 
 ---
 
-## 6. Development Identities
+## 7. Development Identities
 
 A minimal deterministic seed provides two users for local development and demonstration:
 - `dev.analyst.1@meridian.local` (role: `analyst`, UUID `e26bbc72-e869-50f5-b62b-f1e51703ddc5`)
@@ -84,6 +90,6 @@ When the database is seeded (`meridian.loader.dev_users`), existing user rows wi
 
 ---
 
-## 7. Related Documents
+## 8. Related Documents
 
 `docs/DATABASE_SCHEMA.md` §3 and §4.1 (provenance/synthetic flag), `docs/EVALUATION.md` §8 (fixture set), `docs/TESTING.md` §3 (fixtures reused for tests), `docs/PRODUCT_BRIEF.md` §5 (the canonical worked example this data must support).
