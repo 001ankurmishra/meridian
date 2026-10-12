@@ -7,7 +7,10 @@ or implicit defaults).
 Zero rows return the typed WatchlistVersionNotLoaded variant (it is not
 raised). Loaded rows are validated in memory as defense in depth and returned
 as a LoadedWatchlistVersion; corrupt rows raise WatchlistIntegrityViolation.
-Exception messages raised here never embed row data.
+The reader's own malformed-row and container-construction error messages do not
+embed row data. Validation exceptions propagated from validate_watchlist_entries
+may include row-derived values; callers must not assume all reader exceptions
+are data-free.
 """
 
 import uuid
