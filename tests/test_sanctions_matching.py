@@ -19,11 +19,20 @@ from meridian.agents.sanctions.matching import (
 from meridian.agents.sanctions.types import (
     AbstentionReason,
     DobComparison,
+    LoadedWatchlistVersion,
     NameType,
     ScreeningOutcome,
 )
 from meridian.loader.watchlist_corpus import (
     SYNTHETIC_WATCHLIST_CORPUS,
+    SYNTHETIC_WATCHLIST_NAME,
+    SYNTHETIC_WATCHLIST_VERSION,
+)
+
+_LOADED = LoadedWatchlistVersion(
+    SYNTHETIC_WATCHLIST_NAME,
+    SYNTHETIC_WATCHLIST_VERSION,
+    tuple(SYNTHETIC_WATCHLIST_CORPUS),
 )
 
 
@@ -32,7 +41,7 @@ def test_matching_primary_exact_equality() -> None:
     res = match_customer_against_watchlist(
         customer_name="Aurelius Vance",
         customer_dob=datetime.date(1980, 5, 15),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert res.reason_code is None
@@ -49,7 +58,7 @@ def test_matching_alias_exact_equality() -> None:
     res = match_customer_against_watchlist(
         customer_name="Kaz Drake",
         customer_dob=datetime.date(1992, 8, 4),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert len(res.candidates) == 1
@@ -65,7 +74,7 @@ def test_matching_normalization_equivalence() -> None:
     res = match_customer_against_watchlist(
         customer_name="  Ａｕｒｅｌｉｕｓ    Ｖａｎｃｅ  ",
         customer_dob=datetime.date(1980, 5, 15),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert len(res.candidates) == 1
@@ -77,7 +86,7 @@ def test_matching_unrelated_negative() -> None:
     res = match_customer_against_watchlist(
         customer_name="Zephyr Nightingale",
         customer_dob=datetime.date(1990, 1, 1),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.NO_CANDIDATE_MATCH
     assert res.reason_code is None
@@ -93,7 +102,7 @@ def test_matching_excluded_mechanisms_do_not_match() -> None:
     res_typo = match_customer_against_watchlist(
         customer_name="Aurelius Vancx",
         customer_dob=None,
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_typo.outcome == ScreeningOutcome.NO_CANDIDATE_MATCH
 
@@ -101,7 +110,7 @@ def test_matching_excluded_mechanisms_do_not_match() -> None:
     res_reorder = match_customer_against_watchlist(
         customer_name="Vance Aurelius",
         customer_dob=None,
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_reorder.outcome == ScreeningOutcome.NO_CANDIDATE_MATCH
 
@@ -109,7 +118,7 @@ def test_matching_excluded_mechanisms_do_not_match() -> None:
     res_sub = match_customer_against_watchlist(
         customer_name="Aurelius",
         customer_dob=None,
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_sub.outcome == ScreeningOutcome.NO_CANDIDATE_MATCH
 
@@ -122,7 +131,7 @@ def test_matching_homonym_generates_distinct_candidates() -> None:
     res = match_customer_against_watchlist(
         customer_name="Elena Rostova",
         customer_dob=datetime.date(1985, 3, 20),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert len(res.candidates) == 2
@@ -147,7 +156,7 @@ def test_matching_dob_only_overlap_does_not_generate_candidate() -> None:
     res = match_customer_against_watchlist(
         customer_name="Marcus Thorne",
         customer_dob=datetime.date(1980, 5, 15),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.NO_CANDIDATE_MATCH
     assert len(res.candidates) == 0
@@ -161,7 +170,7 @@ def test_matching_dob_does_not_suppress_candidate() -> None:
     res_diff = match_customer_against_watchlist(
         customer_name="Aurelius Vance",
         customer_dob=datetime.date(1955, 1, 1),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_diff.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert res_diff.candidates[0].dob_comparison == DobComparison.DIFFERENT
@@ -170,7 +179,7 @@ def test_matching_dob_does_not_suppress_candidate() -> None:
     res_null_cust = match_customer_against_watchlist(
         customer_name="Aurelius Vance",
         customer_dob=None,
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_null_cust.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert res_null_cust.candidates[0].dob_comparison == DobComparison.NOT_COMPARABLE
@@ -179,7 +188,7 @@ def test_matching_dob_does_not_suppress_candidate() -> None:
     res_null_subj = match_customer_against_watchlist(
         customer_name="Tariq Mansoor",
         customer_dob=datetime.date(1990, 1, 1),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res_null_subj.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND
     assert res_null_subj.candidates[0].dob_comparison == DobComparison.NOT_COMPARABLE
@@ -190,7 +199,7 @@ def test_matching_controlled_abstention_missing_name() -> None:
     res = match_customer_against_watchlist(
         customer_name=None,
         customer_dob=datetime.date(1980, 5, 15),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.NOT_PERFORMED
     assert res.reason_code == AbstentionReason.CUSTOMER_NAME_MISSING
@@ -205,7 +214,7 @@ def test_matching_controlled_abstention_empty_after_normalization() -> None:
     res = match_customer_against_watchlist(
         customer_name="   \u00a0 \t\n ",
         customer_dob=datetime.date(1980, 5, 15),
-        watchlist_entries=SYNTHETIC_WATCHLIST_CORPUS,
+        watchlist=_LOADED,
     )
     assert res.outcome == ScreeningOutcome.NOT_PERFORMED
     assert (

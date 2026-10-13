@@ -11,7 +11,6 @@ from meridian.agents.sanctions.errors import (
     WatchlistIntegrityViolation,
     WatchlistValidationError,
     WatchlistVersionConflict,
-    WatchlistVersionNotLoaded,
 )
 from meridian.agents.sanctions.matching import (
     compare_dob,
@@ -27,11 +26,14 @@ from meridian.agents.sanctions.types import (
     MATCHING_RULE_ID,
     AbstentionReason,
     DobComparison,
+    LoadedWatchlistVersion,
     NameType,
     SanctionsCandidate,
     SanctionsMatchResult,
     ScreeningOutcome,
     WatchlistEntry,
+    WatchlistReadResult,
+    WatchlistVersionNotLoaded,
 )
 from meridian.agents.sanctions.validation import validate_watchlist_entries
 
@@ -41,6 +43,7 @@ __all__ = [
     "NORMALIZATION_VERSION",
     "AbstentionReason",
     "DobComparison",
+    "LoadedWatchlistVersion",
     "NameType",
     "NormalizationVersionMismatch",
     "SanctionsCandidate",
@@ -49,6 +52,7 @@ __all__ = [
     "ScreeningOutcome",
     "WatchlistEntry",
     "WatchlistIntegrityViolation",
+    "WatchlistReadResult",
     "WatchlistValidationError",
     "WatchlistVersionConflict",
     "WatchlistVersionNotLoaded",

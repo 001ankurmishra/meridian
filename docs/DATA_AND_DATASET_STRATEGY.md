@@ -66,7 +66,7 @@ A four-document synthetic internal-policy corpus v1 now exists. Documents are lo
 
 ## 5. Synthetic Watchlist Corpus
 
-A 10-entry synthetic watchlist corpus (`SYNTHETIC_WATCHLIST_CORPUS`) exists under `src/meridian/loader/watchlist_corpus.py`. It uses watchlist name `"meridian_synthetic_watchlist"`, version `"v1"`, and source `"meridian_synthetic_v1"`, spanning 5 synthetic subjects (`SUBJ-SYNTH-001` through `SUBJ-SYNTH-005`) with primary and alias names. The corpus is synthetic-only (`is_synthetic = True`), containing no real persons, entities, or external government/public lists. It is ingested into `watchlist_entries` exclusively by the privileged loader (`meridian.loader.watchlist_ingest.ingest_watchlist_version`) under single-transaction whole-version validation. The watchlist loader is not invoked by `src/meridian/loader/main.py`.
+A 10-entry synthetic watchlist corpus (`SYNTHETIC_WATCHLIST_CORPUS`) exists under `src/meridian/loader/watchlist_corpus.py`. It uses watchlist name `"meridian_synthetic_watchlist"`, version `"v1"`, and source `"MERIDIAN_SYNTHETIC_WATCHLIST_v1"`, spanning 5 synthetic subjects (`SUBJ-SYNTH-001` through `SUBJ-SYNTH-005`) with primary and alias names. The corpus is synthetic-only (`is_synthetic = True`), containing no real persons, entities, or external government/public lists. It is ingested into `watchlist_entries` exclusively by the privileged loader (`meridian.loader.watchlist_ingest.ingest_watchlist_version`) under single-transaction whole-version validation. The watchlist loader is not invoked by `src/meridian/loader/main.py`.
 
 ---
 

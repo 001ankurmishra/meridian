@@ -19,7 +19,9 @@ from meridian.agents.sanctions.matching import match_customer_against_watchlist
 from meridian.agents.sanctions.reader import read_watchlist_version
 from meridian.agents.sanctions.types import (
     MATCHING_RULE_ID,
+    LoadedWatchlistVersion,
     WatchlistEntry,
+    WatchlistVersionNotLoaded,
 )
 from meridian.fixtures.sanctions_eval_corpus import (
     EVAL_SUBJECT_KEYS,
@@ -83,16 +85,24 @@ def measure_sanctions_baseline(
     w_name = SYNTHETIC_WATCHLIST_NAME
     w_ver = SYNTHETIC_WATCHLIST_VERSION
 
-    # Resolve entries source
+    # Resolve the typed watchlist to screen against
     if watchlist_entries is None:
         if engine is not None:
-            entries_to_screen = read_watchlist_version(
+            read_result = read_watchlist_version(
                 engine, watchlist_name=w_name, watchlist_version=w_ver
             )
+            if isinstance(read_result, WatchlistVersionNotLoaded):
+                raise RuntimeError(
+                    f"Watchlist '{w_name}' version '{w_ver}' is not loaded; "
+                    "the baseline requires it."
+                )
+            watchlist = read_result
         else:
-            entries_to_screen = get_synthetic_watchlist_corpus()
+            watchlist = LoadedWatchlistVersion(
+                w_name, w_ver, tuple(get_synthetic_watchlist_corpus())
+            )
     else:
-        entries_to_screen = tuple(watchlist_entries)
+        watchlist = LoadedWatchlistVersion(w_name, w_ver, tuple(watchlist_entries))
 
     cases = tuple(eval_cases or get_sanctions_eval_cases())
     table = tuple(review_table or get_candidate_review_table())
@@ -116,9 +126,7 @@ def measure_sanctions_baseline(
         match_result = match_customer_against_watchlist(
             customer_name=case.customer_name,
             customer_dob=case.customer_dob,
-            watchlist_entries=entries_to_screen,
-            watchlist_name=w_name,
-            watchlist_version=w_ver,
+            watchlist=watchlist,
         )
 
         measured_candidate_keys = frozenset(

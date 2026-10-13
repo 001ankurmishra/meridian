@@ -4,8 +4,13 @@ Read-only exact-version reader for watchlist entries.
 Requires explicit (watchlist_name, watchlist_version) parameters. Queries only
 that exact identity using bound parameters (no MAX, version ordering,
 or implicit defaults).
-Zero rows raise WatchlistVersionNotLoaded. Loaded rows are validated in memory
-as defense in depth; corrupt rows raise WatchlistIntegrityViolation.
+Zero rows return the typed WatchlistVersionNotLoaded variant (it is not
+raised). Loaded rows are validated in memory as defense in depth and returned
+as a LoadedWatchlistVersion; corrupt rows raise WatchlistIntegrityViolation.
+The reader's own malformed-row and container-construction error messages do not
+embed row data. Validation exceptions propagated from validate_watchlist_entries
+may include row-derived values; callers must not assume all reader exceptions
+are data-free.
 """
 
 import uuid
@@ -15,9 +20,15 @@ from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.sanctions.errors import (
     WatchlistIntegrityViolation,
+    WatchlistValidationError,
+)
+from meridian.agents.sanctions.types import (
+    LoadedWatchlistVersion,
+    NameType,
+    WatchlistEntry,
+    WatchlistReadResult,
     WatchlistVersionNotLoaded,
 )
-from meridian.agents.sanctions.types import NameType, WatchlistEntry
 from meridian.agents.sanctions.validation import validate_watchlist_entries
 
 
@@ -25,7 +36,7 @@ def read_watchlist_version(
     target: Union[Engine, Connection],
     watchlist_name: str,
     watchlist_version: str,
-) -> tuple[WatchlistEntry, ...]:
+) -> WatchlistReadResult:
     """
     Reads all entries for an exact, pinned watchlist version.
 
@@ -35,11 +46,11 @@ def read_watchlist_version(
         watchlist_version: Exact version string of the watchlist (required, no default).
 
     Returns:
-        Immutable tuple of validated WatchlistEntry domain records.
+        LoadedWatchlistVersion holding the validated entries, or a
+        WatchlistVersionNotLoaded result if zero rows exist for the version.
 
     Raises:
         ValueError: If watchlist_name or watchlist_version is missing or empty.
-        WatchlistVersionNotLoaded: If zero rows exist for the specified version.
         WatchlistIntegrityViolation: If loaded data fails whole-version validation.
     """
     if not isinstance(watchlist_name, str) or not watchlist_name.strip():
@@ -69,10 +80,7 @@ def read_watchlist_version(
         ).fetchall()
 
     if not rows:
-        raise WatchlistVersionNotLoaded(
-            f"Watchlist '{watchlist_name}' version '{watchlist_version}' "
-            "is not loaded."
-        )
+        return WatchlistVersionNotLoaded(watchlist_name, watchlist_version)
 
     entries: list[WatchlistEntry] = []
     for r in rows:
@@ -99,10 +107,17 @@ def read_watchlist_version(
             )
         except Exception as e:
             raise WatchlistIntegrityViolation(
-                f"Malformed watchlist entry data: {e}"
+                "Malformed watchlist entry data."
             ) from e
 
     # Whole-version defense-in-depth validation
     validate_watchlist_entries(entries, as_integrity_violation=True)
 
-    return tuple(entries)
+    try:
+        return LoadedWatchlistVersion(
+            watchlist_name, watchlist_version, tuple(entries)
+        )
+    except WatchlistValidationError as e:
+        raise WatchlistIntegrityViolation(
+            "Loaded watchlist rows violate container invariants."
+        ) from e

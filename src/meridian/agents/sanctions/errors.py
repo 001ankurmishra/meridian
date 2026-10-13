@@ -9,10 +9,6 @@ class SanctionsError(Exception):
     """Base exception for all sanctions/watchlist domain/infra errors."""
 
 
-class WatchlistVersionNotLoaded(SanctionsError):
-    """Raised when an explicit watchlist version has zero loaded entries."""
-
-
 class WatchlistIntegrityViolation(SanctionsError):
     """Raised when loaded watchlist data violates domain validation invariants."""
 

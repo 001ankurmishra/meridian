@@ -3,7 +3,7 @@ Tests for read-only exact-version watchlist reader.
 
 Verifies:
 - Exact-version querying with bound parameters
-- Typed WatchlistVersionNotLoaded on zero rows
+- Typed WatchlistVersionNotLoaded result (returned, not raised) on zero rows
 - Defense-in-depth WatchlistIntegrityViolation on corrupted data
 - Architecture guard prohibiting MAX/latest/implicit pins
 """
@@ -13,11 +13,12 @@ from pathlib import Path
 import pytest
 from sqlalchemy import Engine, text
 
-from meridian.agents.sanctions.errors import (
-    WatchlistIntegrityViolation,
+from meridian.agents.sanctions.errors import WatchlistIntegrityViolation
+from meridian.agents.sanctions.reader import read_watchlist_version
+from meridian.agents.sanctions.types import (
+    LoadedWatchlistVersion,
     WatchlistVersionNotLoaded,
 )
-from meridian.agents.sanctions.reader import read_watchlist_version
 from meridian.loader.watchlist_corpus import (
     SYNTHETIC_WATCHLIST_NAME,
     SYNTHETIC_WATCHLIST_VERSION,
@@ -39,25 +40,33 @@ def seed_watchlist(loader_role_engine: Engine, superuser_engine: Engine) -> None
 
 def test_reader_loads_exact_version(app_role_engine: Engine) -> None:
     """Verify reading exact pinned version returns all 10 validated domain records."""
-    entries = read_watchlist_version(
+    result = read_watchlist_version(
         app_role_engine,
         watchlist_name=SYNTHETIC_WATCHLIST_NAME,
         watchlist_version=SYNTHETIC_WATCHLIST_VERSION,
     )
-    assert len(entries) == 10
-    assert isinstance(entries, tuple)
-    assert entries[0].watchlist_name == SYNTHETIC_WATCHLIST_NAME
-    assert entries[0].watchlist_version == SYNTHETIC_WATCHLIST_VERSION
+    assert isinstance(result, LoadedWatchlistVersion)
+    assert result.watchlist_name == SYNTHETIC_WATCHLIST_NAME
+    assert result.watchlist_version == SYNTHETIC_WATCHLIST_VERSION
+    assert isinstance(result.entries, tuple)
+    assert len(result.entries) == 10
+    assert result.entries[0].watchlist_name == SYNTHETIC_WATCHLIST_NAME
+    assert result.entries[0].watchlist_version == SYNTHETIC_WATCHLIST_VERSION
 
 
-def test_reader_unloaded_version_raises(app_role_engine: Engine) -> None:
-    """Verify querying an un-loaded version raises typed WatchlistVersionNotLoaded."""
-    with pytest.raises(WatchlistVersionNotLoaded, match="is not loaded"):
-        read_watchlist_version(
-            app_role_engine,
-            watchlist_name=SYNTHETIC_WATCHLIST_NAME,
-            watchlist_version="9999.unloaded",
-        )
+def test_reader_unloaded_version_returns_typed_variant(
+    app_role_engine: Engine,
+) -> None:
+    """Zero rows return the WatchlistVersionNotLoaded variant; nothing is raised."""
+    result = read_watchlist_version(
+        app_role_engine,
+        watchlist_name=SYNTHETIC_WATCHLIST_NAME,
+        watchlist_version="9999.unloaded",
+    )
+    assert isinstance(result, WatchlistVersionNotLoaded)
+    assert not isinstance(result, Exception)
+    assert result.watchlist_name == SYNTHETIC_WATCHLIST_NAME
+    assert result.watchlist_version == "9999.unloaded"
 
 
 def test_reader_missing_arguments_raises(app_role_engine: Engine) -> None:

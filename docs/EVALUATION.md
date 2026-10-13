@@ -381,7 +381,7 @@ Note: The v0.5 corpus with seed `er_corpus_v0.5_freeze` must already be loaded; 
 * Watchlist name: `meridian_synthetic_watchlist`
 * Watchlist version: `v1`
 * Evaluation corpus: `meridian.fixtures.sanctions_eval_corpus`
-* Frozen protocol: Evaluation cases, review pairs, candidate review table, and expected counts were frozen prior to baseline measurement.
+* Frozen protocol: Evaluation cases, review pairs, candidate review table, and expected counts were frozen prior to baseline measurement (corpus and review table committed in `9fb9c32`; baseline fixture committed in `af74e92`).
 
 #### Pair Semantics & Evaluation Universe
 The evaluation universe comprises the full Cartesian product of the 8 frozen evaluation cases and the 5 synthetic watchlist subjects, yielding exactly 40 review pairs:
@@ -390,7 +390,7 @@ The evaluation universe comprises the full Cartesian product of the 8 frozen eva
 * Expected candidate pairs: 4 pairs
 * Measured candidate pairs: 4 pairs
 
-Each pair is evaluated individually by running the live candidate matching implementation (`match_customer_against_watchlist`) against the synthetic watchlist entries and comparing the resulting candidate set against the hand-declared expected candidate keys and review records.
+The matcher (`match_customer_against_watchlist`) is invoked once per evaluation case (8 invocations) against the synthetic watchlist entries. Each of that case's 5 subject pairs is then classified by comparing whether the subject appears in the returned candidate set against the hand-declared review record.
 
 #### Evaluation Case Inventory & Review Mapping
 * **CASE-SYNTH-001** (`IN_SCOPE_PRIMARY_POSITIVE`): Customer `"Aurelius Vance"`, DOB `1980-05-15`, planted `SUBJ-SYNTH-001`, expected candidates `{"SUBJ-SYNTH-001"}`, outcome `CANDIDATE_MATCHES_FOUND`. (5 pairs: TP=1 on `SUBJ-SYNTH-001`, TN=4).
@@ -445,6 +445,7 @@ Stratification across all 8 case categories confirms the exact distribution of t
 PYTHONPATH=src uv run python -m meridian.fixtures.sanctions_baseline
 ```
 Output SHA-256: `30ddd37022b7c5990a31e25bea0148d5ea26068d1ca5736d35178052081b537b` (15,730 bytes).
+The command screens the in-memory synthetic corpus (`get_synthetic_watchlist_corpus()`). It does not read `watchlist_entries` from a database, so the database reader path is not exercised by this reproduction.
 
 #### Complete Baseline Output (Verbatim)
 ```json

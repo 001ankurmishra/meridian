@@ -104,8 +104,8 @@ Scope (Features F11–F14):
 - **ADR-0008 and Task 23 foundation:** ADR-0008 accepted. The deterministic synthetic-watchlist foundation (Task 23) is implemented: schema migration `4573f3e20e1c` (`watchlist_entries`), atomic privileged loader, read-only version reader, exact normalized-name candidate matcher (`exact_norm_name_v1`), in-memory synthetic corpus, and candidate-generation fidelity baseline (PROTOTYPE).
 - **Status is UNWIRED:** The foundation remains unwired into runtime pipelines. Not done: `screening_results` table, `SanctionsAgent` dispatch, orchestrator wiring, report/authoring, audit-trail extension, and UI integration.
 - **Task sequencing:** ADR-0008 implementation sequencing references Task 24 as a non-binding guide, not an authorization to begin. The post-Task 21 maintainer order is preserved: F11 implementation, then RAG evaluation.
-- **Contract status:** The exception-based reader and matcher API shape is provisionally accepted pending a maintainer decision on the typed-result contract.
-- **Regression evidence:** Full database-enabled test suite verified with zero skips (472 passed, 0 skipped, 0 failed), superseding earlier offline results with missing database environment variables.
+- **Contract status:** The originally approved Task 23 typed-result contract is not recoverable from the repository. On 2026-10-11 the maintainer decided to fix the contract rather than waive it and approved a replacement contract (an approved replacement, not a recovery of the original). It is implemented in Task 23b and recorded in `docs/ARCHITECTURE.md` §4.7: `read_watchlist_version` returns `LoadedWatchlistVersion | WatchlistVersionNotLoaded`, and the matcher owns controlled abstention. F11 remains unwired.
+- **Regression evidence:** No full-suite pass count is recorded in this document. Test results are established by running the CI commands (`ruff`, `mypy src/`, `alembic upgrade head`, `pytest`) in a database-enabled environment at a stated commit; a count quoted here without that command, commit, and date would not be verifiable.
 
 ---
 
