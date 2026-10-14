@@ -315,7 +315,49 @@ Version Immutability:
 Enforced via privileged loader validation and database role permissions, not database triggers or a versions table. The privileged loader validates entire version structures prior to insert. An identical reload is an idempotent no-op returning `already_existed=True`; conflicting data under an existing version raises `WatchlistVersionConflict`.
 
 Integration Note:
-The companion table `screening_results` (ADR-0008 D7) is NOT implemented; its implementation and wiring belong to Task 24.
+The companion table `screening_results` (ADR-0008 D7) is implemented (unwired) in Task 24 Stage 2a (see §4.21); orchestrator wiring belongs to Stage 2b.
+
+### 4.21 `screening_results`
+**Status:** Implemented, unwired (migration `e82f1b4a9c3d`, ADR-0008 D7). Stores authoritative deterministic F11 sanctions and watchlist candidate screening outcomes per investigation run.
+
+| Column | Type | Notes |
+|---|---|---|
+| `screening_result_id` | UUID PK | Result row identifier |
+| `investigation_run_id` | UUID FK → investigation_runs | NOT NULL, UNIQUE (1 result per investigation run) |
+| `agent_run_id` | UUID FK → agent_runs | NOT NULL, UNIQUE (1 result per agent run) |
+| `customer_id` | UUID FK → customers | NOT NULL, screened customer |
+| `outcome` | text | NOT NULL, CHECK in (`CANDIDATE_MATCHES_FOUND`, `NO_CANDIDATE_MATCH`, `NOT_PERFORMED`) |
+| `reason_code` | text, nullable | CHECK: non-NULL iff outcome is `NOT_PERFORMED` |
+| `candidate_count` | integer | NOT NULL, CHECK: >= 0 and (> 0 iff `CANDIDATE_MATCHES_FOUND`) |
+| `watchlist_name` | text | Pinned watchlist identifier (NOT NULL) |
+| `watchlist_version` | text | Pinned watchlist version string (NOT NULL) |
+| `matching_rule_id` | text | Matching rule identifier (NOT NULL) |
+| `normalization_version` | text | Normalization version string (NOT NULL) |
+| `created_at` | timestamptz | NOT NULL DEFAULT `now()` |
+
+Constraints:
+- Primary Key: `screening_results_pkey` on `(screening_result_id)`.
+- Foreign Keys:
+  - `fk_screening_results_investigation_run_id` → `investigation_runs.investigation_run_id`
+  - `fk_screening_results_agent_run_id` → `agent_runs.agent_run_id`
+  - `fk_screening_results_customer_id` → `customers.customer_id`
+- Unique Constraints:
+  - `uq_screening_results_investigation_run_id` on `(investigation_run_id)`
+  - `uq_screening_results_agent_run_id` on `(agent_run_id)`
+- Check Constraints:
+  - `chk_screening_results_outcome`: `outcome IN ('CANDIDATE_MATCHES_FOUND', 'NO_CANDIDATE_MATCH', 'NOT_PERFORMED')`
+  - `chk_screening_results_reason_code`: `reason_code` is NOT NULL if and only if `outcome = 'NOT_PERFORMED'`, and must be in (`CUSTOMER_NAME_MISSING`, `CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION`, `WATCHLIST_VERSION_NOT_LOADED`). If `outcome != 'NOT_PERFORMED'`, `reason_code` must be NULL.
+  - `chk_screening_results_candidate_count`: `candidate_count >= 0`, and `candidate_count > 0` if and only if `outcome = 'CANDIDATE_MATCHES_FOUND'`.
+
+Role Privileges:
+- `meridian_app`: `SELECT` and `INSERT` only (append-only); `UPDATE` and `DELETE` revoked.
+
+Authoritative Outcome & Invariants:
+- The `outcome` value in `screening_results` is the authoritative F11 domain outcome under ADR-0008 D7. F11 screening state must be read from this table when a result exists, not inferred from `agent_runs`, evidence presence/absence, findings text, or report prose.
+- `agent_runs.status` describes agent execution status (`SUCCESS`, `FAILED`, `PARTIAL`). `screening_results.outcome` describes the domain outcome.
+- Technical failures (e.g. database errors, watchlist integrity errors, normalization version mismatches) produce no `screening_results` row; technical failures record `status = 'FAILED'` with an approved reason code in `agent_runs.error`.
+- `candidate_count` cannot yet be verified against candidate findings in Stage 2a because candidate findings are authored downstream in Stage 2b. Full cross-check consistency is deferred to Stage 2b authoring.
+- `get_case_audit_trail()` does not yet include `screening_results`; F11 outcomes are not reconstructable from the audit trail until Stage 2b.
 
 ---
 
