@@ -28,11 +28,18 @@ EVIDENCE_TYPE_BENEFICIARY_AGE_INPUT_BENEFICIARY: Final[str] = (
 EVIDENCE_TYPE_POLICY_CHUNK: Final[str] = "DOCUMENT_REFERENCE"
 EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP: Final[str] = "graph_cycle_relationship"
 EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP: Final[str] = "graph_chain_relationship"
+# Neutral customer-reference pointer to the screened customer record.
+# This reference pointer does not indicate whether screening occurred,
+# does not represent a screening outcome, and is not evidence of clearance.
+EVIDENCE_TYPE_SCREENED_CUSTOMER: Final[str] = "screened_customer"
+EVIDENCE_TYPE_WATCHLIST_ENTRY: Final[str] = "watchlist_entry"
 
 REFERENCE_TABLE_TRANSACTIONS: Final[str] = "transactions"
 REFERENCE_TABLE_DOCUMENT_CHUNKS: Final[str] = "document_chunks"
 REFERENCE_TABLE_BENEFICIARIES: Final[str] = "beneficiaries"
 REFERENCE_TABLE_GRAPH_RELATIONSHIPS: Final[str] = "graph_relationships"
+REFERENCE_TABLE_CUSTOMERS: Final[str] = "customers"
+REFERENCE_TABLE_WATCHLIST_ENTRIES: Final[str] = "watchlist_entries"
 
 
 def record_evidence_with_connection(

@@ -28,6 +28,10 @@ def clean_investigation_run_dependencies(
             text("DELETE FROM risk_signals WHERE investigation_run_id = :rid"), params
         )
         conn.execute(
+            text("DELETE FROM screening_results WHERE investigation_run_id = :rid"),
+            params,
+        )
+        conn.execute(
             text("DELETE FROM agent_runs WHERE investigation_run_id = :rid"), params
         )
         conn.execute(
@@ -39,5 +43,6 @@ def clean_investigation_run_dependencies(
         conn.execute(text("DELETE FROM findings"))
         conn.execute(text("DELETE FROM evidence"))
         conn.execute(text("DELETE FROM risk_signals"))
+        conn.execute(text("DELETE FROM screening_results"))
         conn.execute(text("DELETE FROM agent_runs"))
         conn.execute(text("DELETE FROM investigation_runs"))

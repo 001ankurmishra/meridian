@@ -453,9 +453,14 @@ def test_21_provenance(
             {"inv_run_id": inv_run_id},
         ).fetchall()
 
-    assert len(agent_runs) == 3
+    assert len(agent_runs) == 4
     agents = {r[0] for r in agent_runs}
-    assert agents == {"TransactionAgent", "GraphAgent", "PolicyAgent"}
+    assert agents == {
+        "TransactionAgent",
+        "GraphAgent",
+        "PolicyAgent",
+        "SanctionsAgent",
+    }
 
     # Check that exactly these IDs are what orchestrator sent to the mocked dispatchers...  # noqa: E501
     # Actually since they are mocked, orchestrator generates UUIDs and passes them in.
@@ -834,7 +839,9 @@ def test_27_end_to_end_worked_example(
     non_policy = [e for e in evidence if e[0] != "DOCUMENT_REFERENCE"]
 
     assert len(policy_evidence) == 1
-    assert len(non_policy) == 5  # 1 alerted + 3 historical amount + 1 velocity
+    assert (
+        len(non_policy) == 6
+    )  # 1 alerted + 3 historical amount + 1 velocity + 1 screened_customer
 
     signals = [f[1] for f in findings]
     has_target_signal = any(

@@ -11,6 +11,7 @@ from sqlalchemy import Connection, text
 from meridian.agents.graph.structure_signals import ChainDepthComputed, CycleFound
 from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 from meridian.agents.report.outcome import InvestigationOutcome
+from meridian.agents.sanctions.types import ScreeningOutcome
 from meridian.agents.transaction.amount_deviation import AmountDeviationComputed
 from meridian.agents.transaction.beneficiary_age import BeneficiaryAgeComputed
 from meridian.agents.transaction.transaction_velocity import TransactionVelocityComputed
@@ -21,17 +22,22 @@ from meridian.evidence.evidence import (
     EVIDENCE_TYPE_GRAPH_CHAIN_RELATIONSHIP,
     EVIDENCE_TYPE_GRAPH_CYCLE_RELATIONSHIP,
     EVIDENCE_TYPE_POLICY_CHUNK,
+    EVIDENCE_TYPE_SCREENED_CUSTOMER,
     EVIDENCE_TYPE_VELOCITY_INPUT_TRANSACTION,
+    EVIDENCE_TYPE_WATCHLIST_ENTRY,
     REFERENCE_TABLE_BENEFICIARIES,
+    REFERENCE_TABLE_CUSTOMERS,
     REFERENCE_TABLE_DOCUMENT_CHUNKS,
     REFERENCE_TABLE_GRAPH_RELATIONSHIPS,
     REFERENCE_TABLE_TRANSACTIONS,
+    REFERENCE_TABLE_WATCHLIST_ENTRIES,
     record_evidence_with_connection,
 )
 from meridian.findings.findings import (
     evaluate_evidence_sufficiency,
     record_finding_with_connection,
 )
+from meridian.orchestration.screening_results_persistence import record_screening_result
 from meridian.recommendations.recommendations import (
     record_recommendation_with_connection,
 )
@@ -63,6 +69,12 @@ CYCLE_RECOMMENDATION_TEXT: Final[str] = (
 CHAIN_RECOMMENDATION_TEXT: Final[str] = (
     "A human analyst should review this finding and its cited evidence, "
     "including the chain relationships, "
+    "before any determination is made."
+)
+
+SANCTIONS_RECOMMENDATION_TEXT: Final[str] = (
+    "A human analyst should review this finding and its cited evidence, "
+    "including the matched watchlist entry and customer record, "
     "before any determination is made."
 )
 
@@ -113,6 +125,7 @@ class AuthoringResult:
     evidence_ids: tuple[uuid.UUID, ...]
     finding_ids: tuple[uuid.UUID, ...]
     recommendation_ids: tuple[uuid.UUID, ...]
+    screening_result_id: uuid.UUID | None = None
 
 
 class AuthoringError(Exception):
@@ -502,6 +515,83 @@ def build_authoring_drafts(outcome: InvestigationOutcome) -> AuthoringDrafts:
             )
         )
 
+    # Sanctions screening outcome
+    if outcome.sanctions is not None and outcome.sanctions.result is not None:
+        s_result = outcome.sanctions.result
+        s_agent_run_id = outcome.sanctions.agent_run_id
+        s_customer_id = outcome.sanctions.customer_id
+
+        # Exactly one screened_customer evidence row per persisted
+        # screening result (Decision A)
+        customer_ev_key = f"screened_customer_{s_customer_id}"
+        evidence.append(
+            EvidenceDraft(
+                key=customer_ev_key,
+                evidence_type=EVIDENCE_TYPE_SCREENED_CUSTOMER,
+                reference_table=REFERENCE_TABLE_CUSTOMERS,
+                reference_id=s_customer_id,
+                agent_run_id=s_agent_run_id,
+            )
+        )
+
+        if s_result.outcome == ScreeningOutcome.CANDIDATE_MATCHES_FOUND:
+            # Per candidate subject, one INVESTIGATIVE finding and one
+            # fixed-template recommendation (ADR-0008 D10)
+            seen_entry_keys: set[str] = {customer_ev_key}
+            for candidate in s_result.candidates:
+                candidate_entry_keys: list[str] = []
+                for entry in candidate.matched_entries:
+                    entry_key = f"watchlist_entry_{entry.entry_id}"
+                    if entry_key not in seen_entry_keys:
+                        evidence.append(
+                            EvidenceDraft(
+                                key=entry_key,
+                                evidence_type=EVIDENCE_TYPE_WATCHLIST_ENTRY,
+                                reference_table=REFERENCE_TABLE_WATCHLIST_ENTRIES,
+                                reference_id=entry.entry_id,
+                                agent_run_id=s_agent_run_id,
+                            )
+                        )
+                        seen_entry_keys.add(entry_key)
+                    candidate_entry_keys.append(entry_key)
+
+                observed_fact = (
+                    "The customer's normalized name equals a listed name on "
+                    f"synthetic list {s_result.watchlist_name} "
+                    f"{s_result.watchlist_version} under rule "
+                    f"{s_result.matching_rule_id}, "
+                    f"normalization {s_result.normalization_version}."
+                )
+                derived_signal = (
+                    f"Exact normalized-name equality; "
+                    f"dob_comparison = {candidate.dob_comparison.value}."
+                )
+                interpretation = (
+                    "Candidate watchlist match for human review. "
+                    "Not an identity or sanctions determination. "
+                    "Synthetic list. No validated threshold."
+                )
+                finding_evidence_keys = tuple(
+                    dict.fromkeys([customer_ev_key] + candidate_entry_keys)
+                )
+
+                findings.append(
+                    FindingDraft(
+                        category=FindingCategory.INVESTIGATIVE,
+                        observed_fact=observed_fact,
+                        derived_signal=derived_signal,
+                        interpretation=interpretation,
+                        evidence_keys=finding_evidence_keys,
+                        confidence=PROTOTYPE_CONFIDENCE_FLOOR,
+                    )
+                )
+                recommendations.append(
+                    RecommendationDraft(
+                        finding_index=len(findings) - 1,
+                        text=SANCTIONS_RECOMMENDATION_TEXT,
+                    )
+                )
+
     drafts = AuthoringDrafts(
         evidence=tuple(evidence),
         findings=tuple(findings),
@@ -576,24 +666,57 @@ def author_investigation_records(
         text("SELECT count(*) FROM findings WHERE investigation_run_id = :run_id"),
         {"run_id": run_id},
     ).scalar()
+    screening_count = conn.execute(
+        text(
+            "SELECT count(*) FROM screening_results "
+            "WHERE investigation_run_id = :run_id"
+        ),
+        {"run_id": run_id},
+    ).scalar()
 
     # Need to check properly if count is truthy
     # scalar returns an int in this case
-    if (evidence_count and evidence_count > 0) or (
-        findings_count and findings_count > 0
+    if (
+        (evidence_count and evidence_count > 0)
+        or (findings_count and findings_count > 0)
+        or (screening_count and screening_count > 0)
     ):
         raise AuthoringAlreadyPerformedError(
             "Evidence or findings already exist for this investigation run."
         )
 
-    # 2. Build drafts
+    # 2. Persist screening_results first if sanctions result exists
+    screening_result_id: uuid.UUID | None = None
+    if outcome.sanctions is not None and outcome.sanctions.result is not None:
+        s_res = outcome.sanctions.result
+        candidate_count = len(s_res.candidates)
+        screening_result_id = record_screening_result(
+            conn,
+            investigation_run_id=run_id,
+            agent_run_id=outcome.sanctions.agent_run_id,
+            customer_id=outcome.sanctions.customer_id,
+            outcome=s_res.outcome,
+            reason_code=s_res.reason_code,
+            candidate_count=candidate_count,
+            watchlist_name=s_res.watchlist_name,
+            watchlist_version=s_res.watchlist_version,
+            matching_rule_id=s_res.matching_rule_id,
+            normalization_version=s_res.normalization_version,
+        )
+
+    # 3. Build drafts
     drafts = build_authoring_drafts(outcome)
 
-    # 3. If no drafts
+    # 4. If no drafts
     if not drafts.evidence and not drafts.findings:
-        return AuthoringResult(evidence_ids=(), finding_ids=(), recommendation_ids=())
+        return AuthoringResult(
+            evidence_ids=(),
+            finding_ids=(),
+            recommendation_ids=(),
+            screening_result_id=screening_result_id,
+        )
 
-    # 4. Insert evidence
+    # 5. Insert evidence
     resolved_keys: dict[str, uuid.UUID] = {}
     evidence_ids: list[uuid.UUID] = []
 
@@ -609,7 +732,7 @@ def author_investigation_records(
         resolved_keys[ed.key] = record.evidence_id
         evidence_ids.append(record.evidence_id)
 
-    # 5. For each finding
+    # 6. For each finding
     finding_ids: list[uuid.UUID] = []
     for fd in drafts.findings:
         f_evidence_ids = [resolved_keys[k] for k in fd.evidence_keys]
@@ -630,7 +753,7 @@ def author_investigation_records(
         )
         finding_ids.append(record_f.finding_id)
 
-    # 6. For each recommendation
+    # 7. For each recommendation
     recommendation_ids: list[uuid.UUID] = []
     for rd in drafts.recommendations:
         finding_id = finding_ids[rd.finding_index]
@@ -642,9 +765,10 @@ def author_investigation_records(
         )
         recommendation_ids.append(record_r.recommendation_id)
 
-    # 7. Return
+    # 8. Return
     return AuthoringResult(
         evidence_ids=tuple(evidence_ids),
         finding_ids=tuple(finding_ids),
         recommendation_ids=tuple(recommendation_ids),
+        screening_result_id=screening_result_id,
     )
