@@ -89,9 +89,25 @@ class AuditEventEntry:
 
 
 @dataclass(frozen=True)
+class ScreeningResultEntry:
+    """One row from `screening_results` (F11 sanctions screening)."""
+
+    screening_result_id: uuid.UUID
+    agent_run_id: uuid.UUID
+    outcome: str
+    reason_code: str | None
+    candidate_count: int
+    watchlist_name: str
+    watchlist_version: str
+    matching_rule_id: str
+    normalization_version: str
+    created_at: datetime
+
+
+@dataclass(frozen=True)
 class InvestigationRunEntry:
     """One row from `investigation_runs`, with its nested agent runs,
-    evidence, and findings."""
+    evidence, findings, and optional screening result."""
 
     investigation_run_id: uuid.UUID
     status: str
@@ -100,6 +116,7 @@ class InvestigationRunEntry:
     agent_runs: tuple[AgentRunEntry, ...]
     evidence: tuple[EvidenceEntry, ...]
     findings: tuple[FindingEntry, ...]
+    screening_result: ScreeningResultEntry | None = None
 
 
 @dataclass(frozen=True)
@@ -216,6 +233,32 @@ def get_case_audit_trail(engine: Engine, case_id: uuid.UUID) -> CaseAuditTrail:
                 for r in finding_rows
             )
 
+            screening_row = conn.execute(
+                text(
+                    "SELECT screening_result_id, agent_run_id, outcome, "
+                    "reason_code, candidate_count, watchlist_name, "
+                    "watchlist_version, matching_rule_id, "
+                    "normalization_version, created_at "
+                    "FROM screening_results WHERE investigation_run_id = :inv_id"
+                ),
+                {"inv_id": inv_run_id},
+            ).fetchone()
+
+            screening_result: ScreeningResultEntry | None = None
+            if screening_row is not None:
+                screening_result = ScreeningResultEntry(
+                    screening_result_id=screening_row[0],
+                    agent_run_id=screening_row[1],
+                    outcome=screening_row[2],
+                    reason_code=screening_row[3],
+                    candidate_count=screening_row[4],
+                    watchlist_name=screening_row[5],
+                    watchlist_version=screening_row[6],
+                    matching_rule_id=screening_row[7],
+                    normalization_version=screening_row[8],
+                    created_at=screening_row[9],
+                )
+
             investigation_runs.append(
                 InvestigationRunEntry(
                     investigation_run_id=inv_run_id,
@@ -225,6 +268,7 @@ def get_case_audit_trail(engine: Engine, case_id: uuid.UUID) -> CaseAuditTrail:
                     agent_runs=agent_runs,
                     evidence=evidence,
                     findings=findings,
+                    screening_result=screening_result,
                 )
             )
 

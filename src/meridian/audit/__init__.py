@@ -6,6 +6,7 @@ from meridian.audit.audit_trail import (
     EvidenceEntry,
     FindingEntry,
     InvestigationRunEntry,
+    ScreeningResultEntry,
     get_case_audit_trail,
 )
 from meridian.audit.errors import AuditError, CaseNotFoundError
@@ -15,6 +16,7 @@ __all__ = [
     "get_case_audit_trail",
     "CaseAuditTrail",
     "InvestigationRunEntry",
+    "ScreeningResultEntry",
     "AgentRunEntry",
     "EvidenceEntry",
     "FindingEntry",
