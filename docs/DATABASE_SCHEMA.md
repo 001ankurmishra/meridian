@@ -177,7 +177,7 @@ meridian_app has SELECT, INSERT only on this table; UPDATE/DELETE are not grante
 |---|---|---|
 | `evidence_id` | UUID PK | |
 | `investigation_run_id` | UUID FK → investigation_runs | |
-| `evidence_type` | text | Implemented values (constants in meridian.evidence.evidence): alerted_transaction, amount_deviation_input_transaction, velocity_input_transaction, beneficiary_age_input_beneficiary, DOCUMENT_REFERENCE (policy chunk), graph_cycle_relationship, graph_chain_relationship. |
+| `evidence_type` | text | Implemented values (constants in meridian.evidence.evidence): alerted_transaction, amount_deviation_input_transaction, velocity_input_transaction, beneficiary_age_input_beneficiary, DOCUMENT_REFERENCE (policy chunk), graph_cycle_relationship, graph_chain_relationship, screened_customer (customer-reference pointer), watchlist_entry. |
 | `reference_table` | text | which source table this points to |
 | `reference_id` | UUID | polymorphic reference (application-enforced) |
 | `produced_by_agent_run_id` | UUID FK → agent_runs | |

@@ -16,6 +16,7 @@ from meridian.agents.report.outcome import (
     GraphOutcome,
     InvestigationOutcome,
     PolicyOutcome,
+    SanctionsOutcome,
     TransactionOutcome,
 )
 from meridian.agents.transaction.amount_deviation import (
@@ -28,6 +29,10 @@ from meridian.orchestration.errors import InvestigationError
 from meridian.orchestration.graph_agent_dispatch import run_graph_agent
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.policy_agent_dispatch import run_policy_agent
+from meridian.orchestration.sanctions_agent_dispatch import (
+    SanctionsDispatchError,
+    run_sanctions_agent,
+)
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
 from meridian.risk_engine.risk_signals import (
     compute_beneficiary_age_risk_score,
@@ -144,6 +149,35 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
         if fatal_error is None:
             fatal_error = e
 
+    # 4. SanctionsAgent
+    sanctions_outcome: SanctionsOutcome | None = None
+    if alert_row.customer_id is not None:
+        sanctions_agent_run_id = uuid.uuid4()
+        try:
+            sanctions_dispatch_result = run_sanctions_agent(
+                engine,
+                inv_id,
+                alert_row.customer_id,
+                agent_run_id=sanctions_agent_run_id,
+            )
+            sanctions_outcome = SanctionsOutcome(
+                result=sanctions_dispatch_result.result,
+                agent_run_id=sanctions_agent_run_id,
+                customer_id=alert_row.customer_id,
+            )
+        except SanctionsDispatchError as e:
+            # Ordinary technical screening failure is non-fatal (ADR-0008 D9, AI_SAFETY_AND_GUARDRAILS.md §6.1)
+            sanctions_outcome = SanctionsOutcome(
+                result=None,
+                agent_run_id=sanctions_agent_run_id,
+                customer_id=alert_row.customer_id,
+                error=e.reason_code,
+            )
+        except Exception as e:
+            # Stage 1 agent-run persistence failure or unexpected failure in record_agent_run()
+            if fatal_error is None:
+                fatal_error = e
+
     # Step 4.4 - Orchestrator Status Conclusion
     if fatal_error is not None:
         with engine.begin() as conn:
@@ -167,6 +201,7 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
             transaction=tx_outcome,
             graph=graph_outcome,
             policy=policy_outcome,
+            sanctions=sanctions_outcome,
         )
         try:
             with engine.begin() as conn:

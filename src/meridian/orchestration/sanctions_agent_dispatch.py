@@ -94,6 +94,7 @@ class SanctionsAgentDispatchResult:
 
     investigation_run_id: uuid.UUID
     result: SanctionsMatchResult
+    agent_run_id: uuid.UUID | None = None
 
 
 def _sanitize_and_classify_exception(exc: BaseException) -> SanctionsDispatchError:
@@ -216,4 +217,5 @@ def run_sanctions_agent(
     return SanctionsAgentDispatchResult(
         investigation_run_id=investigation_run_id,
         result=match_result,
+        agent_run_id=agent_run_id,
     )
