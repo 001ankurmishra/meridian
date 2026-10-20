@@ -107,6 +107,11 @@ Scope (Features F11–F14):
 - **Contract status:** The originally approved Task 23 typed-result contract is not recoverable from the repository. On 2026-10-11 the maintainer decided to fix the contract rather than waive it and approved a replacement contract (an approved replacement, not a recovery of the original). It is implemented in Task 23b and recorded in `docs/ARCHITECTURE.md` §4.7: `read_watchlist_version` returns `LoadedWatchlistVersion | WatchlistVersionNotLoaded`, and the matcher owns controlled abstention. F11 remains unwired.
 - **Regression evidence:** No full-suite pass count is recorded in this document. Test results are established by running the CI commands (`ruff`, `mypy src/`, `alembic upgrade head`, `pytest`) in a database-enabled environment at a stated commit; a count quoted here without that command, commit, and date would not be verifiable.
 
+### Phase 2 status update (recorded 2026-10-20)
+
+- **Sanctions/Watchlist Screening (Task 24):** Task 24 is complete. Implemented: `screening_results` schema migration (`e82f1b4a9c3d`), `SanctionsAgent` dispatch with static tool calls, pinned watchlist constants (`meridian_synthetic_watchlist` `v1`), orchestrator integration with two-stage persistence, authoring of evidence and candidate findings, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`).
+- **Next Priority (RAG Evaluation):** The documented next priority is RAG evaluation (evaluating policy retrieval accuracy via a labeled query set against the policy corpus, calibrating `confidence_threshold` per `docs/EVALUATION.md` §4). Implementation of RAG evaluation has not yet begun.
+
 ---
 
 ## Phase 3 — Production Readiness

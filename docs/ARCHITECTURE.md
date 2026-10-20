@@ -67,11 +67,11 @@ All AI/DB/agent activity is written to the append-only audit log (`docs/OBSERVAB
 | Module | Responsibility | Owns Data |
 |---|---|---|
 | `case_management` | Alert intake, case lifecycle, analyst assignment | `cases`, `alerts` |
-| `orchestration` | Investigation workflow control, agent/tool dispatch, evidence-sufficiency gating | `investigation_runs`, `agent_runs` |
+| `orchestration` | Investigation workflow control, agent/tool dispatch, evidence-sufficiency gating | `investigation_runs`, `agent_runs`, `screening_results` |
 | `agents.transaction` | Transaction anomaly/behavioral analysis (read-only SQL) | — (reads `transactions`, `accounts`) |
 | `agents.graph` | Entity/transaction graph construction & analysis (read-only) | — (reads `transactions`, `entities`, `graph_relationships`) |
 | `agents.policy` | Policy/regulatory retrieval via RAG (read-only) | — (reads `documents`, `document_chunks`) |
-| `agents.sanctions` | Deterministic customer/watchlist candidate screening against a pinned synthetic watchlist. Implemented but UNWIRED (Task 23 foundation); ADR-0008. Must not autonomously determine sanctions/AML guilt. | — (reads `watchlist_entries`; customer lookup not implemented) |
+| `agents.sanctions` | Deterministic customer/watchlist candidate screening against a pinned synthetic watchlist (ADR-0008, Tasks 23–24). Wired into orchestrator dispatch, two-stage persistence, audit trail, and report rendering. Must not autonomously determine sanctions/AML guilt. | — (reads `watchlist_entries`, `customers`) |
 | `agents.report` | Evidence-backed report synthesis; enforces no-unsupported-conclusions rule | `findings`, `recommendations` |
 | `risk_engine` | ML-based anomaly/risk scoring (batch and on-demand) | `risk_signals` |
 | `evidence` | Canonical evidence records linking findings to source data | `evidence` |
@@ -135,24 +135,26 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Tools:** Controlled write access to `case_notes` — writes always attributed to and confirmed by the human analyst; the agent never writes autonomously without a human-confirmed action.
 - **Permissions:** Write, but only via a human-confirmed action, never silently.
 
-### 4.7 Sanctions/Watchlist Screening
+### 4.7 SanctionsAgent (F11)
 
-- **Responsibility:** Screen the customer name against a pinned, versioned synthetic watchlist to generate candidates for human review. It must not autonomously determine sanctions/AML guilt.
-- **Inputs:** Customer full name and date of birth (customer lookup by ID is not yet implemented).
-- **Outputs:** Candidates with a DOB comparison attribute (`EQUAL`, `DIFFERENT`, `NOT_COMPARABLE`; not an identity gate), or explicit outcomes (controlled `NOT_PERFORMED` vs technical failure). A match is a candidate for human review, not an identity or sanctions determination.
-- **Tools:** Read-only exact normalized-name candidate matching (`exact_norm_name_v1`), reusing the existing `normalize_full_name()` and normalization version `v1`. No fuzzy, phonetic, transliteration, token-reorder, nickname, typo, embedding, ML, or LLM matching.
-- **Permissions:** Read-only (`app_role` has `SELECT` only on `watchlist_entries`).
-- **Failure behavior:** Differentiates between controlled abstention (the matcher emits `NOT_PERFORMED` with reason codes `WATCHLIST_VERSION_NOT_LOADED`, `CUSTOMER_NAME_MISSING` and `CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION`; an unavailable watchlist version takes precedence over the customer-name abstentions) and technical failure (exceptions such as `WatchlistIntegrityViolation`, `NormalizationVersionMismatch`). When the requested watchlist version has no rows, `read_watchlist_version` returns the typed `WatchlistVersionNotLoaded` variant (it is not raised) and the matcher converts it into `NOT_PERFORMED(WATCHLIST_VERSION_NOT_LOADED)`.
-- **Reader/matcher contract:** This is the maintainer-approved replacement contract (approved 2026-10-11, implemented in Task 23b). It is not a recovery of the original Task 23 contract, whose text is unrecoverable.
-  - `LoadedWatchlistVersion(watchlist_name, watchlist_version, entries)`: frozen dataclass. Name and version are non-blank strings. `entries` must be a non-empty `tuple` of `WatchlistEntry`, each carrying the container's name and version. Only structural checks are made here; whole-version validation stays in `validate_watchlist_entries`, run by the reader. Exception text never contains entry data.
-  - `WatchlistVersionNotLoaded(watchlist_name, watchlist_version)`: a frozen data variant that is returned, not raised.
-  - `read_watchlist_version(...)` returns `LoadedWatchlistVersion | WatchlistVersionNotLoaded`. Zero rows return the variant. Invalid rows raise `WatchlistIntegrityViolation`; blank arguments raise `ValueError`; database errors propagate.
-  - `match_customer_against_watchlist(customer_name, customer_dob, watchlist)` is the single place where controlled abstention is produced. A `WatchlistVersionNotLoaded` input yields only `NOT_PERFORMED(WATCHLIST_VERSION_NOT_LOADED)`, never `NO_CANDIDATE_MATCH`, a candidate, or a failure. Any other input type raises `TypeError`.
-- **Status:** Deterministic watchlist data and computation foundation is implemented (Task 23, typed contract Task 23b), but UNWIRED.
-  - Implemented: `watchlist_entries` schema and migration `4573f3e20e1c`, atomic loader (`ingest_watchlist_version`), read-only version reader (`read_watchlist_version`), pure candidate matcher (`match_customer_against_watchlist`), synthetic corpus (`get_synthetic_watchlist_corpus`), and evaluation baseline fixture (`measure_sanctions_baseline`).
-  - Outstanding limitations / UNWIRED (Task 24 scope): `SanctionsAgent` agent class does not exist; `screening_results` table does not exist; dispatch and orchestrator wiring are absent; report, evidence, findings, and UI integration are absent; `get_case_audit_trail` does not include sanctions records; production watchlist pin constant is absent; alert customer lookup by ID is absent; loader invocation from `loader/main.py` is absent.
-  - Task 24 abstention mapping: the matcher already converts an unavailable watchlist version into controlled abstention, so the Task 24 dispatch passes the reader result to the matcher and needs no exception handling for it. It must be recorded as ADR D8 `NOT_PERFORMED` with reason `WATCHLIST_VERSION_NOT_LOADED` under agent run status `SUCCESS` (not generic `FAILED`), and must never become `NO_CANDIDATE_MATCH` or be represented as clearance.
-  - Task 24 error-text requirement: ADR-0008 D8 permits only reason codes in `agent_runs.error`. Some existing validation error messages (`validation.py`) embed listed names, subject keys, or dates of birth, so the Task 24 dispatch must convert every exception into a reason code before it reaches `agent_runs.error`. Task 23b made the new contract code and the reader's malformed-row message free of such data but did not change `validation.py`.
+- **Responsibility:** Screen the alerted customer's name against a pinned, versioned synthetic watchlist to generate candidate matches for human review. It must not autonomously determine sanctions status, criminality, or AML guilt.
+- **Inputs:** Customer ID (`customer_id` from alert record, resolved to customer `full_name` and `date_of_birth` via parameterized SQL query on `customers`).
+- **Outputs:** `SanctionsMatchResult` returning candidate matches with a DOB comparison attribute (`EQUAL`, `DIFFERENT`, `NOT_COMPARABLE`; not an identity gate), or explicit domain outcomes (`CANDIDATE_MATCHES_FOUND`, `NO_CANDIDATE_MATCH`, controlled `NOT_PERFORMED` with reason code). A candidate is an indicator for human review, not an identity confirmation or sanctions determination.
+- **Tools:** Read-only exact normalized-name candidate matching (`exact_norm_name_v1`), reusing `normalize_full_name()` and normalization version `v1` from `entity_resolution.matching`. Static tool-calls summary (`_SANCTIONS_AGENT_TOOL_CALLS`). No fuzzy, phonetic, transliteration, token-reorder, nickname, typo, embedding, ML, or LLM matching.
+- **Permissions:** Read-only (`app_role` has `SELECT` only on `watchlist_entries` and `customers`).
+- **Failure behavior:** Differentiates between controlled abstention (the matcher emits `NOT_PERFORMED` with reason codes `WATCHLIST_VERSION_NOT_LOADED`, `CUSTOMER_NAME_MISSING`, and `CUSTOMER_NAME_EMPTY_AFTER_NORMALIZATION`; an unavailable watchlist version takes precedence over customer-name abstentions) and technical failure (exceptions classified to approved reason codes: `WATCHLIST_INTEGRITY_VIOLATION`, `NORMALIZATION_VERSION_MISMATCH`, `DATABASE_ERROR`, `UNEXPECTED_ERROR`). Technical failures record `agent_runs.status = 'FAILED'` with sanitized error code in `agent_runs.error` and write no `screening_results` row. Controlled abstentions record `agent_runs.status = 'SUCCESS'` and write `screening_results` with `outcome = 'NOT_PERFORMED'`. Both technical failure and controlled abstention are non-fatal to the overall investigation workflow (ADR-0008 D9, `docs/AI_SAFETY_AND_GUARDRAILS.md` §6.1).
+- **Reader/matcher contract:** Implemented per Task 23b maintainer-approved replacement contract:
+  - `LoadedWatchlistVersion(watchlist_name, watchlist_version, entries)`: frozen dataclass. Name and version are non-blank strings; `entries` is a non-empty `tuple` of `WatchlistEntry`. Whole-version validation is performed by the reader. Exception text never contains entry data.
+  - `WatchlistVersionNotLoaded(watchlist_name, watchlist_version)`: frozen data variant returned (not raised) when the pinned version has zero rows.
+  - `read_watchlist_version(...)` returns `LoadedWatchlistVersion | WatchlistVersionNotLoaded`.
+  - `match_customer_against_watchlist(customer_name, customer_dob, watchlist)` is the single place where controlled abstention is produced. A `WatchlistVersionNotLoaded` input yields `NOT_PERFORMED(WATCHLIST_VERSION_NOT_LOADED)`.
+- **Status (Wired, Tasks 23–24, ADR-0008):**
+  - Data layer: `watchlist_entries` schema and migration `4573f3e20e1c`, atomic loader (`ingest_watchlist_version`), read-only reader (`read_watchlist_version`), pure candidate matcher (`match_customer_against_watchlist`), and synthetic corpus (`get_synthetic_watchlist_corpus`).
+  - Orchestrator wiring: `run_sanctions_agent()` in `src/meridian/orchestration/sanctions_agent_dispatch.py` executes screening wrapped in `record_agent_run()`. Pinned watchlist constants: `PINNED_WATCHLIST_NAME = "meridian_synthetic_watchlist"`, `PINNED_WATCHLIST_VERSION = "v1"`.
+  - Two-stage persistence (ADR-0008 D9): Stage 1 records the agent run independently. Stage 2 in authoring writes `screening_results` via `record_screening_result()` only on successful agent runs, candidate evidence (`screened_customer`, `watchlist_entry`), investigative findings, and fixed-template human-review recommendations.
+  - Audit trail: `get_case_audit_trail()` exposes persisted `screening_results`.
+  - Report rendering: `assemble_report()` renders a mandatory watchlist screening section using pure 7-state deterministic classifier `classify_screening_state()` (`screening_classification.py`).
+  - Scope restriction: Screens only the customer identified by `alerts.customer_id`. Beneficiary names, counterparty names, account names, device names, and entity-resolution clusters are not supported screening inputs.
 
 ### 4.8 Adverse Media
 
@@ -169,12 +171,13 @@ Deferred to Phase 2. Will follow the same documentation pattern above once desig
 2. If alert has a transaction_id → run TransactionAgent. Amount deviation, transaction velocity, and beneficiary age are evaluated and persisted as `risk_signals` using `record_risk_signal_with_connection`.
 3. Run GraphAgent using the transaction's source_account_id via `record_agent_run`. Graph cycle length and outbound chain depth are evaluated and persisted as `risk_signals`.
 4. Always run: PolicyAgent (every investigation needs applicable-policy context).
-5. Evidence and Findings generation: `author_investigation_records` translates the signal outcomes into standard Evidence and Finding records.
-6. Evaluate evidence sufficiency:
+5. Run SanctionsAgent (screen customer full_name and date_of_birth against pinned synthetic watchlist via `run_sanctions_agent`). Persist Stage 1 agent run. Screening failure or abstention is non-fatal to the workflow.
+6. Evidence, Findings, and Screening Results authoring: `author_investigation_records` writes `screening_results` (Stage 2), candidate evidence, findings, and recommendations.
+7. Evaluate evidence sufficiency:
    - If critical evidence missing (e.g. TransactionAgent returned UNKNOWN or was skipped) → status INCOMPLETE_INSUFFICIENT_EVIDENCE
    - Else → status COMPLETE
-7. ReportAgent synthesizes findings; if no findings meet evidence bar → report states "insufficient evidence," not a fabricated conclusion.
-8. Route to human review queue.
+8. ReportAgent synthesizes findings and renders the mandatory watchlist screening section; if no findings meet evidence bar → report states "insufficient evidence," not a fabricated conclusion.
+9. Route to human review queue.
 ```
 
 This is intentionally simple for MVP (rule-based dispatch) rather than a free-form LLM planner, per `CLAUDE.md` §10 ("do not over-engineer the MVP"). LLM-assisted dynamic planning is a Phase 2+ candidate, to be justified via ADR before implementation.

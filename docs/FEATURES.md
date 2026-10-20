@@ -74,9 +74,9 @@ MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals 
 
 **Phase:** Phase 2 · **Module:** `agents.sanctions` (new)
 
-F11 deterministic watchlist data and computation foundation is implemented (Task 23, ADR-0008), but UNWIRED.
+F11 deterministic sanctions and watchlist screening is implemented and wired (Tasks 23–24, ADR-0008).
 
-The data layer (`watchlist_entries` table), atomic version loader, read-only reader, exact normalized-name matcher (`exact_norm_name_v1`), synthetic corpus, and synthetic candidate-generation fidelity baseline are implemented. `SanctionsAgent`, `screening_results`, dispatch, orchestrator wiring, report/authoring, and UI integration are not implemented (Task 24 scope).
+The data layer (`watchlist_entries` and `screening_results` tables), atomic version loader, read-only reader, exact normalized-name matcher (`exact_norm_name_v1`), synthetic corpus, `SanctionsAgent` dispatch, orchestrator two-stage persistence, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`) are implemented. Streamlit/UI visualization remains a prototype component.
 
 Candidate generation uses exact normalized-name matching via the existing normalization behavior and matching rule `exact_norm_name_v1`.
 

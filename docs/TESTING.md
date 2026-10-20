@@ -73,6 +73,12 @@ These fixtures serve triple duty: functional tests (§1), evaluation ground trut
   - `tests/test_sanctions_db_permissions.py`: Database role boundaries and least privilege (`app_role` has `SELECT` only; `loader_role` has `SELECT` and `INSERT` only; rejected `UPDATE`/`DELETE`/`TRUNCATE` operations).
   - `tests/test_sanctions_eval_corpus.py`: Structural completeness of the frozen 40-pair `CANDIDATE_REVIEW_TABLE`, internal consistency between review decisions and `FROZEN_EXPECTED_COUNTS`, valid IDs, and AST independence from matcher/normalization/ER code.
   - `tests/test_sanctions_baseline.py`: Deterministic synthetic candidate generation fidelity measurement against the frozen evaluation corpus, 100% agreement with frozen counts and zero mismatches, DB-backed reader integration, recursive forbidden-key rejection, mismatch detection, and CLI runner behavior.
+- **Sanctions / Watchlist Screening Wiring and Report Rendering (Task 24):**
+  - `tests/test_screening_results_persistence.py`: Two-stage persistence function `record_screening_result`, input validation, check constraints, foreign key / agent run verification, least-privilege role boundaries, and cleanup rollback semantics.
+  - `tests/test_sanctions_agent_dispatch.py`: Isolated SanctionsAgent dispatch execution (`run_sanctions_agent`), static `tool_calls` validation, exception sanitization mapping raw errors to approved reason codes without leaking customer/watchlist data, canary sanitization, and pinned watchlist constants.
+  - `tests/test_sanctions_orchestration_wiring.py`: Orchestrator integration of `run_sanctions_agent`, non-fatal failure handling, non-fatal abstention handling, two-stage persistence rollback guarantees (Stage 2 authoring failure preserves Stage 1 agent run), authoring of `screened_customer` and `watchlist_entry` evidence, investigative findings, human-review recommendations, and forbidden language scans.
+  - `tests/test_watchlist_screening_rendering.py`: Pure deterministic classification of all 7 ADR-0008 D10 states (`WatchlistScreeningState`), consistency overrides on candidate count mismatches or invalid runs, forbidden terminology assertions, and integration with `assemble_report()`.
+  - `tests/test_audit_trail.py`: Audit trail extension for `screening_results`, asserting that `get_case_audit_trail()` exposes persisted screening outcomes.
 
 ---
 
