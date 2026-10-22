@@ -315,10 +315,10 @@ Version Immutability:
 Enforced via privileged loader validation and database role permissions, not database triggers or a versions table. The privileged loader validates entire version structures prior to insert. An identical reload is an idempotent no-op returning `already_existed=True`; conflicting data under an existing version raises `WatchlistVersionConflict`.
 
 Integration Note:
-The companion table `screening_results` (ADR-0008 D7) is implemented (unwired) in Task 24 Stage 2a (see §4.21); orchestrator wiring belongs to Stage 2b.
+The companion table `screening_results` (ADR-0008 D7) is implemented and wired (migration code `e82f1b4a9c3d` committed; Task 24); see §4.21.
 
 ### 4.21 `screening_results`
-**Status:** Implemented, unwired (migration `e82f1b4a9c3d`, ADR-0008 D7). Stores authoritative deterministic F11 sanctions and watchlist candidate screening outcomes per investigation run.
+**Status:** Implemented and wired (migration code `e82f1b4a9c3d` committed; ADR-0008 D7). Stores authoritative deterministic F11 sanctions and watchlist candidate screening outcomes per investigation run.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -356,8 +356,8 @@ Authoritative Outcome & Invariants:
 - The `outcome` value in `screening_results` is the authoritative F11 domain outcome under ADR-0008 D7. F11 screening state must be read from this table when a result exists, not inferred from `agent_runs`, evidence presence/absence, findings text, or report prose.
 - `agent_runs.status` describes agent execution status (`SUCCESS`, `FAILED`, `PARTIAL`). `screening_results.outcome` describes the domain outcome.
 - Technical failures (e.g. database errors, watchlist integrity errors, normalization version mismatches) produce no `screening_results` row; technical failures record `status = 'FAILED'` with an approved reason code in `agent_runs.error`.
-- `candidate_count` cannot yet be verified against candidate findings in Stage 2a because candidate findings are authored downstream in Stage 2b. Full cross-check consistency is deferred to Stage 2b authoring.
-- `get_case_audit_trail()` does not yet include `screening_results`; F11 outcomes are not reconstructable from the audit trail until Stage 2b.
+- Full cross-check consistency is enforced in report classification (Stage 2b, ADR-0008 D10): if `candidate_count` does not equal the count of authored candidate findings, the report overrides to `"Inconsistent screening record. Not determined."`
+- `get_case_audit_trail()` includes `screening_results` (Stage 2b, ADR-0008 D8/D10); F11 outcomes are exposed in the case audit trail.
 
 ---
 

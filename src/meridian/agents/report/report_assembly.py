@@ -6,6 +6,13 @@ from typing import List
 
 from sqlalchemy import Engine, text
 
+from meridian.agents.report.screening_classification import (
+    SanctionsAgentRunInfo,
+    ScreeningResultRow,
+    WatchlistScreeningSection,
+    WatchlistScreeningState,
+    classify_screening_state,
+)
 from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, EvidenceRecord
 from meridian.findings.findings import FindingRecord, evaluate_evidence_sufficiency
 from meridian.recommendations.recommendations import RecommendationRecord
@@ -16,6 +23,15 @@ class InsufficientEvidenceError(Exception):
     """Raised when report generation is gated by insufficient evidence."""
 
     pass
+
+
+__all__ = [
+    "InsufficientEvidenceError",
+    "InvestigationReport",
+    "WatchlistScreeningSection",
+    "WatchlistScreeningState",
+    "assemble_report",
+]
 
 
 @dataclass(frozen=True)
@@ -36,6 +52,7 @@ class InvestigationReport:
     recommendations: List[RecommendationRecord]
     risk_signals: List[RiskSignalRecord]
     confidence_text: str
+    watchlist_screening: WatchlistScreeningSection
     human_review_required: bool = True
 
 
@@ -238,6 +255,101 @@ def assemble_report(
             else:
                 confidence_text = "Overall confidence is HIGH."
 
+        # 7. Fetch Watchlist Screening Data and Classify (ADR-0008 D10)
+        screening_res_row = conn.execute(
+            text(
+                """
+                SELECT screening_result_id, investigation_run_id, agent_run_id,
+                       outcome, reason_code, candidate_count, watchlist_name,
+                       watchlist_version, matching_rule_id, normalization_version
+                FROM screening_results
+                WHERE investigation_run_id = :run_id
+                """
+            ),
+            {"run_id": investigation_run_id},
+        ).first()
+
+        screening_result: ScreeningResultRow | None = None
+        referenced_agent_run: SanctionsAgentRunInfo | None = None
+
+        if screening_res_row is not None:
+            screening_result = ScreeningResultRow(
+                screening_result_id=screening_res_row.screening_result_id,
+                investigation_run_id=screening_res_row.investigation_run_id,
+                agent_run_id=screening_res_row.agent_run_id,
+                outcome=screening_res_row.outcome,
+                reason_code=screening_res_row.reason_code,
+                candidate_count=screening_res_row.candidate_count,
+                watchlist_name=screening_res_row.watchlist_name,
+                watchlist_version=screening_res_row.watchlist_version,
+                matching_rule_id=screening_res_row.matching_rule_id,
+                normalization_version=screening_res_row.normalization_version,
+            )
+
+            ref_ar_row = conn.execute(
+                text(
+                    """
+                    SELECT agent_run_id, agent_name, status,
+                           investigation_run_id
+                    FROM agent_runs
+                    WHERE agent_run_id = :ar_id
+                    """
+                ),
+                {"ar_id": screening_res_row.agent_run_id},
+            ).first()
+
+            if ref_ar_row is not None:
+                referenced_agent_run = SanctionsAgentRunInfo(
+                    agent_run_id=ref_ar_row.agent_run_id,
+                    agent_name=ref_ar_row.agent_name,
+                    status=ref_ar_row.status,
+                    investigation_run_id=ref_ar_row.investigation_run_id,
+                )
+
+        all_sanctions_ar_rows = conn.execute(
+            text(
+                """
+                SELECT agent_run_id, agent_name, status,
+                       investigation_run_id
+                FROM agent_runs
+                WHERE investigation_run_id = :run_id
+                  AND agent_name = 'SanctionsAgent'
+                ORDER BY started_at ASC
+                """
+            ),
+            {"run_id": investigation_run_id},
+        ).fetchall()
+
+        all_sanctions_agent_runs = tuple(
+            SanctionsAgentRunInfo(
+                agent_run_id=r.agent_run_id,
+                agent_name=r.agent_name,
+                status=r.status,
+                investigation_run_id=r.investigation_run_id,
+            )
+            for r in all_sanctions_ar_rows
+        )
+
+        candidate_finding_count = conn.execute(
+            text(
+                """
+                SELECT count(DISTINCT f.finding_id)
+                FROM findings f
+                JOIN evidence e ON e.evidence_id = ANY(f.evidence_ids)
+                WHERE f.investigation_run_id = :run_id
+                  AND e.evidence_type = 'watchlist_entry'
+                """
+            ),
+            {"run_id": investigation_run_id},
+        ).scalar_one()
+
+        watchlist_screening = classify_screening_state(
+            screening_result=screening_result,
+            referenced_agent_run=referenced_agent_run,
+            all_sanctions_agent_runs=all_sanctions_agent_runs,
+            candidate_finding_count=int(candidate_finding_count or 0),
+        )
+
         return InvestigationReport(
             investigation_run_id=investigation_run_id,
             case_id=case_id,
@@ -252,5 +364,6 @@ def assemble_report(
             recommendations=recommendations,
             risk_signals=risk_signals,
             confidence_text=confidence_text,
+            watchlist_screening=watchlist_screening,
             human_review_required=True,
         )

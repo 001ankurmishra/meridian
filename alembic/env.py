@@ -17,7 +17,37 @@ from meridian.config import settings
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+ALEMBIC_PLACEHOLDER_URL = "driver://user:pass@localhost/dbname"
+ALEMBIC_GUARD_ATTRIBUTE = "meridian_guard_validated_url"
+
+validated_url = config.attributes.get(ALEMBIC_GUARD_ATTRIBUTE)
+current_ini_url = config.get_main_option("sqlalchemy.url")
+
+if validated_url:
+    # State A: Explicitly validated caller URL from test guard
+    if current_ini_url != validated_url:
+        raise RuntimeError(
+            "Alembic safety violation: config sqlalchemy.url does not match "
+            "the guard-validated URL signal."
+        )
+elif current_ini_url in (ALEMBIC_PLACEHOLDER_URL, settings.database_url):
+    # State B: Standalone Alembic CLI execution with exact repository placeholder
+    # or already-resolved settings database URL
+    if not settings.database_url:
+        raise RuntimeError(
+            "Alembic configuration error: settings.database_url is empty."
+        )
+    if current_ini_url == ALEMBIC_PLACEHOLDER_URL:
+        config.set_main_option(
+            "sqlalchemy.url", settings.database_url.replace("%", "%%")
+        )
+else:
+    # State C: Unexpected, unvalidated, or untrusted configuration
+    raise RuntimeError(
+        "Alembic safety violation: Untrusted or unexpected database URL in "
+        "configuration. Direct non-placeholder URLs require explicit test guard "
+        "validation."
+    )
 
 # Interpret the config file for Python logging.
 if config.config_file_name is not None:

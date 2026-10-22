@@ -8,12 +8,18 @@ import pytest
 from sqlalchemy import Engine, text
 
 from meridian.audit.audit_events import record_audit_event
-from meridian.audit.audit_trail import get_case_audit_trail
+from meridian.audit.audit_trail import (
+    ScreeningResultEntry,
+    get_case_audit_trail,
+)
 from meridian.audit.errors import CaseNotFoundError
 from meridian.evidence.evidence import record_evidence
 from meridian.findings.findings import record_finding
 from meridian.orchestration.agent_run_tracking import record_agent_run
 from meridian.orchestration.investigation_run import create_investigation_run
+from meridian.orchestration.screening_results_persistence import (
+    record_screening_result,
+)
 from meridian.orchestration.transaction_agent_dispatch import run_transaction_agent
 from tests.db_cleanup import clean_investigation_run_dependencies
 
@@ -442,6 +448,78 @@ def test_integration_transaction_agent_dispatch_tool_calls(
         assert agent_runs[0].agent_name == "TransactionAgent"
         assert agent_runs[0].tool_calls["tool"] == "sql_query"
         assert any("transactions" in q for q in agent_runs[0].tool_calls["queries"])
+
+    finally:
+        _cleanup(superuser_engine, cid)
+
+
+# --- 8. F11 Screening Results Reconstruction --------------------------------
+
+
+def test_audit_trail_includes_screening_result(
+    app_role_engine: Engine, superuser_engine: Engine
+) -> None:
+    """Audit trail exposes persisted F11 screening_results for investigation runs."""
+    cid = _seed_customer(superuser_engine)
+    try:
+        aid = _seed_account(superuser_engine, cid)
+        tid = _seed_transaction(superuser_engine, aid, Decimal("100.0"), 0)
+        case_id = _seed_alert_case(superuser_engine, cid, tid)
+        inv_run = create_investigation_run(app_role_engine, case_id)
+
+        now = datetime.now(timezone.utc)
+        sanctions_ar_id = uuid.uuid4()
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO agent_runs ("
+                    "agent_run_id, investigation_run_id, agent_name, "
+                    "status, started_at, tool_calls) "
+                    "VALUES (:ar_id, :inv_id, 'SanctionsAgent', "
+                    "'SUCCESS', :now, '{}')"
+                ),
+                {
+                    "ar_id": sanctions_ar_id,
+                    "inv_id": inv_run.investigation_run_id,
+                    "now": now,
+                },
+            )
+            s_res_id = record_screening_result(
+                conn,
+                investigation_run_id=inv_run.investigation_run_id,
+                agent_run_id=sanctions_ar_id,
+                customer_id=cid,
+                outcome="NO_CANDIDATE_MATCH",
+                reason_code=None,
+                candidate_count=0,
+                watchlist_name="test_sdn_synthetic",
+                watchlist_version="2026-10-08",
+                matching_rule_id="exact_norm_name_v1",
+                normalization_version="v1",
+            )
+
+        trail = get_case_audit_trail(app_role_engine, case_id)
+        assert len(trail.investigation_runs) == 1
+        run_entry = trail.investigation_runs[0]
+
+        assert run_entry.screening_result is not None
+        sr = run_entry.screening_result
+        assert isinstance(sr, ScreeningResultEntry)
+        assert sr.screening_result_id == s_res_id
+        assert sr.agent_run_id == sanctions_ar_id
+        assert sr.outcome == "NO_CANDIDATE_MATCH"
+        assert sr.reason_code is None
+        assert sr.candidate_count == 0
+        assert sr.watchlist_name == "test_sdn_synthetic"
+        assert sr.watchlist_version == "2026-10-08"
+        assert sr.matching_rule_id == "exact_norm_name_v1"
+        assert sr.normalization_version == "v1"
+        assert isinstance(sr.created_at, datetime)
+
+        # Confirm customer_id / sensitive customer PII is NOT in ScreeningResultEntry
+        assert not hasattr(sr, "customer_id")
+        assert not hasattr(sr, "customer_name")
+        assert not hasattr(sr, "date_of_birth")
 
     finally:
         _cleanup(superuser_engine, cid)

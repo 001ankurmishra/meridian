@@ -38,10 +38,7 @@ from meridian.agents.transaction.errors import (
 @pytest.fixture
 def superuser_engine() -> Generator[Engine, None, None]:
     """Engine using the migrator/superuser role (DATABASE_URL)."""
-    db_url = os.environ.get(
-        "DATABASE_URL",
-        "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-    )
+    db_url = os.environ["DATABASE_URL"]
     engine = create_engine(db_url)
     yield engine
     engine.dispose()
@@ -50,10 +47,7 @@ def superuser_engine() -> Generator[Engine, None, None]:
 @pytest.fixture
 def app_engine() -> Generator[Engine, None, None]:
     """Engine using the least-privilege application role (APP_DATABASE_URL)."""
-    db_url = os.environ.get(
-        "APP_DATABASE_URL",
-        "postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db",
-    )
+    db_url = os.environ["APP_DATABASE_URL"]
     engine = create_engine(db_url)
     yield engine
     engine.dispose()

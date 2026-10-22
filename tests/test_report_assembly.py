@@ -44,6 +44,9 @@ def assert_no_forbidden_language(report: InvestigationReport) -> None:
     for rec in report.recommendations:
         text_blocks.append(rec.text)
 
+    if hasattr(report, "watchlist_screening") and report.watchlist_screening:
+        text_blocks.append(report.watchlist_screening.rendered_text)
+
     for block in text_blocks:
         if not block:
             continue
@@ -241,6 +244,12 @@ def test_assemble_report_success(
 
         assert report.human_review_required is True
         assert "Overall confidence is HIGH" in report.confidence_text
+
+        assert report.watchlist_screening.state == "SCREENING_NOT_RECORDED"
+        assert (
+            report.watchlist_screening.rendered_text
+            == "Screening not recorded. Not determined."
+        )
 
         # Validate against forbidden language
         assert_no_forbidden_language(report)

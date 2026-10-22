@@ -23,21 +23,13 @@ def get_free_port() -> int:
 
 
 @pytest.fixture(scope="session")
-def live_server_url() -> Generator[str, None, None]:
+def live_server_url(run_migrations: None) -> Generator[str, None, None]:
     port = get_free_port()
 
-    import unittest.mock
-
     from meridian.loader.main import main as loader_main
-    env_vars = {
-        "DATABASE_URL": "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-        "LOADER_DATABASE_URL": "postgresql+psycopg://meridian_loader:meridian_loader_pass@localhost:5432/meridian_db",
-    }
-    with unittest.mock.patch.dict(os.environ, env_vars):
-        loader_main()
+    loader_main()
 
     env = os.environ.copy()
-    env.update(env_vars)
     env["PYTHONPATH"] = os.path.join(os.getcwd(), "src")
 
     proc = subprocess.Popen(
@@ -85,10 +77,8 @@ def live_server_url() -> Generator[str, None, None]:
 
 
 @pytest.fixture(scope="session")
-def ui_smoke_engine() -> Generator[Engine, None, None]:
-    import unittest.mock
-    with unittest.mock.patch.dict(os.environ, {"DATABASE_URL": "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db"}):
-        eng = get_migrator_engine()
+def ui_smoke_engine(run_migrations: None) -> Generator[Engine, None, None]:
+    eng = get_migrator_engine()
     yield eng
     eng.dispose()
 

@@ -73,6 +73,12 @@ These fixtures serve triple duty: functional tests (§1), evaluation ground trut
   - `tests/test_sanctions_db_permissions.py`: Database role boundaries and least privilege (`app_role` has `SELECT` only; `loader_role` has `SELECT` and `INSERT` only; rejected `UPDATE`/`DELETE`/`TRUNCATE` operations).
   - `tests/test_sanctions_eval_corpus.py`: Structural completeness of the frozen 40-pair `CANDIDATE_REVIEW_TABLE`, internal consistency between review decisions and `FROZEN_EXPECTED_COUNTS`, valid IDs, and AST independence from matcher/normalization/ER code.
   - `tests/test_sanctions_baseline.py`: Deterministic synthetic candidate generation fidelity measurement against the frozen evaluation corpus, 100% agreement with frozen counts and zero mismatches, DB-backed reader integration, recursive forbidden-key rejection, mismatch detection, and CLI runner behavior.
+- **Sanctions / Watchlist Screening Wiring and Report Rendering (Task 24):**
+  - `tests/test_screening_results_persistence.py`: Two-stage persistence function `record_screening_result`, input validation, check constraints, foreign key / agent run verification, least-privilege role boundaries, and cleanup rollback semantics.
+  - `tests/test_sanctions_agent_dispatch.py`: Isolated SanctionsAgent dispatch execution (`run_sanctions_agent`), static `tool_calls` validation, exception sanitization mapping raw errors to approved reason codes without leaking customer/watchlist data, canary sanitization, and pinned watchlist constants.
+  - `tests/test_sanctions_orchestration_wiring.py`: Orchestrator integration of `run_sanctions_agent`, non-fatal failure handling, non-fatal abstention handling, two-stage persistence rollback guarantees (Stage 2 authoring failure preserves Stage 1 agent run), authoring of `screened_customer` and `watchlist_entry` evidence, investigative findings, human-review recommendations, and forbidden language scans.
+  - `tests/test_watchlist_screening_rendering.py`: Pure deterministic classification of all 7 ADR-0008 D10 states (`WatchlistScreeningState`), consistency overrides on candidate count mismatches or invalid runs, forbidden terminology assertions, and integration with `assemble_report()`.
+  - `tests/test_audit_trail.py`: Audit trail extension for `screening_results`, asserting that `get_case_audit_trail()` exposes persisted screening outcomes.
 
 ---
 
@@ -80,6 +86,82 @@ These fixtures serve triple duty: functional tests (§1), evaluation ground trut
 
 - Database-touching tests run against a real (ephemeral/test) PostgreSQL instance with pgvector, not mocks — mocking the DB layer would hide the exact integrity issues this project cares most about.
 - LLM-dependent tests: **REQUIRES VERIFICATION/decision at implementation time** whether to use a real (rate-limited, cost-bounded) LLM call in CI, a recorded/replayed response fixture, or a combination (e.g., schema-shape tests use recorded fixtures; a small nightly job uses real calls). Document the chosen approach here once decided — do not leave this undocumented.
+
+### 4.1 Disposable Test Database Safety Boundary (Task T0)
+
+To protect the development database (`meridian_db:5432`) and unapproved databases from accidental schema modification, data corruption, or destructive migration teardown, Project Meridian enforces a fail-closed safety boundary.
+
+#### Architecture and Invariants
+- **Dedicated Compose Service (`docker-compose.test.yml`):** Runs an isolated PostgreSQL/pgvector container (`meridian-test-db`) bound exclusively to loopback `127.0.0.1:55432`.
+- **Dedicated Test Database:** The test database is named `meridian_test`. Connecting to `meridian_db` or port `5432` during tests is rejected fail-closed.
+- **Disposable In-Memory Storage (tmpfs):** The PostgreSQL data directory `/var/lib/postgresql/data` is mounted as tmpfs. All state is held in memory and discarded when the container stops or is removed.
+- **Canonical Database Marker:** Initialized via `docker/postgres-init/03-set-disposable-marker.sh`, setting `meridian.disposable_test_db = 'on'` via `ALTER DATABASE meridian_test SET ...`.
+- **Least-Privilege Role Separation:** Reuses the project's role initialization scripts (`01-init-roles.sh`, `02-init-extensions.sh`):
+  - Migrator / superuser role: `meridian_user` (`DATABASE_URL`)
+  - Application runtime role: `meridian_app` (`APP_DATABASE_URL`)
+  - Data loader role: `meridian_loader` (`LOADER_DATABASE_URL`)
+
+#### Fail-Closed Central Safety Guard (`src/meridian/testing/guard.py`)
+Before Alembic runs any migration (`upgrade head`) or destructive teardown (`downgrade base`), the central safety guard verifies:
+1. All three connection URLs (`DATABASE_URL`, `APP_DATABASE_URL`, `LOADER_DATABASE_URL`) are explicitly exported in the environment.
+2. Dialects/drivers are PostgreSQL (`postgresql+psycopg`).
+3. Host is loopback (`127.0.0.1` or `localhost`), port is `55432`, and database is `meridian_test`.
+4. Required roles match expected configuration (`meridian_user`, `meridian_app`, `meridian_loader`).
+5. Process environment URLs and application settings (`meridian.config.settings`) do not silently disagree (the guard refuses to mutate `settings` to mask mismatches).
+6. Live connected database is `meridian_test`.
+7. Canonical GUC marker `meridian.disposable_test_db` equals `'on'`.
+8. Target runtime identity is captured (`TargetIdentity`: host, port, db, user, db OID, postmaster start timestamp, marker).
+9. Passwords and credentials are never leaked in error messages or logs (passwords are redacted with `***`).
+
+#### Alembic Three-State URL Trust Contract (`alembic/env.py`)
+Alembic enforces a three-state contract to guarantee that migrations only execute against explicitly validated targets:
+- **State A (Validated Test Runner):** When invoked through the test runner fixture, the guard stores the validated target in `config.attributes["meridian_guard_validated_url"]`. `env.py` asserts that `config.get_main_option("sqlalchemy.url")` exactly matches this attribute. Any mismatch fails closed.
+- **State B (Standalone Alembic CLI):** Standalone CLI invocations without the guard attribute resolve the repository's exact placeholder (`driver://user:pass@localhost/dbname`) to `settings.database_url`.
+- **State C (Untrusted / Unexpected URL):** Any non-placeholder URL without the guard validation attribute fails closed immediately.
+- **ConfigParser Percent Escaping:** To prevent `configparser` interpolation syntax errors from corrupting percent-encoded credentials (`%40` for `@`, `%25` for `%`), URLs set via `config.set_main_option` escape percent signs as `%%`. When read back via `config.get_main_option`, `%%` is interpolated back to `%`.
+
+#### Teardown Revalidation
+The session-scoped `run_migrations` fixture re-verifies the live database state against the immutable `TargetIdentity` captured at setup before running `command.downgrade(alembic_cfg, "base")`. If the database OID, postmaster start timestamp, disposable marker, or connection URL changed during the test session, teardown aborts fail-closed to prevent destructive operations against a substituted cluster or database.
+
+#### Offline Unit-Test Mode (`--offline-unit-tests`)
+To run unit tests without requiring Docker or database configuration:
+- Tests must be explicitly registered with the marker `@pytest.mark.offline_guard_unit`.
+- When invoked with `--offline-unit-tests`, collection fails closed with exit code 4 (`pytest.UsageError`) if any test lacks the marker, carries the `integration` marker, or requests a database engine fixture (`superuser_engine`, `app_engine`, `loader_role_engine`, etc.).
+- The enforcement hook executes during collection before any test body runs.
+
+#### Test Execution Commands
+
+1. **Start the Disposable Test Database:**
+   ```bash
+   docker compose -f docker-compose.test.yml up -d
+   ```
+
+2. **Export Required Test Environment Variables:**
+   ```bash
+   export DATABASE_URL="postgresql+psycopg://meridian_user:meridian_pass@127.0.0.1:55432/meridian_test"
+   export APP_DATABASE_URL="postgresql+psycopg://meridian_app:meridian_app_pass@127.0.0.1:55432/meridian_test"
+   export LOADER_DATABASE_URL="postgresql+psycopg://meridian_loader:meridian_loader_pass@127.0.0.1:55432/meridian_test"
+   ```
+
+3. **Run the Full Test Suite (Database Integration + Unit Tests):**
+   ```bash
+   uv run pytest
+   ```
+
+4. **Run Pure Offline Guard Unit Tests (No Database Required):**
+   ```bash
+   uv run pytest --offline-unit-tests tests/test_test_guard.py
+   ```
+
+5. **Stop and Clean Up the Disposable Test Database:**
+   ```bash
+   docker compose -f docker-compose.test.yml down -v
+   ```
+
+#### Guarantees and Residual Limitations
+- **tmpfs In-Memory Guarantee:** The tmpfs mount ensures that all test data resides in volatile container memory. Stopping the container completely purges all data.
+- **Platform Limitation (macOS / Docker Desktop):** On macOS, Docker runs inside a lightweight Linux hypervisor VM. The tmpfs mount resides in VM RAM, which is completely reclaimed when the container is terminated, but Docker VM host swap behavior is controlled by the hypervisor.
+- **Database Identity Limitation:** Revalidating database OID, postmaster start timestamp (`pg_postmaster_start_time()`), marker, and host/port protects against server restarts, container replacement, and local database drops within the session. However, it is not a mathematically unique global cluster identity; a database dropped and recreated with an identical OID in a freshly initialized cluster cannot be detected purely via OID. This residual risk is acceptable given PostgreSQL's non-privileged permission model (avoiding superuser-only `pg_control_system()`).
 
 ---
 
