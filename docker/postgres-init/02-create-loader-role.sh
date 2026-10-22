@@ -13,7 +13,7 @@ fi
 
 echo "Creating loader role: $LOADER_DB_USER"
 
-psql -v ON_ERROR_STOP=1 ${POSTGRES_HOST:+--host="$POSTGRES_HOST"} --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+psql -v ON_ERROR_STOP=1 ${POSTGRES_HOST:+--host="$POSTGRES_HOST"} ${POSTGRES_PORT:+--port="$POSTGRES_PORT"} --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
     DO \$\$
     BEGIN
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$LOADER_DB_USER') THEN

@@ -16,9 +16,9 @@ jobs:
         env:
           POSTGRES_USER: meridian_user
           POSTGRES_PASSWORD: meridian_pass
-          POSTGRES_DB: meridian_db
+          POSTGRES_DB: meridian_test
         ports:
-          - 5432:5432
+          - 55432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -26,13 +26,15 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db
+      PGPORT: 55432
+      POSTGRES_PORT: 55432
+      DATABASE_URL: postgresql+psycopg://meridian_user:meridian_pass@localhost:55432/meridian_test
       APP_DB_USER: meridian_app
       APP_DB_PASSWORD: meridian_app_pass
-      APP_DATABASE_URL: postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db
+      APP_DATABASE_URL: postgresql+psycopg://meridian_app:meridian_app_pass@localhost:55432/meridian_test
       LOADER_DB_USER: meridian_loader
       LOADER_DB_PASSWORD: meridian_loader_pass
-      LOADER_DATABASE_URL: postgresql+psycopg://meridian_loader:meridian_loader_pass@localhost:5432/meridian_db
+      LOADER_DATABASE_URL: postgresql+psycopg://meridian_loader:meridian_loader_pass@localhost:55432/meridian_test
 
     steps:
       - name: Checkout repository
@@ -42,8 +44,9 @@ jobs:
         env:
           PGPASSWORD: meridian_pass
           POSTGRES_HOST: localhost
+          POSTGRES_PORT: 55432
           POSTGRES_USER: meridian_user
-          POSTGRES_DB: meridian_db
+          POSTGRES_DB: meridian_test
         run: |
           ./docker/postgres-init/01-create-app-role.sh
           echo "Running a second time to verify idempotency:"
@@ -53,12 +56,24 @@ jobs:
         env:
           PGPASSWORD: meridian_pass
           POSTGRES_HOST: localhost
+          POSTGRES_PORT: 55432
           POSTGRES_USER: meridian_user
-          POSTGRES_DB: meridian_db
+          POSTGRES_DB: meridian_test
         run: |
           ./docker/postgres-init/02-create-loader-role.sh
           echo "Running a second time to verify idempotency:"
           ./docker/postgres-init/02-create-loader-role.sh
+
+      - name: Set Disposable DB Marker
+        env:
+          PGPASSWORD: meridian_pass
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 55432
+          POSTGRES_USER: meridian_user
+          POSTGRES_DB: meridian_test
+          DISPOSABLE_TEST_DB: "true"
+        run: |
+          ./docker/postgres-init/03-set-disposable-marker.sh
 
       - name: Install uv
         uses: astral-sh/setup-uv@v3
