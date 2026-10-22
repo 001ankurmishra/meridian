@@ -30,10 +30,7 @@ ADVISORY_LOCK_KEY = 7_299_301_482  # fixed bigint for the rollback test
 @pytest.fixture
 def superuser_engine() -> Generator[Engine, None, None]:
     """Engine using the migrator/superuser role (DATABASE_URL)."""
-    db_url = os.environ.get(
-        "DATABASE_URL",
-        "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-    )
+    db_url = os.environ["DATABASE_URL"]
     engine = create_engine(db_url)
     yield engine
     engine.dispose()
@@ -42,10 +39,7 @@ def superuser_engine() -> Generator[Engine, None, None]:
 @pytest.fixture
 def app_engine() -> Generator[Engine, None, None]:
     """Engine using the least-privilege application role (APP_DATABASE_URL)."""
-    db_url = os.environ.get(
-        "APP_DATABASE_URL",
-        "postgresql+psycopg://meridian_app:meridian_app_pass@localhost:5432/meridian_db",
-    )
+    db_url = os.environ["APP_DATABASE_URL"]
     engine = create_engine(db_url)
     yield engine
     engine.dispose()
@@ -635,12 +629,7 @@ class TestIntegration:
             assert "permission denied" in str(exc_info.value).lower()
 
             # 6. Verify rollback using a FRESH, SEPARATE connection
-            verify_engine = create_engine(
-                os.environ.get(
-                    "DATABASE_URL",
-                    "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-                )
-            )
+            verify_engine = create_engine(os.environ["DATABASE_URL"])
             try:
                 with verify_engine.connect() as verify_conn:
                     alert_count = verify_conn.execute(
@@ -678,14 +667,8 @@ class TestIntegration:
         from meridian.loader.main import main
 
         # loader main() requires these environment variables
-        db_url = os.environ.get(
-            "DATABASE_URL",
-            "postgresql+psycopg://meridian_user:meridian_pass@localhost:5432/meridian_db",
-        )
-        loader_url = os.environ.get(
-            "LOADER_DATABASE_URL",
-            "postgresql+psycopg://meridian_loader:meridian_loader_pass@localhost:5432/meridian_db",
-        )
+        db_url = os.environ["DATABASE_URL"]
+        loader_url = os.environ["LOADER_DATABASE_URL"]
         monkeypatch.setenv("DATABASE_URL", db_url)
         monkeypatch.setenv("LOADER_DATABASE_URL", loader_url)
 
