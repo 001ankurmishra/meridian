@@ -230,7 +230,7 @@ def test_execution_failure(
         assert ar_rows[0][0] == "PolicyAgent"
         assert ar_rows[0][1] == "FAILED"
         assert ar_rows[0][2] is not None
-        assert "Simulated retrieval failure" in ar_rows[0][2]
+        assert ar_rows[0][2] == "INVALID_INPUT"
 
 
 def test_passes_supplied_agent_run_id(

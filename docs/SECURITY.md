@@ -49,7 +49,7 @@ Key rule: **LLM output is never trusted as an authorization signal.** An agent r
 | **Secrets exposure** | No secrets in source control; environment-variable-based config with a documented `.env.example`; secrets scanning in CI (Phase 3). |
 | **Model manipulation** | Model/provider selection is abstracted (`docs/ARCHITECTURE.md` §6); output from the model is validated against expected schema before being used downstream (e.g., a "finding" object must match a defined structure — reject and flag if it doesn't). |
 | **Untrusted external content** | Any externally sourced content (documents, alert payloads) is validated and provenance-tagged before entering the evidence pipeline. |
-| **Hallucinated evidence / fabricated citations** | Evidence records must reference real rows in the database (`findings.evidence_ids` FK-validated); a citation with no resolvable source record is a hard validation failure, not a warning. |
+| **Hallucinated evidence / fabricated citations** | Evidence records must reference real rows in the database (application validation of source pointers and same-run finding/evidence links, rechecked at report assembly); a citation with no resolvable source record is a hard validation failure, not a warning. |
 
 ---
 

@@ -21,9 +21,10 @@ from meridian.agents.transaction.amount_deviation import (
     AmountDeviationUnknown,
 )
 from meridian.agents.transaction.errors import InvalidTransactionError
-from meridian.orchestration.graph_agent_dispatch import GraphAgentDispatchResult
+from meridian.orchestration.graph_agent_dispatch import GraphAgentExecutionResult
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from tests.db_cleanup import clean_investigation_run_dependencies
+from tests.source_helpers import cleanup_reference_sources, seed_source
 
 
 def _seed_case_and_alert(
@@ -102,6 +103,7 @@ def _cleanup(superuser_engine: Engine) -> None:
         conn.execute(text("DELETE FROM beneficiaries"))
         conn.execute(text("DELETE FROM accounts"))
         conn.execute(text("DELETE FROM customers"))
+    cleanup_reference_sources(superuser_engine)
 
 
 @pytest.fixture(autouse=True)
@@ -131,20 +133,19 @@ def test_all_evidence_found(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -152,7 +153,7 @@ def test_all_evidence_found(
     mock_retrieve.return_value = PolicyEvidenceFound(
         citations=[
             PolicyCitation(
-                chunk_id=uuid.uuid4(),
+                chunk_id=seed_source(superuser_engine, "document_chunks"),
                 document_id=uuid.uuid4(),
                 title="Test",
                 document_type="Test",
@@ -204,20 +205,19 @@ def test_policy_evidence_insufficient(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -332,17 +332,17 @@ def test_graph_agent_hard_failure(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
     mock_run_graph.side_effect = ValueError("Graph Boom")
     mock_retrieve.return_value = PolicyEvidenceFound(citations=[])
 
-    status = orchestrate_investigation(app_role_engine, case_id)
+    with pytest.raises(ValueError, match="Graph Boom"):
+        orchestrate_investigation(app_role_engine, case_id)
 
     mock_retrieve.assert_called_once()
-    assert status == "COMPLETE"
-    _assert_terminal_state(superuser_engine, case_id, "COMPLETE")
+    _assert_terminal_state(superuser_engine, case_id, "FAILED")
 
 
 @patch("meridian.orchestration.policy_agent_dispatch.retrieve_policy_evidence")
@@ -365,20 +365,19 @@ def test_policy_agent_hard_failure(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -415,20 +414,19 @@ def test_21_provenance(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -493,20 +491,19 @@ def test_22_authoring_failure(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -585,20 +582,19 @@ def test_24_policy_agent_hard_failure(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -633,17 +629,16 @@ def test_25_incomplete_path_only_supported_findings(
     mock_compute.return_value = AmountDeviationUnknown(
         alerted_transaction_id=tid, source_account_id=uuid.uuid4(), reason="no history"
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -654,7 +649,7 @@ def test_25_incomplete_path_only_supported_findings(
                 document_id=uuid.uuid4(),
                 document_type="policy",
                 chunk_text="text",
-                chunk_id=uuid.uuid4(),
+                chunk_id=seed_source(superuser_engine, "document_chunks"),
                 title="Doc",
                 version="1.0",
                 chunk_index=1,
@@ -699,20 +694,19 @@ def test_26_second_incomplete_path(
         historical_average=Decimal("10"),
         deviation_multiple=Decimal("10"),
         historical_transaction_count=1,
-        source_transaction_ids=(uuid.uuid4(),),
+        source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
         currency="INR",
     )
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -776,17 +770,16 @@ def test_27_end_to_end_worked_example(
         assert res is not None
         case_id = res[0]
 
-    mock_run_graph.return_value = GraphAgentDispatchResult(
-        investigation_run_id=uuid.uuid4(),
-        result=SubgraphResult(
+    mock_run_graph.return_value = GraphAgentExecutionResult(
+        subgraph=SubgraphResult(
             start_entity_id=uuid.uuid4(),
             max_hops=3,
             node_entity_ids=(uuid.uuid4(),),
             relationship_ids=(uuid.uuid4(),),
             truncated=False,
         ),
-        cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-        chain_result=ChainDepthComputed(
+        cycle=CycleNotFound(account_id=uuid.uuid4()),
+        chain=ChainDepthComputed(
             account_id=uuid.uuid4(), depth=0, chain_entity_ids=(),
                 chain_relationship_ids=(),
         ),
@@ -797,7 +790,7 @@ def test_27_end_to_end_worked_example(
                 document_id=uuid.uuid4(),
                 document_type="policy",
                 chunk_text="text",
-                chunk_id=uuid.uuid4(),
+                chunk_id=seed_source(superuser_engine, "document_chunks"),
                 title="Policy A",
                 version="1.0",
                 chunk_index=1,

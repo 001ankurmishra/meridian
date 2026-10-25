@@ -42,6 +42,19 @@ This structure is represented in the `findings` table (`observed_fact`, `derived
 
 ## 3. Evidence-Sufficiency Gate
 
+Implementation update (Phase B): evidence writes resolve source rows through a
+fixed table/query allowlist and require the producing agent to belong to the same
+investigation. Finding and recommendation references must belong to that run.
+Report assembly revalidates every referenced evidence row, source pointer and
+producer, and rejects missing or cross-run links. Empty draft references remain
+permitted at the primitive storage layer but cannot support a report.
+This verifies referential integrity, not substantive correctness or calibrated
+confidence. Sanctions consistency classification remains authoritative for F11.
+
+Graph technical failures now mark the investigation FAILED; only the documented
+F11 exception permits non-fatal screening failure. Controlled Unknown/abstention
+results retain their existing semantics. No automatic retries are introduced.
+
 Before a `finding` can be included in a generated report:
 
 1. It must have at least one non-empty `evidence_ids` reference (`docs/DATABASE_SCHEMA.md` §4.13), and each reference must resolve to a real row.

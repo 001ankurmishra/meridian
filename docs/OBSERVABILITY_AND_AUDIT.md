@@ -53,6 +53,13 @@ MVP uses structured (JSON) application logs plus the `audit_events` table as the
 
 ## 4. Audit Log Integrity
 
+Phase B: generic agent failures persist bounded reason codes, never raw exception
+text. Audit reads suppress legacy raw error strings without rewriting append-only
+records. Unexpected HTTP failures emit a JSON diagnostic containing an event,
+server-generated request ID and reason code only; response bodies omit exception
+text, SQL parameters and request content. Domain exceptions still propagate within
+library calls for control flow, so callers must use the same boundary discipline.
+
 - `audit_events` is append-only at the database-grant level (no `UPDATE`/`DELETE` for the application role) — see `docs/DATABASE_SCHEMA.md` §4.17.
 - Every case-disposition-changing action (`docs/DESIGN.md` §5) must produce exactly one corresponding `audit_events` row before the case status is considered changed — i.e., the audit write and the state transition should be in the same transaction, not eventually-consistent, so an approval can never happen without a corresponding audit record.
 

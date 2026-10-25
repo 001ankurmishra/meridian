@@ -42,6 +42,48 @@ REFERENCE_TABLE_CUSTOMERS: Final[str] = "customers"
 REFERENCE_TABLE_WATCHLIST_ENTRIES: Final[str] = "watchlist_entries"
 
 
+# Fixed SQL only: a caller cannot turn a source-table name into executable SQL.
+_SOURCE_QUERIES: Final[dict[str, str]] = {
+    "transactions": "SELECT 1 FROM transactions WHERE transaction_id = :id",
+    "document_chunks": "SELECT 1 FROM document_chunks WHERE chunk_id = :id",
+    "beneficiaries": "SELECT 1 FROM beneficiaries WHERE beneficiary_id = :id",
+    "graph_relationships":
+        "SELECT 1 FROM graph_relationships WHERE relationship_id = :id",
+    "customers": "SELECT 1 FROM customers WHERE customer_id = :id",
+    "watchlist_entries": "SELECT 1 FROM watchlist_entries WHERE entry_id = :id",
+    "risk_signals": "SELECT 1 FROM risk_signals WHERE risk_signal_id = :id "
+        "AND investigation_run_id = :run_id",
+}
+
+
+def validate_evidence_reference(
+    conn: Connection,
+    investigation_run_id: uuid.UUID,
+    reference_table: str,
+    reference_id: uuid.UUID,
+    produced_by_agent_run_id: uuid.UUID,
+) -> None:
+    """Resolve a source pointer and its producing run using fixed read-only SQL.
+
+    Called before persistence and again at report assembly. Raises ValueError
+    with a bounded message on unknown sources, missing rows or wrong ownership.
+    """
+    query = _SOURCE_QUERIES.get(reference_table)
+    if query is None:
+        raise ValueError("Unsupported evidence source table.")
+    if conn.execute(text(query), {
+        "id": reference_id, "run_id": investigation_run_id,
+    }).first() is None:
+        raise ValueError("Evidence source record does not exist in its scope.")
+    producer = conn.execute(text(
+        "SELECT 1 FROM agent_runs WHERE agent_run_id = :agent_id "
+        "AND investigation_run_id = :run_id"
+    ), {"agent_id": produced_by_agent_run_id,
+        "run_id": investigation_run_id}).first()
+    if producer is None:
+        raise ValueError("Evidence producer is not an agent in this run.")
+
+
 def record_evidence_with_connection(
     conn: Connection,
     investigation_run_id: uuid.UUID,
@@ -63,6 +105,10 @@ def record_evidence_with_connection(
     Returns:
         An EvidenceRecord object containing the persisted evidence details.
     """
+    validate_evidence_reference(
+        conn, investigation_run_id, reference_table, reference_id,
+        produced_by_agent_run_id,
+    )
     evidence_id = uuid.uuid4()
     now = datetime.now(timezone.utc)
 

@@ -16,6 +16,7 @@ from meridian.findings.findings import record_finding
 from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.recommendations.recommendations import record_recommendation
 from tests.db_cleanup import clean_investigation_run_dependencies
+from tests.source_helpers import cleanup_reference_sources, seed_source
 
 
 def assert_no_forbidden_language(report: InvestigationReport) -> None:
@@ -170,6 +171,8 @@ def _cleanup_seeded_data(superuser_engine: Engine, customer_id: uuid.UUID) -> No
             text("DELETE FROM customers WHERE customer_id = :cid"), {"cid": customer_id}
         )
 
+    cleanup_reference_sources(superuser_engine)
+
 
 def test_assemble_report_success(
     app_role_engine: Engine, superuser_engine: Engine
@@ -196,7 +199,7 @@ def test_assemble_report_success(
             investigation_run_id=inv_run.investigation_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=ar_id,
         )
 

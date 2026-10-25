@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy import Engine, text
 
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
+from tests.test_graph_agent_dispatch import _seed_entity, _seed_relationship
 from tests.test_transaction_agent_dispatch import (
     _seed_account,
     _seed_customer,
@@ -51,6 +52,7 @@ def investigation_setup(
     """Set up a test case in the database."""
     customer_id = _seed_customer(superuser_engine)
     account_id = _seed_account(superuser_engine, customer_id)
+    _seed_entity(superuser_engine, reference_id=account_id)
     tx_id = _seed_transaction(superuser_engine, account_id, Decimal("50.0"), 0)
     case_id = _seed_alert(superuser_engine, customer_id, tx_id)
 
@@ -68,10 +70,12 @@ def investigation_setup(
         conn.execute(text("TRUNCATE TABLE transactions CASCADE"))
         conn.execute(text("TRUNCATE TABLE accounts CASCADE"))
         conn.execute(text("TRUNCATE TABLE customers CASCADE"))
+        conn.execute(text("TRUNCATE TABLE entities CASCADE"))
 
 
 def test_atomicity_rollback_on_error(
     app_role_engine: Engine,
+    superuser_engine: Engine,
     investigation_setup: tuple[uuid.UUID, uuid.UUID, uuid.UUID],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -85,6 +89,12 @@ def test_atomicity_rollback_on_error(
     from meridian.agents.graph.subgraph import SubgraphResult
     from meridian.orchestration import investigation_orchestrator
 
+    node_a = _seed_entity(superuser_engine)
+    node_b = _seed_entity(superuser_engine)
+    relationships = (
+        _seed_relationship(superuser_engine, node_a, node_b),
+        _seed_relationship(superuser_engine, node_b, node_a),
+    )
     # Force GraphAgent to return a cycle and chain
     def mock_run_graph_agent(*args: Any, **kwargs: Any) -> Any:
         from datetime import datetime, timezone
@@ -121,19 +131,19 @@ def test_atomicity_rollback_on_error(
                 start_entity_id=customer_id,
                 max_hops=3,
                 node_entity_ids=(customer_id,),
-                relationship_ids=(uuid.uuid4(), uuid.uuid4()),
+                relationship_ids=relationships,
                 truncated=False,
             ),
             cycle_result=CycleFound(
                 account_id=uuid.uuid4(),
                 cycle_entity_ids=(uuid.uuid4(), uuid.uuid4()),
-                cycle_relationship_ids=(uuid.uuid4(), uuid.uuid4()),
+                cycle_relationship_ids=relationships,
             ),
             chain_result=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=2,
                 chain_entity_ids=(uuid.uuid4(), uuid.uuid4(), uuid.uuid4()),
-                chain_relationship_ids=(uuid.uuid4(), uuid.uuid4()),
+                chain_relationship_ids=relationships,
             ),
         )
 
@@ -215,7 +225,7 @@ def test_atomicity_rollback_on_error(
         assert risk_count == 0
 
 
-def test_graph_agent_failure_does_not_fail_investigation(
+def test_graph_agent_failure_fails_investigation(
     app_role_engine: Engine,
     investigation_setup: tuple[uuid.UUID, uuid.UUID, uuid.UUID],
     monkeypatch: pytest.MonkeyPatch,
@@ -231,8 +241,8 @@ def test_graph_agent_failure_does_not_fail_investigation(
         investigation_orchestrator, "run_graph_agent", failing_graph_agent
     )
 
-    # Let the orchestration run (should not raise RuntimeError)
-    orchestrate_investigation(app_role_engine, case_id)
+    with pytest.raises(RuntimeError, match="Simulated GraphAgent failure"):
+        orchestrate_investigation(app_role_engine, case_id)
 
     with app_role_engine.connect() as conn:
         inv_runs = conn.execute(
@@ -245,8 +255,7 @@ def test_graph_agent_failure_does_not_fail_investigation(
 
         assert len(inv_runs) == 1
         inv_id = inv_runs[0][0]
-        # Should NOT be FAILED
-        assert inv_runs[0][1] != "FAILED"
+        assert inv_runs[0][1] == "FAILED"
 
         # No graph findings or risk signals
         graph_findings = conn.execute(
@@ -287,6 +296,7 @@ def test_graph_agent_runs_exactly_once(
 
 def test_graph_artifacts_are_persisted(
     app_role_engine: Engine,
+    superuser_engine: Engine,
     investigation_setup: tuple[uuid.UUID, uuid.UUID, uuid.UUID],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -301,8 +311,10 @@ def test_graph_artifacts_are_persisted(
     from meridian.orchestration import investigation_orchestrator
 
     # Prepare some real UUIDs for relationships to check against
-    rel_id_1 = uuid.uuid4()
-    rel_id_2 = uuid.uuid4()
+    node_a = _seed_entity(superuser_engine)
+    node_b = _seed_entity(superuser_engine)
+    rel_id_1 = _seed_relationship(superuser_engine, node_a, node_b)
+    rel_id_2 = _seed_relationship(superuser_engine, node_b, node_a)
 
     def mock_run_graph_agent(*args: Any, **kwargs: Any) -> Any:
         from datetime import datetime, timezone

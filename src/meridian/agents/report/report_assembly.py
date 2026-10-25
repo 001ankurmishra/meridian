@@ -13,7 +13,11 @@ from meridian.agents.report.screening_classification import (
     WatchlistScreeningState,
     classify_screening_state,
 )
-from meridian.evidence.evidence import EVIDENCE_TYPE_POLICY_CHUNK, EvidenceRecord
+from meridian.evidence.evidence import (
+    EVIDENCE_TYPE_POLICY_CHUNK,
+    EvidenceRecord,
+    validate_evidence_reference,
+)
 from meridian.findings.findings import FindingRecord, evaluate_evidence_sufficiency
 from meridian.recommendations.recommendations import RecommendationRecord
 from meridian.risk_engine.risk_signals import RiskSignalRecord
@@ -141,6 +145,9 @@ def assemble_report(
                     f"Finding {finding.finding_id} fails evidence sufficiency gate."
                 )
 
+        if run_status == "COMPLETE" and not findings:
+            raise InsufficientEvidenceError("Complete run has no supported findings.")
+
         # 4. Fetch Recommendations
         rec_rows = conn.execute(
             text(
@@ -165,6 +172,15 @@ def assemble_report(
             )
             for row in rec_rows
         ]
+
+        finding_ids = {f.finding_id for f in findings}
+        for rec in recommendations:
+            if not rec.based_on_finding_ids or not set(
+                rec.based_on_finding_ids
+            ).issubset(finding_ids):
+                raise InsufficientEvidenceError(
+                    "Recommendation has missing or cross-investigation findings."
+                )
 
         # 5. Fetch Referenced Evidence
         referenced_evidence_ids = set()
@@ -199,6 +215,19 @@ def assemble_report(
                 )
                 for row in evidence_rows
             ]
+
+        if {e.evidence_id for e in all_evidence} != referenced_evidence_ids:
+            raise InsufficientEvidenceError("Finding references missing evidence.")
+        for item in all_evidence:
+            if item.investigation_run_id != investigation_run_id:
+                raise InsufficientEvidenceError("Evidence belongs to another run.")
+            try:
+                validate_evidence_reference(
+                    conn, investigation_run_id, item.reference_table,
+                    item.reference_id, item.produced_by_agent_run_id,
+                )
+            except ValueError as exc:
+                raise InsufficientEvidenceError(str(exc)) from None
 
         evidence = [
             e for e in all_evidence if e.evidence_type != EVIDENCE_TYPE_POLICY_CHUNK

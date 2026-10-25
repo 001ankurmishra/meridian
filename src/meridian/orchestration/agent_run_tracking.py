@@ -7,6 +7,8 @@ from typing import Any, Callable, TypeVar
 
 from sqlalchemy import Engine, text
 
+from meridian.audit.safety import error_code
+
 T = TypeVar("T")
 
 
@@ -129,7 +131,7 @@ def record_agent_run(
                     "tool_calls": json.dumps(recorded_tool_calls),
                     "started_at": started_at,
                     "completed_at": completed_at,
-                    "error": str(e),
+                    "error": error_code(e),
                 },
             )
         raise

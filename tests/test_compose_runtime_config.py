@@ -372,7 +372,7 @@ def test_missing_app_database_url_fails_closed(
     """Test 3: Missing application URL fails closed.
 
     Asserts that when APP_DATABASE_URL is absent (None), get_app_engine()
-    raises RuntimeError, propagates through FastAPI without falling back to
+    raises RuntimeError, becomes a bounded HTTP failure without falling back to
     DATABASE_URL, and no partial state is persisted.
     """
     # 1. Safety check
@@ -451,16 +451,11 @@ def test_missing_app_database_url_fails_closed(
                 "source_system": "test-fail-closed",
             }
 
-            with pytest.raises(RuntimeError) as exc_info:
-                client.post("/cases", json=payload, headers=headers)
-
-            assert "APP_DATABASE_URL is not configured" in str(exc_info.value)
-
-            # Verify failure originated in get_app_engine()
-            frames = [f.name for f in exc_info.traceback]
-            assert "get_app_engine" in frames, (
-                f"Expected get_app_engine in traceback frames: {frames}"
-            )
+            response = client.post("/cases", json=payload, headers=headers)
+            assert response.status_code == 500
+            assert response.json()["code"] == "AGENT_ERROR"
+            assert "APP_DATABASE_URL" not in response.text
+            assert response.headers["X-Request-ID"]
 
         finally:
             # Database cleanup

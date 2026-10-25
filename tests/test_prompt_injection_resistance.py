@@ -173,6 +173,12 @@ def _seed_e2e_scenario(
             {"aid": account_id, "cid": customer_id, "now": now},
         )
 
+        conn.execute(
+            sa.text("INSERT INTO entities (entity_id, entity_type, reference_id) "
+                    "VALUES (:eid, 'account', :aid)"),
+            {"eid": uuid.uuid4(), "aid": account_id},
+        )
+
         # Historical transactions (baseline: 3 x 60000 INR)
         for i, tx_id in enumerate(hist_tx_ids):
             conn.execute(
@@ -278,6 +284,11 @@ def _cleanup_e2e_scenario(
                 {"tid": tx_id},
             )
         if scenario.get("account_id"):
+            conn.execute(
+                sa.text("DELETE FROM entities WHERE entity_type = 'account' "
+                        "AND reference_id = :aid"),
+                {"aid": scenario["account_id"]},
+            )
             conn.execute(
                 sa.text("DELETE FROM accounts WHERE account_id = :aid"),
                 {"aid": scenario["account_id"]},

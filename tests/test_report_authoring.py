@@ -436,6 +436,8 @@ def test_18_missing_blank_alert_type() -> None:
 def test_19_persistence_atomicity(
     app_role_engine: Engine, superuser_engine: Engine
 ) -> None:
+    from tests.source_helpers import seed_source
+
     tx_agent_id = uuid.uuid4()
     policy_agent_id = uuid.uuid4()
     run_id = uuid.uuid4()
@@ -487,12 +489,12 @@ def test_19_persistence_atomicity(
     tx_outcome = TransactionOutcome(
         result=AmountDeviationComputed(
             source_account_id=uuid.uuid4(),
-            alerted_transaction_id=uuid.uuid4(),
+            alerted_transaction_id=seed_source(superuser_engine, "transactions"),
             alerted_amount=Decimal("123.456"),
             historical_average=Decimal("100.0"),
             historical_transaction_count=2,
             deviation_multiple=Decimal("1.234"),
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="USD",
         ),
         agent_run_id=tx_agent_id,
@@ -505,7 +507,7 @@ def test_19_persistence_atomicity(
                     document_id=uuid.uuid4(),
                     document_type="policy",
                     chunk_text="text",
-                    chunk_id=uuid.uuid4(),
+                    chunk_id=seed_source(superuser_engine, "document_chunks"),
                     title="Doc A",
                     version="1.0",
                     chunk_index=1,

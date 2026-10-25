@@ -130,9 +130,9 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
                 cycle_result=graph_dispatch_result.cycle_result,
                 chain_result=graph_dispatch_result.chain_result,
             )
-        except Exception:
-            # GraphAgent failure does NOT determine final investigation status
-            pass
+        except Exception as e:
+            if fatal_error is None:
+                fatal_error = e
 
     # 3. PolicyAgent
     try:

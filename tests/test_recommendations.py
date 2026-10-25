@@ -232,7 +232,7 @@ def test_unresolvable_finding_rejection(
 
         random_finding_id = uuid.uuid4()
 
-        with pytest.raises(ValueError, match="do not exist in the findings table"):
+        with pytest.raises(ValueError, match="same investigation"):
             record_recommendation(
                 engine=app_role_engine,
                 investigation_run_id=inv_run.investigation_run_id,
