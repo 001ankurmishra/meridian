@@ -165,10 +165,10 @@ The v0.4 corpus currently has a maximum observed outbound chain depth of 3. Ther
 
 The currently implemented threshold value is `confidence_threshold = 0.01` in `src/meridian/agents/policy/policy_agent.py`. Its methodology tier is `PROTOTYPE`. This value is explicitly an unvalidated placeholder; it was not derived from any evaluation, sample, or tuning process. The precision/recall tradeoff this threshold implies is currently unknown and unmeasured. This threshold will eventually be calibrated using the 20–50 labeled alert-pattern → expected-policy-chunk evaluation set described above. Once that evaluation exists and the threshold is properly tuned against it, its tier will be updated to `EXPERIMENTALLY_CALIBRATED`.
 
-### RAG evaluation protocol (policy_retrieval_eval_v1) — PROPOSED, NOT FROZEN; no measurement performed
+### RAG evaluation protocol (policy_retrieval_eval_v1) — FROZEN 2026-10-25; measurement pending
 
-> **Protocol Status:** PROPOSED, NOT FROZEN. No measurement performed.
-> This protocol and labeled evaluation set take effect as FROZEN only on maintainer approval, recorded by a separate later documentation update (recording approver identity, approval date, canonical SHA-256, and status flip).
+> **Protocol Status:** FROZEN by explicit approval from Ankur on 2026-10-25. No measurement performed at freeze.
+> Approval and both reviewed/frozen payload hashes are recorded in `docs/evaluation/policy_retrieval_eval_v1.freeze.json`. Frozen canonical SHA-256: `993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053`. Labels are maintainer-approved, not independently validated.
 > Passing automated integrity tests proves structure, binding, and mathematical validity only, NOT that human or AI judgments are substantively correct.
 
 #### 1. Protocol Metadata and Preconditions
@@ -177,15 +177,15 @@ The currently implemented threshold value is `confidence_threshold = 0.01` in `s
 * **Seed:** `policy_retrieval_eval_v1`
 * **Corpus Identifier:** `POLICY_CORPUS_V1` (4 documents, 10 chunks)
 * **Model Name:** `BAAI/bge-small-en-v1.5`
-* **Model Snapshot:** `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` (precondition metadata only; the evaluation baseline must record the actual revision and mark any revision mismatch as non-comparable; the embedding model is not pinned in code and this protocol does not change that)
+* **Model Snapshot:** `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` (pinned for model and tokenizer; evaluation rejects revision mismatch)
 * **Retrieval Parameters:** `retrieval_k = 60`, `retrieval_top_k = 5`
-* **A0 Tie-Break Contract:** RRF fused ranking total order: items are ordered by `(rrf_score DESC, document_title ASC, chunk_index ASC)`.
+* **A0 Tie-Break Contract:** RRF fused ranking total order: items are ordered by `(rrf_score DESC, document_title ASC, document_version ASC, chunk_index ASC, chunk_id ASC)`; SQL title/version use C collation. Logical reload stability requires unique title/version/index tuples.
 * **Chunk Identity:** Chunks are referenced exclusively by literal tuples: `(title, version, chunk_index, text_sha256)`. Database UUIDs (`chunk_id`) are never used for evaluation ground truth.
 
 #### 2. Cohorts and Statuses
 * **Cohort C1 (PRIMARY, n=3):** Production query path (`large_transaction`, `new_beneficiary`, `rapid_movement`), where `alert_type` is passed verbatim to policy retrieval. Descriptive only. Never split (`split = NONE`).
 * **Cohort C2 (PROVISIONAL, n=5):** Legacy query strings (`AML_GENERAL`, `AML_STRUCTURING`, `AML_RAPID_MOVEMENT`, `AML_CIRCULAR`, `AML_MULE`) present in the legacy fixture generator. This protocol does not claim the legacy workflow is supported; inclusion in runtime evaluation requires maintainer confirmation. Never split (`split = NONE`). Evaluated strictly by literal meaning; applicability is `UNDETERMINED` where literal meaning is not an unambiguous investigative subject; borderline flags and notes are assigned where in doubt. Missing corpus coverage is never relabeled as "no applicable policy". All C2 queries carry abstention `NOT_ASSESSED`.
-* **Cohort C3 (ROBUSTNESS, n=11):** Out-of-domain probes (not production-reachable). Contains 10 out-of-domain queries (e.g. `zzzz qqqq`, `weather forecast for tomorrow`, `chocolate cake recipe`, etc.) labeled `NOT_APPLICABLE_OUT_OF_DOMAIN`, `OUT_OF_DOMAIN`, and `SHOULD_ABSTAIN`. Contains the empty string `""` exactly once, labeled `UNDETERMINED`, `NOT_COVERED`, and `NOT_ASSESSED`, with rationale noting that alert intake rejects empty or whitespace `alert_type` at the API schema boundary so it serves as a behavior probe only. Generic words are not labeled as negatives.
+* **Cohort C3 (ROBUSTNESS, n=11):** Out-of-domain robustness probes. Arbitrary non-empty alert types are production-reachable. Contains 10 out-of-domain queries (e.g. `zzzz qqqq`, `weather forecast for tomorrow`, `chocolate cake recipe`, etc.) labeled `NOT_APPLICABLE_OUT_OF_DOMAIN`, `OUT_OF_DOMAIN`, and `SHOULD_ABSTAIN`. Contains the empty string `""` exactly once, labeled `UNDETERMINED`, `NOT_COVERED`, and `NOT_ASSESSED`, with rationale noting that alert intake rejects empty or whitespace `alert_type` at the intake validation boundary so it serves as a behavior probe only. Generic words are not labeled as negatives.
 * **Cohort C4 (EXPLORATORY, n=20):** Authored paraphrase queries (>=3 per each of the four corpus topics: large transaction review, new beneficiary review, rapid movement, and evidence/documentation standards) and >=4 in-domain coverage-gap queries (applicable financial investigation subjects with no matching procedure in the synthetic corpus, labeled `APPLICABLE` + `NOT_COVERED` or `PARTIALLY_COVERED` + `NOT_ASSESSED`, with grade-1 notes where supporting guidance exists). Never mix C4 into C1 metrics.
 * **Total Query Count:** 39 queries (within the required [38, 50] range).
 

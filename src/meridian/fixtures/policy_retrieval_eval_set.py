@@ -2,10 +2,10 @@
 """
 RAG Evaluation Set Fixture — Policy Retrieval Evaluation v1.
 
-Status: PROPOSED_NOT_FROZEN.
-This module defines a proposed evaluation set, rubric, and integrity validator
+Status: FROZEN.
+This module defines a maintainer-approved evaluation set, rubric, and integrity validator
 for policy retrieval evaluation against POLICY_CORPUS_V1.
-Labels and protocol are pending human maintainer review and approval.
+Labels and protocol approved by Ankur on 2026-10-25; see the freeze record.
 
 PROHIBITED VOCABULARY SCAN:
 This module contains pure data and validation logic.
@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
-PROTOCOL_STATUS = "PROPOSED_NOT_FROZEN"
+PROTOCOL_STATUS = "FROZEN"
 EVAL_SET_VERSION = "policy_retrieval_eval_v1"
 SEED = "policy_retrieval_eval_v1"
 CORPUS_ID = "POLICY_CORPUS_V1"
@@ -26,7 +26,7 @@ MODEL_NAME = "BAAI/bge-small-en-v1.5"
 MODEL_SNAPSHOT = "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a"
 RETRIEVAL_K = 60
 RETRIEVAL_TOP_K = 5
-LABELER_PROVENANCE = "AI-assisted authoring (Antigravity); maintainer review PENDING"
+LABELER_PROVENANCE = "AI-assisted authoring (Antigravity); labels and protocol approved by Ankur 2026-10-25"
 
 COHORT_STATUS: Dict[str, str] = {
     "C1": "PRIMARY",

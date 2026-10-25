@@ -1,0 +1,15 @@
+{
+  "status": "FROZEN",
+  "approved_by": "Ankur Mishra",
+  "approval_date": "2026-10-25",
+  "approval_source": "Explicit maintainer reply in Codex chat: Approve labels, protocol and freeze for this hash",
+  "reviewed_sha256": "eb81920c950053c6de399b05625f65e62bffbfbcc6608de0e99abba44172a45e",
+  "frozen_sha256": "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053",
+  "metadata_changes": [
+    "labeler_provenance",
+    "protocol_status"
+  ],
+  "independently_validated": false,
+  "human_comparison": "NOT PERFORMED",
+  "labels_queries_splits_and_chunks_unchanged": true
+}

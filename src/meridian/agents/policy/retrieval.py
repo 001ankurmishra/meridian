@@ -4,11 +4,15 @@ import sqlalchemy as sa
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
+from meridian.agents.policy.model_config import MODEL_NAME, MODEL_REVISION
+
 # Load the model locally. CPU only.
 # This will trigger a download on first run if not cached.
 # Model inference uses NO external embedding API and NO API key.
 # Dimension: 384
-embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+embedding_model = SentenceTransformer(
+    MODEL_NAME, revision=MODEL_REVISION, device="cpu", trust_remote_code=False,
+)
 
 
 def embed_document_chunk(chunk_text: str) -> List[float]:

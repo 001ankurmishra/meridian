@@ -2,7 +2,7 @@
 """
 Integrity and structural validation tests for PROPOSED RAG evaluation set fixture.
 
-Status: PROPOSED_NOT_FROZEN.
+Status: FROZEN.
 Protocol and evaluation set are pending human maintainer approval.
 
 CRITICAL ARCHITECTURAL BOUNDARIES:
@@ -45,9 +45,9 @@ from meridian.fixtures.policy_retrieval_eval_set import (
 )
 from meridian.loader.policy_corpus import POLICY_CORPUS_V1
 
-# Pinned proposed canonical SHA-256 for change detection.
+# Pinned maintainer-approved canonical SHA-256 for change detection.
 # Updating during review is expected; becomes the FROZEN identity only on maintainer approval.
-PROPOSED_CANONICAL_SHA256 = "eb81920c950053c6de399b05625f65e62bffbfbcc6608de0e99abba44172a45e"
+FROZEN_CANONICAL_SHA256 = "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053"
 
 
 # =============================================================================
@@ -277,11 +277,11 @@ def test_cohort_counts_and_exact_strings() -> None:
     - >= 4 C4 coverage-gap queries
     - Empty string present exactly once in C3 with UNDETERMINED and NOT_ASSESSED
     - C2 cohort_status is PROVISIONAL
-    - PROTOCOL_STATUS == 'PROPOSED_NOT_FROZEN'
+    - PROTOCOL_STATUS == 'FROZEN'
     """
     eval_set = build_eval_set()
-    assert PROTOCOL_STATUS == "PROPOSED_NOT_FROZEN"
-    assert eval_set.protocol_status == "PROPOSED_NOT_FROZEN"
+    assert PROTOCOL_STATUS == "FROZEN"
+    assert eval_set.protocol_status == "FROZEN"
     assert eval_set.cohort_status["C2"] == "PROVISIONAL"
 
     total_queries = len(eval_set.queries)
@@ -401,7 +401,7 @@ def test_c4_query_leakage_guard() -> None:
 def test_canonical_json_determinism_and_pinned_sha256() -> None:
     """
     canonical_json is byte-identical across two builds and a fresh subprocess.
-    SHA-256 equals PROPOSED_CANONICAL_SHA256 pinned in this test suite.
+    SHA-256 equals FROZEN_CANONICAL_SHA256 pinned in this test suite.
     """
     set1 = build_eval_set()
     set2 = build_eval_set()
@@ -411,8 +411,8 @@ def test_canonical_json_determinism_and_pinned_sha256() -> None:
     assert json1 == json2, "canonical_json differed across consecutive builds in same process"
 
     sha1 = canonical_sha256(set1)
-    assert sha1 == PROPOSED_CANONICAL_SHA256, (
-        f"canonical_sha256 {sha1} does not match PROPOSED_CANONICAL_SHA256 {PROPOSED_CANONICAL_SHA256}"
+    assert sha1 == FROZEN_CANONICAL_SHA256, (
+        f"canonical_sha256 {sha1} does not match FROZEN_CANONICAL_SHA256 {FROZEN_CANONICAL_SHA256}"
     )
 
     # Subprocess check for byte-identical serialization in a clean interpreter
@@ -433,7 +433,7 @@ def test_canonical_json_determinism_and_pinned_sha256() -> None:
         check=True,
     )
     subprocess_sha = res.stdout.strip()
-    assert subprocess_sha == PROPOSED_CANONICAL_SHA256
+    assert subprocess_sha == FROZEN_CANONICAL_SHA256
 
 
 # =============================================================================
