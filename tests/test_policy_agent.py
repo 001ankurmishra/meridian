@@ -83,7 +83,11 @@ def test_all_above_threshold(
 ) -> None:
     with Session(app_role_engine) as session:
         res = retrieve_policy_evidence(
-            session, "flibbertigibbet", top_k=2, confidence_threshold=0.0
+            session,
+            "flibbertigibbet",
+            top_k=2,
+            confidence_threshold=0.0,
+            absolute_similarity_threshold=None,
         )
         assert isinstance(res, PolicyEvidenceFound)
         assert len(res.citations) > 0
@@ -95,7 +99,11 @@ def test_all_above_threshold(
 def test_mixed_threshold(app_role_engine: Engine, agent_synthetic_corpus: None) -> None:
     with Session(app_role_engine) as session:
         base_res = retrieve_policy_evidence(
-            session, "flibbertigibbet", top_k=5, confidence_threshold=0.0
+            session,
+            "flibbertigibbet",
+            top_k=5,
+            confidence_threshold=0.0,
+            absolute_similarity_threshold=None,
         )
         assert isinstance(base_res, PolicyEvidenceFound)
         assert len(base_res.citations) > 1
@@ -108,7 +116,11 @@ def test_mixed_threshold(app_role_engine: Engine, agent_synthetic_corpus: None) 
         threshold = (highest_score + second_score) / 2.0
 
         filtered_res = retrieve_policy_evidence(
-            session, "flibbertigibbet", top_k=5, confidence_threshold=threshold
+            session,
+            "flibbertigibbet",
+            top_k=5,
+            confidence_threshold=threshold,
+            absolute_similarity_threshold=None,
         )
         assert isinstance(filtered_res, PolicyEvidenceFound)
         assert len(filtered_res.citations) == 1
@@ -121,7 +133,11 @@ def test_all_below_threshold(
     with Session(app_role_engine) as session:
         # threshold=1.0 is impossible for RRF (max is ~0.033)
         res = retrieve_policy_evidence(
-            session, "flibbertigibbet", top_k=5, confidence_threshold=1.0
+            session,
+            "flibbertigibbet",
+            top_k=5,
+            confidence_threshold=1.0,
+            absolute_similarity_threshold=None,
         )
         assert isinstance(res, PolicyEvidenceInsufficient)
 
@@ -132,6 +148,9 @@ def test_zero_candidates(app_role_engine: Engine, superuser_engine: Engine) -> N
 
     with Session(app_role_engine) as session:
         res = retrieve_policy_evidence(
-            session, "test query", confidence_threshold=0.0
+            session,
+            "test query",
+            confidence_threshold=0.0,
+            absolute_similarity_threshold=None,
         )
         assert isinstance(res, PolicyEvidenceInsufficient)

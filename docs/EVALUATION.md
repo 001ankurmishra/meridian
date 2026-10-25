@@ -165,6 +165,13 @@ The v0.4 corpus currently has a maximum observed outbound chain depth of 3. Ther
 
 The currently implemented threshold value is `confidence_threshold = 0.01` in `src/meridian/agents/policy/policy_agent.py`. Its methodology tier is `PROTOTYPE`. This value is explicitly an unvalidated placeholder; it was not derived from any evaluation, sample, or tuning process. The precision/recall tradeoff this threshold implies is currently unknown and unmeasured. This threshold will eventually be calibrated using the 20–50 labeled alert-pattern → expected-policy-chunk evaluation set described above. Once that evaluation exists and the threshold is properly tuned against it, its tier will be updated to `EXPERIMENTALLY_CALIBRATED`.
 
+ADR-0009 (accepted by Ankur 2026-10-26) adds a query-level maximum-cosine
+threshold of 0.620313, selected only from the labeled DEV examples. The original
+RRF threshold and ranking are unchanged. This added gate is PROTOTYPE, not
+calibrated; it cannot establish policy applicability or validate each citation.
+The paired baseline/gate HELDOUT configuration is locked in
+`docs/evaluation/policy_retrieval_eval_v1.plan.json` before measurement.
+
 ### RAG evaluation protocol (policy_retrieval_eval_v1) — FROZEN 2026-10-25; measurement pending
 
 > **Protocol Status:** FROZEN by explicit approval from Ankur on 2026-10-25. No measurement performed at freeze.

@@ -1,0 +1,839 @@
+{
+  "absolute_gate": "DISABLED",
+  "cohorts": {
+    "C3": {
+      "abstention_counts": {
+        "SHOULD_ABSTAIN/RETRIEVE": 5
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 5,
+          "included": 0
+        },
+        "lenient": {
+          "excluded": 5,
+          "included": 0
+        },
+        "strict": {
+          "excluded": 5,
+          "included": 0
+        }
+      },
+      "queries": 5
+    },
+    "C4": {
+      "abstention_counts": {
+        "NOT_ASSESSED": 5,
+        "SHOULD_RETRIEVE/RETRIEVE": 4
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 5,
+          "included": 4,
+          "nDCG@1": {
+            "lift": 0.8,
+            "observed": 1.0,
+            "random": 0.2
+          },
+          "nDCG@3": {
+            "lift": 0.6219022762018656,
+            "observed": 0.8832169954784115,
+            "random": 0.26131471927654587
+          },
+          "nDCG@5": {
+            "lift": 0.5876661397766361,
+            "observed": 0.9492340261215593,
+            "random": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "Hit@1": {
+            "lift": 0.8,
+            "observed": 1.0,
+            "random": 0.2
+          },
+          "Hit@3": {
+            "lift": 0.4666666666666667,
+            "observed": 1.0,
+            "random": 0.5333333333333333
+          },
+          "Hit@5": {
+            "lift": 0.2222222222222222,
+            "observed": 1.0,
+            "random": 0.7777777777777778
+          },
+          "P@1": {
+            "lift": 0.8,
+            "observed": 1.0,
+            "random": 0.2
+          },
+          "P@3": {
+            "lift": 0.38333333333333325,
+            "observed": 0.5833333333333333,
+            "random": 0.2
+          },
+          "P@5": {
+            "lift": 0.2,
+            "observed": 0.4,
+            "random": 0.2
+          },
+          "RR": {
+            "lift": 0.5713403880070547,
+            "observed": 1.0,
+            "random": 0.42865961199294533
+          },
+          "Recall@1": {
+            "lift": 0.4,
+            "observed": 0.5,
+            "random": 0.1
+          },
+          "Recall@3": {
+            "lift": 0.575,
+            "observed": 0.875,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.5,
+            "observed": 1.0,
+            "random": 0.5
+          },
+          "excluded": 5,
+          "included": 4
+        },
+        "strict": {
+          "Hit@1": {
+            "lift": 0.8,
+            "observed": 1.0,
+            "random": 0.2
+          },
+          "Hit@3": {
+            "lift": 0.4666666666666667,
+            "observed": 1.0,
+            "random": 0.5333333333333333
+          },
+          "Hit@5": {
+            "lift": 0.2222222222222222,
+            "observed": 1.0,
+            "random": 0.7777777777777778
+          },
+          "P@1": {
+            "lift": 0.8,
+            "observed": 1.0,
+            "random": 0.2
+          },
+          "P@3": {
+            "lift": 0.38333333333333325,
+            "observed": 0.5833333333333333,
+            "random": 0.2
+          },
+          "P@5": {
+            "lift": 0.2,
+            "observed": 0.4,
+            "random": 0.2
+          },
+          "RR": {
+            "lift": 0.5713403880070547,
+            "observed": 1.0,
+            "random": 0.42865961199294533
+          },
+          "Recall@1": {
+            "lift": 0.4,
+            "observed": 0.5,
+            "random": 0.1
+          },
+          "Recall@3": {
+            "lift": 0.575,
+            "observed": 0.875,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.5,
+            "observed": 1.0,
+            "random": 0.5
+          },
+          "excluded": 5,
+          "included": 4
+        }
+      },
+      "queries": 9
+    }
+  },
+  "device": "cpu",
+  "frozen_sha256": "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053",
+  "human_comparison": "NOT PERFORMED",
+  "labels_independently_validated": false,
+  "limitations": "Small synthetic corpus; no calibration or real-world claim. C2 excluded pending confirmation of supported legacy workflow.",
+  "model_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "phase": "DEV",
+  "protocol": "policy_retrieval_eval_v1",
+  "queries": [
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "exploratory_max_cosine_similarity": 0.47727397355151835,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_02",
+      "ranking": [
+        7,
+        5,
+        0,
+        2,
+        3,
+        1,
+        8,
+        4,
+        9,
+        6
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "exploratory_max_cosine_similarity": 0.4005453645857958,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_04",
+      "ranking": [
+        3,
+        4,
+        7,
+        6,
+        5,
+        8,
+        2,
+        0,
+        1,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "exploratory_max_cosine_similarity": 0.49972185492515564,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_05",
+      "ranking": [
+        0,
+        5,
+        2,
+        3,
+        4,
+        7,
+        1,
+        8,
+        6,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "exploratory_max_cosine_similarity": 0.5111351900616184,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_06",
+      "ranking": [
+        3,
+        7,
+        6,
+        1,
+        5,
+        0,
+        8,
+        2,
+        4,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "exploratory_max_cosine_similarity": 0.4289757013320923,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_08",
+      "ranking": [
+        4,
+        1,
+        7,
+        3,
+        0,
+        8,
+        6,
+        5,
+        2,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "exploratory_max_cosine_similarity": 0.7516701965528623,
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 0.9197207891481876,
+            "nDCG@5": 0.9197207891481876
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_001",
+      "ranking": [
+        0,
+        7,
+        1,
+        3,
+        5,
+        6,
+        9,
+        4,
+        2,
+        8
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "exploratory_max_cosine_similarity": 0.7830734252929688,
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 0.6131471927654584,
+            "nDCG@5": 0.8772153153380493
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.3333333333333333,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 0.5,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.3333333333333333,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 0.5,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_003",
+      "ranking": [
+        0,
+        5,
+        7,
+        1,
+        3,
+        2,
+        6,
+        4,
+        8,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "exploratory_max_cosine_similarity": 0.7294913852821129,
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_011",
+      "ranking": [
+        8,
+        9,
+        6,
+        7,
+        1,
+        5,
+        0,
+        4,
+        3,
+        2
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "exploratory_max_cosine_similarity": 0.7355050663800561,
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_012",
+      "ranking": [
+        9,
+        8,
+        1,
+        7,
+        6,
+        3,
+        0,
+        2,
+        4,
+        5
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "exploratory_max_cosine_similarity": 0.6725494861602783,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_013",
+      "ranking": [
+        0,
+        2,
+        4,
+        7,
+        5,
+        3,
+        8,
+        9,
+        1,
+        6
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "exploratory_max_cosine_similarity": 0.6935757533131234,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_014",
+      "ranking": [
+        6,
+        9,
+        8,
+        7,
+        1,
+        5,
+        0,
+        2,
+        4,
+        3
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "exploratory_max_cosine_similarity": 0.7397567188884797,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_015",
+      "ranking": [
+        7,
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        9,
+        2,
+        8
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "exploratory_max_cosine_similarity": 0.6742154346319268,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_017",
+      "ranking": [
+        3,
+        6,
+        1,
+        0,
+        7,
+        4,
+        2,
+        9,
+        5,
+        8
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "exploratory_max_cosine_similarity": 0.7577168715680608,
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_020",
+      "ranking": [
+        1,
+        0,
+        3,
+        5,
+        7,
+        6,
+        8,
+        4,
+        2,
+        9
+      ],
+      "split": "DEV",
+      "system_decision": "RETRIEVE"
+    }
+  ],
+  "rrf_threshold": 0.01,
+  "tier": "PROTOTYPE"
+}

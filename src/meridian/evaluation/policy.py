@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
@@ -51,7 +53,7 @@ def measure(engine: Engine, phase: str) -> dict[str, Any]:
             plan["status"] != "LOCKED"
             or plan["frozen_sha256"] != digest
             or plan["rrf_threshold"] != 0.01
-            or plan["absolute_gate"] != "DISABLED"
+            or plan["absolute_gate"] != 0.620313
         ):
             raise ValueError("HELDOUT requires the locked baseline evaluation plan.")
     # Lazy imports: validating the freeze/metrics needs no model download or DB access.
@@ -104,7 +106,20 @@ def measure(engine: Engine, phase: str) -> dict[str, Any]:
                 for c in candidates
             ]
             decision = retrieve_policy_evidence(
-                session, query.query_text, k=60, top_k=5, confidence_threshold=0.01
+                session,
+                query.query_text,
+                k=60,
+                top_k=5,
+                confidence_threshold=0.01,
+                absolute_similarity_threshold=None,
+            )
+            gated = retrieve_policy_evidence(
+                session,
+                query.query_text,
+                k=60,
+                top_k=5,
+                confidence_threshold=0.01,
+                absolute_similarity_threshold=0.620313,
             )
             row: dict[str, Any] = {
                 "query_id": query.query_id,
@@ -112,6 +127,9 @@ def measure(engine: Engine, phase: str) -> dict[str, Any]:
                 "split": query.split,
                 "ranking": ranking,
                 "metrics": score_ranking([j.grade for j in query.judgments], ranking),
+                "gate_decision": "RETRIEVE"
+                if isinstance(gated, PolicyEvidenceFound)
+                else "ABSTAIN",
                 "expected_abstention": query.abstention_ground_truth.value,
                 "system_decision": "RETRIEVE"
                 if isinstance(decision, PolicyEvidenceFound)
@@ -130,6 +148,22 @@ def measure(engine: Engine, phase: str) -> dict[str, Any]:
                 row["exploratory_max_cosine_similarity"] = float(similarity)
             rows.append(row)
     return {
+        "environment": {
+            "python": platform.python_version(),
+            "platform": platform.platform(),
+            "packages": {
+                name: version(name)
+                for name in (
+                    "sentence-transformers",
+                    "transformers",
+                    "torch",
+                    "pgvector",
+                )
+            },
+            "lock_sha256": hashlib.sha256(
+                (EVALUATION_DIR.parents[1] / "uv.lock").read_bytes()
+            ).hexdigest(),
+        },
         "protocol": fixture.version,
         "frozen_sha256": digest,
         "phase": phase,
@@ -137,14 +171,34 @@ def measure(engine: Engine, phase: str) -> dict[str, Any]:
         "device": "cpu",
         "tier": "PROTOTYPE",
         "rrf_threshold": 0.01,
-        "absolute_gate": "DISABLED",
+        "absolute_gate": 0.620313,
         "human_comparison": "NOT PERFORMED",
         "labels_independently_validated": False,
         "limitations": "Small synthetic corpus; no calibration or real-world claim. "
         "C2 excluded pending confirmation of supported legacy workflow.",
         "cohorts": aggregate(rows),
+        "gate_cohorts": aggregate(
+            [dict(row, system_decision=row["gate_decision"]) for row in rows]
+        ),
         "queries": rows,
     }
+
+
+def claim_heldout(digest: str) -> Path:
+    receipt = EVALUATION_DIR / "policy_retrieval_eval_v1.heldout-receipt.json"
+    with receipt.open("x") as output:
+        json.dump(
+            {
+                "status": "STARTED",
+                "frozen_sha256": digest,
+                "absolute_gate": 0.620313,
+                "repeats_permitted": False,
+            },
+            output,
+            indent=2,
+        )
+        output.write("\n")
+    return receipt
 
 
 def main() -> None:
@@ -157,13 +211,31 @@ def main() -> None:
     if args.output.exists():
         parser.error("Refusing to overwrite evaluation evidence.")
     # Fail closed before loading the model or opening a connection.
-    validate_freeze()
+    digest = validate_freeze()
+    receipt = claim_heldout(digest) if args.phase == "HELDOUT" else None
     engine = create_engine(os.environ["APP_DATABASE_URL"], hide_parameters=True)
     try:
         report = measure(engine, args.phase)
         with args.output.open("x") as output:
             json.dump(report, output, indent=2, sort_keys=True)
             output.write("\n")
+        if receipt is not None:
+            receipt.write_text(
+                json.dumps(
+                    {
+                        "status": "COMPLETED",
+                        "frozen_sha256": digest,
+                        "absolute_gate": 0.620313,
+                        "repeats_permitted": False,
+                        "result_sha256": hashlib.sha256(
+                            args.output.read_bytes()
+                        ).hexdigest(),
+                        "result_file": args.output.name,
+                    },
+                    indent=2,
+                )
+                + "\n"
+            )
     finally:
         engine.dispose()
 

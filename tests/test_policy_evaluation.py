@@ -74,3 +74,11 @@ def test_pinned_tokenizer_reproduces_all_frozen_chunk_hashes():
         for i, chunk in enumerate(chunk_document(doc.text))
     }
     assert actual == expected
+
+
+def test_heldout_receipt_prevents_second_measurement(tmp_path, monkeypatch):
+    monkeypatch.setattr(policy, "EVALUATION_DIR", tmp_path)
+    receipt = policy.claim_heldout("test-digest")
+    assert json.loads(receipt.read_text())["status"] == "STARTED"
+    with pytest.raises(FileExistsError):
+        policy.claim_heldout("test-digest")

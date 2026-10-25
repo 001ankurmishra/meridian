@@ -1,0 +1,24 @@
+{
+  "status": "LOCKED",
+  "locked_date": "2026-10-26",
+  "timezone": "Asia/Kolkata",
+  "approved_by": "Ankur",
+  "approval": "Explicit approval of ADR-0009 and locked paired HELDOUT evaluation before measurement",
+  "frozen_sha256": "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053",
+  "rrf_threshold": 0.01,
+  "absolute_gate": 0.620313,
+  "retrieval_k": 60,
+  "retrieval_top_k": 5,
+  "model_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "device": "cpu",
+  "systems": [
+    "original RRF threshold only",
+    "same ranking with fixed query cosine gate"
+  ],
+  "heldout_runs_permitted": 1,
+  "tuning_after_heldout": false,
+  "C1": "separate descriptive result",
+  "C2": "excluded pending legacy workflow confirmation",
+  "human_comparison": "NOT PERFORMED",
+  "tier": "PROTOTYPE"
+}
