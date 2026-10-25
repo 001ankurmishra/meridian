@@ -1,0 +1,14 @@
+{
+  "scan_date": "2026-10-26",
+  "scope": "Python 3.11 with dev and UI groups",
+  "finding_count": 0,
+  "dependency_count": 103,
+  "packages": {
+    "certifi": "2026.10.19",
+    "filelock": "4.2.1",
+    "pillow": "13.0.0",
+    "setuptools": "84.1.0",
+    "streamlit": "1.66.1",
+    "urllib3": "2.8.0"
+  }
+}
