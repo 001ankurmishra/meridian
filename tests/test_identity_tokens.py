@@ -32,6 +32,9 @@ def _seed_user(engine: Engine, role: str) -> uuid.UUID:
 
 def _cleanup_user(engine: Engine, uid: uuid.UUID) -> None:
     with engine.begin() as conn:
+        conn.execute(text("DELETE FROM audit_events WHERE case_id IS NULL "
+                          "AND input_summary->>'user_id' = :uid"),
+                     {"uid": str(uid)})
         conn.execute(
             text("DELETE FROM api_tokens WHERE user_id = :uid"),
             {"uid": uid}

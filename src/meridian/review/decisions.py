@@ -54,7 +54,7 @@ def record_human_decision(
             conn.execute(
                 text(
                     """
-                SELECT role
+                SELECT role, is_active
                 FROM users
                 WHERE user_id = :actor_user_id
                 """
@@ -67,6 +67,9 @@ def record_human_decision(
 
         if not actor_row:
             raise DecisionValidationError(f"User {actor_user_id} does not exist.")
+
+        if not actor_row["is_active"]:
+            raise UnauthorizedDecisionError("Actor is inactive.")
 
         current_status = case_row["status"]
         assigned_analyst_id = case_row["assigned_analyst_id"]

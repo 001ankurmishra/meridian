@@ -5,7 +5,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
+
+from meridian.audit.audit_events import record_audit_event
 
 MAX_TTL_HOURS = 168
 
@@ -32,6 +34,21 @@ def hash_token(plaintext_token: str) -> bytes:
     return hashlib.sha256(plaintext_token.encode("utf-8")).digest()
 
 
+
+def _audit_identity(
+    conn: Connection, action: str, user_id: uuid.UUID,
+    token_ids: list[uuid.UUID], now: datetime,
+) -> None:
+    # Maintenance is authenticated by the database principal, not a supplied actor.
+    principal = conn.scalar(text("SELECT session_user"))
+    record_audit_event(
+        conn, case_id=None, actor_type="system", actor_id=f"database:{principal}",
+        action=action, input_summary={"user_id": str(user_id)},
+        output_summary={"token_ids": [str(tid) for tid in token_ids]},
+        occurred_at=now,
+    )
+
+
 def issue_token(
     engine: Engine,
     user_id: uuid.UUID,
@@ -52,12 +69,12 @@ def issue_token(
     with engine.begin() as conn:
         # Verify user exists
         user_exists = conn.execute(
-            text("SELECT 1 FROM users WHERE user_id = :user_id"),
+            text("SELECT is_active FROM users WHERE user_id = :user_id FOR UPDATE"),
             {"user_id": user_id}
         ).scalar()
 
         if not user_exists:
-            raise ValueError(f"User {user_id} does not exist.")
+            raise ValueError("User does not exist or is inactive.")
 
         conn.execute(
             text(
@@ -78,6 +95,8 @@ def issue_token(
                 "label": label
             }
         )
+
+        _audit_identity(conn, "TOKEN_ISSUED", user_id, [token_id], now)
 
     return IssuedToken(
         token_id=token_id,
@@ -103,6 +122,7 @@ def verify_token(engine: Engine, plaintext_token: str) -> Optional[TokenInfo]:
                 WHERE t.token_hash = :token_hash
                   AND t.revoked_at IS NULL
                   AND t.expires_at > :now
+                  AND u.is_active
                 """
             ),
             {"token_hash": token_hash, "now": now}
@@ -129,11 +149,16 @@ def revoke_token(engine: Engine, token_id: uuid.UUID) -> bool:
                 UPDATE api_tokens
                 SET revoked_at = :now
                 WHERE token_id = :token_id AND revoked_at IS NULL
+                RETURNING user_id
                 """
             ),
             {"now": now, "token_id": token_id}
         )
-        return result.rowcount > 0
+        user_id = result.scalar()
+        if user_id is None:
+            return False
+        _audit_identity(conn, "TOKEN_REVOKED", user_id, [token_id], now)
+        return True
 
 
 def revoke_all_tokens_for_user(engine: Engine, user_id: uuid.UUID) -> int:
@@ -146,8 +171,30 @@ def revoke_all_tokens_for_user(engine: Engine, user_id: uuid.UUID) -> int:
                 UPDATE api_tokens
                 SET revoked_at = :now
                 WHERE user_id = :user_id AND revoked_at IS NULL
+                RETURNING token_id
                 """
             ),
             {"now": now, "user_id": user_id}
         )
-        return result.rowcount
+        token_ids = list(result.scalars())
+        if token_ids:
+            _audit_identity(conn, "TOKENS_REVOKED", user_id, token_ids, now)
+        return len(token_ids)
+
+
+def deactivate_user(engine: Engine, user_id: uuid.UUID) -> bool:
+    """Disable issuance and verification and revoke credentials atomically."""
+    now = datetime.now(timezone.utc)
+    with engine.begin() as conn:
+        changed = conn.execute(text(
+            "UPDATE users SET is_active = false "
+            "WHERE user_id = :uid AND is_active RETURNING user_id"
+        ), {"uid": user_id}).scalar()
+        if changed is None:
+            return False
+        token_ids = list(conn.execute(text(
+            "UPDATE api_tokens SET revoked_at = :now "
+            "WHERE user_id = :uid AND revoked_at IS NULL RETURNING token_id"
+        ), {"uid": user_id, "now": now}).scalars())
+        _audit_identity(conn, "USER_DEACTIVATED", user_id, token_ids, now)
+        return True

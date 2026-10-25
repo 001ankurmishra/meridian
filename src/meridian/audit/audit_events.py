@@ -9,7 +9,7 @@ from sqlalchemy import Connection, text
 def record_audit_event(
     conn: Connection,
     *,
-    case_id: uuid.UUID,
+    case_id: uuid.UUID | None,
     actor_type: str,
     actor_id: str,
     action: str,

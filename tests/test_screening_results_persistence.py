@@ -26,6 +26,7 @@ from typing import Any, Generator, cast
 import pytest
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import Connection, Engine, text
 from sqlalchemy.exc import IntegrityError
 
@@ -50,7 +51,9 @@ from meridian.orchestration.screening_results_persistence import (
 from tests.db_cleanup import clean_investigation_run_dependencies
 
 PRIOR_MIGRATION_REVISION = "4573f3e20e1c"
-CURRENT_MIGRATION_REVISION = "e82f1b4a9c3d"
+CURRENT_MIGRATION_REVISION = ScriptDirectory.from_config(
+    Config("alembic.ini")
+).get_current_head()
 
 
 # -----------------------------------------------------------------------------

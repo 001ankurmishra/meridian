@@ -139,12 +139,7 @@ def test_compose_app_receives_app_role_url() -> None:
     resolved_app_pass = resolve_compose_interpolation(
         db_env_raw.get("APP_DB_PASSWORD", ""), empty_env
     )
-    resolved_existing_db_url = resolve_compose_interpolation(
-        app_env_raw.get("DATABASE_URL", ""), empty_env
-    )
-
     app_url = make_url(resolved_app_url_str)
-    existing_url = make_url(resolved_existing_db_url)
 
     assert app_url.drivername == "postgresql+psycopg"
     assert app_url.host == "db"
@@ -155,8 +150,8 @@ def test_compose_app_receives_app_role_url() -> None:
 
     # Username must differ from database superuser
     assert app_url.username != resolved_superuser
-    # Username must differ from existing app DATABASE_URL username
-    assert app_url.username != existing_url.username
+    assert "DATABASE_URL" not in app_env_raw
+    assert "MAINTENANCE_DATABASE_URL" not in app_env_raw
 
 
 def test_compose_app_url_works_through_real_engine_path(
@@ -337,6 +332,9 @@ def test_compose_app_url_works_through_real_engine_path(
                         {"cid": customer_id},
                     )
                 if user_id is not None:
+                    conn.execute(text("DELETE FROM audit_events WHERE case_id IS NULL "
+                                      "AND input_summary->>'user_id' = :uid"),
+                                 {"uid": str(user_id)})
                     conn.execute(
                         text("DELETE FROM api_tokens WHERE user_id = :uid"),
                         {"uid": user_id},
@@ -466,6 +464,9 @@ def test_missing_app_database_url_fails_closed(
                         {"cid": customer_id},
                     )
                 if user_id is not None:
+                    conn.execute(text("DELETE FROM audit_events WHERE case_id IS NULL "
+                                      "AND input_summary->>'user_id' = :uid"),
+                                 {"uid": str(user_id)})
                     conn.execute(
                         text("DELETE FROM api_tokens WHERE user_id = :uid"),
                         {"uid": user_id},
