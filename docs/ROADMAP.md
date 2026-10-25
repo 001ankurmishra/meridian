@@ -111,6 +111,7 @@ Scope (Features F11–F14):
 
 - **Sanctions/Watchlist Screening (Task 24):** Task 24 is complete. Implemented: `screening_results` schema migration (`e82f1b4a9c3d`), `SanctionsAgent` dispatch with static tool calls, pinned watchlist constants (`meridian_synthetic_watchlist` `v1`), orchestrator integration with two-stage persistence, authoring of evidence and candidate findings, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`).
 - **Next Priority (RAG Evaluation):** The documented next priority is RAG evaluation (evaluating policy retrieval accuracy via a labeled query set against the policy corpus, calibrating `confidence_threshold` per `docs/EVALUATION.md` §4). Implementation of RAG evaluation has not yet begun.
+- **2026-10-24 (RAG Evaluation Protocol Freeze Preparation):** Protocol and labeled fixture added as PROPOSED / NOT FROZEN (`docs/EVALUATION.md` §4, `src/meridian/fixtures/policy_retrieval_eval_set.py`); measurement, threshold calibration, and retrieval changes have not begun; threshold behavior (inability to trigger `PolicyEvidenceInsufficient` on a non-empty corpus under current RRF minimum) is documented as derived from code, not measured.
 
 ---
 

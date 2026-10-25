@@ -79,6 +79,8 @@ These fixtures serve triple duty: functional tests (§1), evaluation ground trut
   - `tests/test_sanctions_orchestration_wiring.py`: Orchestrator integration of `run_sanctions_agent`, non-fatal failure handling, non-fatal abstention handling, two-stage persistence rollback guarantees (Stage 2 authoring failure preserves Stage 1 agent run), authoring of `screened_customer` and `watchlist_entry` evidence, investigative findings, human-review recommendations, and forbidden language scans.
   - `tests/test_watchlist_screening_rendering.py`: Pure deterministic classification of all 7 ADR-0008 D10 states (`WatchlistScreeningState`), consistency overrides on candidate count mismatches or invalid runs, forbidden terminology assertions, and integration with `assemble_report()`.
   - `tests/test_audit_trail.py`: Audit trail extension for `screening_results`, asserting that `get_case_audit_trail()` exposes persisted screening outcomes.
+- **Policy Retrieval Evaluation Protocol (PROPOSED / NOT FROZEN):**
+  - `tests/test_policy_retrieval_eval_set.py`: Integrity and structural validation for proposed policy retrieval evaluation set (`policy_retrieval_eval_v1`), verifying exact chunk binding against `POLICY_CORPUS_V1` and `chunk_document`, Cartesian completeness of chunk judgments, validator positive and negative checks for V1–V8 invariants, cohort counts, split determinism across `PYTHONHASHSEED`, 5-word C4 n-gram leakage prevention, canonical JSON SHA-256 change-detection pinning, forbidden vocabulary exclusions, sub-process import isolation (ensuring zero runtime dependencies on retrieval, embeddings, or database), and permutation verification of random-ordering expectation formulas on toy inputs.
 
 ---
 
