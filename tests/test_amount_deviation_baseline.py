@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from decimal import Decimal
 
 from sqlalchemy import Engine, text
@@ -95,9 +96,7 @@ def test_determinism(tmp_path, superuser_engine: Engine):
             try:
                 subprocess_res = subprocess.run(
                     [
-                        "uv",
-                        "run",
-                        "python",
+                        sys.executable,
                         "-m",
                         "meridian.fixtures.amount_deviation_baseline",
                     ],

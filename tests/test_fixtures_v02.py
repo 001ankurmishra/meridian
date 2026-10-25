@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import typing
 import uuid
 from decimal import Decimal
@@ -60,7 +61,7 @@ sys.stdout.write(canonical_json(res["manifest"]))
             f.write(script)
 
         subprocess_res = subprocess.run(
-            ["uv", "run", "python", "run_gen.py"],
+            [sys.executable, "run_gen.py"],
             env=env,
             cwd=cwd,
             capture_output=True,
@@ -234,9 +235,7 @@ def test_baseline_compatibility(tmp_path: typing.Any, superuser_engine: Engine) 
 
         res2 = subprocess.run(
             [
-                "uv",
-                "run",
-                "python",
+                sys.executable,
                 "-m",
                 "meridian.fixtures.amount_deviation_baseline",
                 "--fixture-version",
@@ -267,9 +266,7 @@ def test_baseline_compatibility(tmp_path: typing.Any, superuser_engine: Engine) 
 
         res1 = subprocess.run(
             [
-                "uv",
-                "run",
-                "python",
+                sys.executable,
                 "-m",
                 "meridian.fixtures.amount_deviation_baseline",
             ],

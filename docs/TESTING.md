@@ -86,6 +86,11 @@ These fixtures serve triple duty: functional tests (§1), evaluation ground trut
 
 ## 4. Test Environment
 
+Use Python 3.11 (`.python-version`, matching CI and Docker). Install the locked
+environment with `uv sync --frozen --group ui`. Test subprocesses use
+`sys.executable` so they inherit the running interpreter and cannot re-sync or
+replace the environment. Do not run dependency synchronization concurrently with tests.
+
 - Database-touching tests run against a real (ephemeral/test) PostgreSQL instance with pgvector, not mocks — mocking the DB layer would hide the exact integrity issues this project cares most about.
 - LLM-dependent tests: **REQUIRES VERIFICATION/decision at implementation time** whether to use a real (rate-limited, cost-bounded) LLM call in CI, a recorded/replayed response fixture, or a combination (e.g., schema-shape tests use recorded fixtures; a small nightly job uses real calls). Document the chosen approach here once decided — do not leave this undocumented.
 

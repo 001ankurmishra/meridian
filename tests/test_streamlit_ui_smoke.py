@@ -1,6 +1,7 @@
 import os
 import socket
 import subprocess
+import sys
 import time
 import uuid
 from typing import Any, Generator
@@ -34,8 +35,8 @@ def live_server_url(run_migrations: None) -> Generator[str, None, None]:
 
     proc = subprocess.Popen(
         [
-            "uv",
-            "run",
+            sys.executable,
+            "-m",
             "uvicorn",
             "meridian.main:app",
             "--app-dir",
