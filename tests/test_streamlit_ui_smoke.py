@@ -223,7 +223,8 @@ def test_ui_smoke_auth_boundary(live_server_url: str, ui_smoke_engine: Engine) -
 
         assert not at.exception
         error_msgs = [e.value for e in at.error]
-        assert any("not found" in m.lower() for m in error_msgs), error_msgs
+        assert any("HTTP 404" in m for m in error_msgs), error_msgs
+        assert any("do not have access" in item.value for item in at.info)
 
         with ui_smoke_engine.connect() as conn:
             status = conn.execute(
