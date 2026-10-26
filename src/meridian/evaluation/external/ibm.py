@@ -45,7 +45,9 @@ class Transaction:
     generator_label: int
 
 
-def parse_row(row: list[str], row_number: int) -> Transaction:
+def parse_row(
+    row: list[str], row_number: int, *, allow_signed: bool = False,
+) -> Transaction:
     """Reject malformed records with bounded errors, without printing row data."""
     try:
         if len(row) != len(HEADER):
@@ -60,10 +62,11 @@ def parse_row(row: list[str], row_number: int) -> Transaction:
             if row[index] == "(null)":
                 amounts.append(None)
                 continue
-            if not re.fullmatch(r"\d+(?:\.\d+)?", row[index]):
+            pattern = r"-?\d+(?:\.\d+)?" if allow_signed else r"\d+(?:\.\d+)?"
+            if not re.fullmatch(pattern, row[index]):
                 raise ValueError("amount format")
             amount = Decimal(row[index])
-            if not amount.is_finite() or amount < 0:
+            if not amount.is_finite() or (amount < 0 and not allow_signed):
                 raise ValueError("amount range")
             amounts.append(amount)
         if row[10] not in {"0", "1"}:

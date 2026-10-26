@@ -71,11 +71,15 @@ def validate(source: Path, destination: Path, expected_sha256: str) -> dict[str,
                     name = HEADER[column] if column < len(HEADER) else "EXTRA"
                     missing_by_column[str(column) + ":" + name] += 1
             try:
-                tx = parse_row(row, number)
+                tx = parse_row(row, number, allow_signed=True)
             except ValueError:
                 counts["invalid_rows"] += 1
                 continue
             counts["valid_rows"] += 1
+            if tx.paid is not None and tx.paid < 0:
+                counts["negative_paid_rows"] += 1
+            if tx.received is not None and tx.received < 0:
+                counts["negative_received_rows"] += 1
             labels[row[10]] += 1
             currencies["paid:" + tx.payment_currency] += 1
             currencies["received:" + tx.receiving_currency] += 1

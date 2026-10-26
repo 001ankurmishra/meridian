@@ -135,6 +135,8 @@ def account_features(transactions: list[Transaction]) -> list[dict[str, Any]]:
     currency_counts: Counter[str] = Counter()
     amount_sum = Decimal(0)
     missing = 0
+    negative = 0
+    day_unsupported = 0
     result = []
     for timestamp, group in groupby(ordered, key=lambda tx: tx.timestamp):
         batch = list(group)
@@ -147,11 +149,16 @@ def account_features(transactions: list[Transaction]) -> list[dict[str, Any]]:
                 missing -= 1
             else:
                 amount_sum -= tx.paid
+                negative -= int(tx.paid < 0)
         while day and day[0].timestamp < timestamp - timedelta(hours=24):
-            day.popleft()
+            expired = day.popleft()
+            day_unsupported -= int(expired.paid is None or expired.paid < 0)
+        batch_unsupported = sum(tx.paid is None or tx.paid < 0 for tx in batch)
         for tx in batch:
             reason = None
-            if tx.paid is None or missing or tx.payment_currency == "Unknown":
+            if negative or (tx.paid is not None and tx.paid < 0):
+                reason = "UNSUPPORTED_SIGNED_AMOUNT"
+            elif tx.paid is None or missing or tx.payment_currency == "Unknown":
                 reason = "MISSING_AMOUNT_OR_CURRENCY"
             elif not history:
                 reason = "NO_HISTORY"
@@ -162,7 +169,11 @@ def account_features(transactions: list[Transaction]) -> list[dict[str, Any]]:
             result.append(
                 {
                     "tx": tx,
-                    "velocity": len(day) + len(batch),
+                    "velocity": (
+                        None
+                        if day_unsupported or batch_unsupported
+                        else len(day) + len(batch)
+                    ),
                     "amount": (
                         float(tx.paid / (amount_sum / len(history)))
                         if reason is None and tx.paid is not None
@@ -175,11 +186,13 @@ def account_features(transactions: list[Transaction]) -> list[dict[str, Any]]:
         for tx in batch:
             history.append(tx)
             day.append(tx)
+            day_unsupported += int(tx.paid is None or tx.paid < 0)
             currency_counts[tx.payment_currency] += 1
             if tx.paid is None:
                 missing += 1
             else:
                 amount_sum += tx.paid
+                negative += int(tx.paid < 0)
     return result
 
 
@@ -202,7 +215,7 @@ def evaluate(sample: Path, protocol_path: Path, output: Path) -> dict[str, Any]:
         reader = csv.reader(stream)
         next(reader)
         for row in reader:
-            tx = parse_row(row[3:], int(row[0]))
+            tx = parse_row(row[3:], int(row[0]), allow_signed=True)
             left = (tx.sender_bank, tx.sender_account)
             right = (tx.receiver_bank, tx.receiver_account)
             components.join(left, right)
@@ -249,6 +262,8 @@ def evaluate(sample: Path, protocol_path: Path, output: Path) -> dict[str, Any]:
                         "score": feature[name],
                         "reason": feature["amount_reason"]
                         if name == "amount"
+                        else "UNSUPPORTED_OR_MISSING_AMOUNT_IN_24H"
+                        if feature["velocity"] is None
                         else None,
                         "currency": tx.payment_currency,
                         "format": tx.payment_format,

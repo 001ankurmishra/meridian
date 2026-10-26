@@ -48,6 +48,30 @@ def test_missing_and_currency_never_imputed() -> None:
     assert mixed[-1]["amount_reason"] == "CURRENCY_MISMATCH"
 
 
+def test_signed_source_amounts_remain_unknown_and_expire() -> None:
+    signed = parse_row(
+        [
+            "2019/01/01 00:00",
+            "1",
+            "A",
+            "2",
+            "B",
+            "-10",
+            "Euro",
+            "-10",
+            "Euro",
+            "Wire",
+            "0",
+        ],
+        2,
+        allow_signed=True,
+    )
+    features = account_features([signed, tx("2019/01/02 00:01", "20", 3)])
+    assert features[0]["velocity"] is None
+    assert features[1]["velocity"] == 1
+    assert features[1]["amount_reason"] == "UNSUPPORTED_SIGNED_AMOUNT"
+
+
 def test_metric_ties_and_capacity() -> None:
     rows = [
         {"source_row": i, "score": 1, "label": label, "reason": None}
