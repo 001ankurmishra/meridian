@@ -1,0 +1,267 @@
+{
+  "protocol": "policy-retrieval-v2.0",
+  "status": "DRAFT_REVIEW_REQUIRED",
+  "corpus_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "label_status": "AI_PROPOSED; NO independent validation or maintainer approval yet",
+  "split_rule": "topic families stay together; six positive topic families plus eight negative families; no cross-split paraphrases",
+  "baseline": "Existing pinned BGE-small, prefixed query, pgvector cosine + PostgreSQL English FTS, complete ranked lists then RRF k=60, top5, query gate 0.620313 unchanged; diagnostic transfer to new corpus, NOT recalibration",
+  "metrics": [
+    "precision@5 (missing slots count as nonrelevant)",
+    "recall@5",
+    "MRR@5",
+    "binary nDCG@5",
+    "positive coverage",
+    "negative abstention",
+    "citation ID existence and exact persisted-text hash",
+    "version/source applicability against reviewed labels"
+  ],
+  "uncertainty": "Report per-topic outcomes and exact numerator/denominator; small 6-topic corpus cannot establish generalization. Topic bootstrap only if sufficient independent groups; otherwise NOT ESTIMABLE.",
+  "citation_limit": "Retrieval labels test passage support/applicability; no generated-answer citation-faithfulness claim",
+  "freeze_gate": "Record explicit reviewer approval and canonical hash before freezing or running final HELDOUT. No v1 evaluation rerun. No threshold tuning in this baseline.",
+  "queries": [
+    {
+      "id": "v2-monitoring-1",
+      "topic_group": "monitoring",
+      "split": "DEV",
+      "kind": "exact_topic",
+      "query": "According to paragraph 28 of the July 2020 BCBS AML guidelines, what must a bank do if it considers an IT monitoring system unnecessary?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-10:chunk-3"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-monitoring-2",
+      "topic_group": "monitoring",
+      "split": "DEV",
+      "kind": "paraphrase",
+      "query": "In the July 2020 BCBS guidance, how must a bank justify using an alternative to automated monitoring?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-10:chunk-3"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-alert_assessment-1",
+      "topic_group": "alert_assessment",
+      "split": "DEV",
+      "kind": "exact_topic",
+      "query": "Under paragraph 30 of the July 2020 BCBS AML guidance, who further assesses alerts of unusual transactions?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-11:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-alert_assessment-2",
+      "topic_group": "alert_assessment",
+      "split": "DEV",
+      "kind": "paraphrase",
+      "query": "What human assessment follows IT-generated unusual transaction alerts in the July 2020 BCBS guidelines?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-11:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-record_updates-1",
+      "topic_group": "record_updates",
+      "split": "DEV",
+      "kind": "exact_topic",
+      "query": "What does paragraph 54 of the July 2020 BCBS AML guidance say about keeping CDD records current?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-15:chunk-3"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-record_updates-2",
+      "topic_group": "record_updates",
+      "split": "DEV",
+      "kind": "paraphrase",
+      "query": "How does regularly updating CDD information assist monitoring according to the July 2020 BCBS guidance?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-15:chunk-3"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-retention-1",
+      "topic_group": "retention",
+      "split": "HELDOUT",
+      "kind": "exact_topic",
+      "query": "Under paragraph 52 of the July 2020 BCBS AML guidelines, how long should records be kept when an investigation continues after account closure?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-15:chunk-2"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-retention-2",
+      "topic_group": "retention",
+      "split": "HELDOUT",
+      "kind": "paraphrase",
+      "query": "According to the July 2020 BCBS recordkeeping guidance, may records be discarded during ongoing litigation after an account closes?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-15:chunk-2"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-confidentiality-1",
+      "topic_group": "confidentiality",
+      "split": "HELDOUT",
+      "kind": "exact_topic",
+      "query": "What does paragraph 57 of the July 2020 BCBS AML guidance say about confidentiality and timeliness in suspicious activity reporting procedures?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-16:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-confidentiality-2",
+      "topic_group": "confidentiality",
+      "split": "HELDOUT",
+      "kind": "paraphrase",
+      "query": "In the July 2020 BCBS guidelines, how should reporting procedures protect confidentiality while ensuring swift investigations?",
+      "expected_relevant_chunks": [
+        "bis-aml-2020:pdf-page-16:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-correspondent-1",
+      "topic_group": "correspondent",
+      "split": "HELDOUT",
+      "kind": "exact_topic",
+      "query": "According to principle 29 criterion 6 in the April 2024 Basel Core Principles, what should banks learn about a respondent bank?",
+      "expected_relevant_chunks": [
+        "bis-core-2024:pdf-page-71:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-correspondent-2",
+      "topic_group": "correspondent",
+      "split": "HELDOUT",
+      "kind": "paraphrase",
+      "query": "What correspondent-banking due diligence information does criterion 6 of principle 29 in the April 2024 Basel Core Principles call for?",
+      "expected_relevant_chunks": [
+        "bis-core-2024:pdf-page-71:chunk-1"
+      ],
+      "expectation": "RETRIEVE",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Source/version-specific passage supporting the requested proposition; alternatives require reviewer adjudication."
+    },
+    {
+      "id": "v2-recipe",
+      "topic_group": "recipe",
+      "split": "DEV",
+      "kind": "out_of_domain",
+      "query": "How do I bake a sourdough loaf?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "No cooking corpus."
+    },
+    {
+      "id": "v2-rupee_threshold",
+      "topic_group": "rupee_threshold",
+      "split": "DEV",
+      "kind": "missing_internal_policy",
+      "query": "What exact INR amount requires Meridian Bank to automatically freeze an account?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "No Meridian internal policy or automatic-freeze authority; public guidance cannot supply a bank-specific threshold."
+    },
+    {
+      "id": "v2-capital_aml",
+      "topic_group": "capital_aml",
+      "split": "DEV",
+      "kind": "hard_negative",
+      "query": "Does meeting Basel capital adequacy ratios prove that a customer transaction is legitimate?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Capital standards do not establish legitimacy of an individual transaction."
+    },
+    {
+      "id": "v2-stock",
+      "topic_group": "stock",
+      "split": "DEV",
+      "kind": "out_of_domain",
+      "query": "Which stock will double in price tomorrow?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "No investment forecasting evidence."
+    },
+    {
+      "id": "v2-rbi_current",
+      "topic_group": "rbi_current",
+      "split": "HELDOUT",
+      "kind": "missing_jurisdiction",
+      "query": "What is the exact current RBI deadline in hours for this bank to file an Indian suspicious transaction report?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "No current RBI source or domestic applicability evidence in corpus."
+    },
+    {
+      "id": "v2-old_source",
+      "topic_group": "old_source",
+      "split": "HELDOUT",
+      "kind": "outdated_source",
+      "query": "Quote the original September 2012 Basel Core Principles criterion 29(5)(f) verbatim from the 2012 source.",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "2012 text is not ingested; a later citation or similar rule is not the original source."
+    },
+    {
+      "id": "v2-draft_binding",
+      "topic_group": "draft_binding",
+      "split": "HELDOUT",
+      "kind": "status_conflict",
+      "query": "Has the January 2026 draft consolidated AFS10 guidance become binding Indian law?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Draft is not ingested or verified as adopted; international guidance is not domestic law."
+    },
+    {
+      "id": "v2-ten_year",
+      "topic_group": "ten_year",
+      "split": "HELDOUT",
+      "kind": "conflicting_premise",
+      "query": "Where do the July 2020 BCBS guidelines mandate destruction of all records exactly ten years after account closure even during litigation?",
+      "expected_relevant_chunks": [],
+      "expectation": "ABSTAIN",
+      "label_origin": "AI_PROPOSED_NOT_INDEPENDENTLY_REVIEWED",
+      "rationale": "Premise conflicts with the cited continued-retention guidance; no supporting passage."
+    }
+  ]
+}

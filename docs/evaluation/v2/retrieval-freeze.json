@@ -1,0 +1,10 @@
+{
+  "status": "FROZEN",
+  "approved_review_sha256": "d6d9a3363545c0cd6c820a3ea2367155860e2152a4d9d06828d55b91e98d1c37",
+  "approval_date": "2026-10-27",
+  "reviewer": "Ankur, maintainer",
+  "approval": "Approve labels, protocol and v2 baseline measurement",
+  "label_provenance": "AI-proposed labels reviewed and approved by maintainer; NOT independent expert validation",
+  "corpus_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "measurement": "One unchanged BGE hybrid baseline, DEV and HELDOUT, no tuning; v1 untouched"
+}
