@@ -69,6 +69,7 @@ def ranking_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "positive": positives,
         "negative": negatives,
         "unknown": len(rows) - len(known),
+        "unknown_positive": sum(r["label"] for r in rows if r["score"] is None),
         "unknown_reasons": dict(
             Counter(r["reason"] for r in rows if r["score"] is None)
         ),
@@ -220,7 +221,8 @@ def evaluate(sample: Path, protocol_path: Path, output: Path) -> dict[str, Any]:
             right = (tx.receiver_bank, tx.receiver_account)
             components.join(left, right)
             edge = (left, right)
-            first_edge[edge] = min(first_edge.get(edge, tx.timestamp), tx.timestamp)
+            if tx.paid is not None and tx.paid >= 0:
+                first_edge[edge] = min(first_edge.get(edge, tx.timestamp), tx.timestamp)
             if row[1] == "1":
                 accounts[left].append(tx)
     rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -246,6 +248,8 @@ def evaluate(sample: Path, protocol_path: Path, output: Path) -> dict[str, Any]:
             reverse = first_edge.get(((tx.receiver_bank, tx.receiver_account), account))
             witnessed = (
                 account != (tx.receiver_bank, tx.receiver_account)
+                and tx.paid is not None
+                and tx.paid >= 0
                 and reverse is not None
                 and reverse <= tx.timestamp
             )

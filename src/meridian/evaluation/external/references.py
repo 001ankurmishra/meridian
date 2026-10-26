@@ -17,6 +17,36 @@ import pypdf
 from meridian.evaluation.external.ibm import sha256_file
 
 
+def fetch_sources(manifest: Path, directory: Path) -> None:
+    """Fetch only pinned official PDFs; reuse verified local files."""
+    import httpx
+
+    directory.mkdir(parents=True, exist_ok=True)
+    for source in json.loads(manifest.read_text())["sources"]:
+        if Path(source["filename"]).name != source["filename"]:
+            raise ValueError("Invalid reference filename")
+        if not source["url"].startswith("https://www.bis.org/publications/"):
+            raise ValueError("Unreviewed reference download origin")
+        path = directory / source["filename"]
+        if path.exists():
+            if sha256_file(path) != source["sha256"]:
+                raise ValueError("Existing reference digest mismatch")
+            continue
+        content = bytearray()
+        with httpx.stream("GET", source["url"], timeout=30) as response:
+            response.raise_for_status()
+            for block in response.iter_bytes(65536):
+                content.extend(block)
+                if len(content) > 10_000_000:
+                    raise ValueError("Reference exceeds reviewed size limit")
+        if not content.startswith(b"%PDF"):
+            raise ValueError("Reference response is not a PDF")
+        if hashlib.sha256(content).hexdigest() != source["sha256"]:
+            raise ValueError("Downloaded reference digest mismatch")
+        with path.open("xb") as output:
+            output.write(content)
+
+
 def chunks(text: str, token_count: Callable[[str], int]) -> list[str]:
     """Use original text spans, <=400 BGE tokens, overlapping at most 30 words."""
     words = list(re.finditer(r"\S+", text))
@@ -106,5 +136,8 @@ if __name__ == "__main__":
     parser.add_argument("manifest", type=Path)
     parser.add_argument("directory", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--download", action="store_true")
     args = parser.parse_args()
+    if args.download:
+        fetch_sources(args.manifest, args.directory)
     print(json.dumps(ingest(args.manifest, args.directory, args.output), indent=2))
