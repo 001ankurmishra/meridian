@@ -69,8 +69,22 @@ Four explicit actions, each requiring the acting analyst's identity to be record
 |---|---|---|
 | Approve | Marks case `CLOSED_APPROVED`; recommendation accepted | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
 | Reject | Marks case `CLOSED_REJECTED`; recommendation rejected with required reason text | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
-| Request More Info | Reopens/extends `investigation_run` (`CLOSED_MORE_INFO`); can specify what's missing | Assigned analyst only |
+| Request More Info | Marks case `CLOSED_MORE_INFO`; records what is missing without automatically starting or extending a run | Assigned analyst only |
 | Escalate | Marks case `ESCALATED`; routes to compliance manager | Assigned analyst (if OPEN/IN_REVIEW/CLOSED_MORE_INFO) or senior analyst |
+
+**Maintainer-approved investigation prerequisites (2026-10-26):**
+- APPROVE and REJECT both require exactly one supported COMPLETE investigation,
+  a report that passes existing source/evidence/finding validation, and at least
+  one supported recommendation. Status alone is insufficient.
+- ESCALATE and REQUEST_MORE_INFO may be used for uninvestigated, FAILED or
+  INCOMPLETE cases under the existing role/action/case-state matrix below. They
+  are triage actions, not assertions of evidential completeness.
+- All human decisions are rejected while any run is IN_PROGRESS. The case lock
+  serializes decisions with admission of a new investigation. Ambiguous historical
+  non-failed runs are rejected for maintainer review; none are silently discarded.
+- The selected run ID and its status are retained in the audit record (null only
+  when there is no run). Report validation uses the same transaction as the
+  case update and audit insert, so any failure rolls the whole decision back.
 
 **F8 Design Clarifications:**
 - `CLOSED_MORE_INFO` is re-decidable. Its authorization tier matches `OPEN`/`IN_REVIEW` for Approve/Reject/Escalate.

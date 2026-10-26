@@ -60,7 +60,11 @@ After entering the token, the first-run form is prefilled with the seeded values
 - Transaction ID: `beafcbac-3048-5134-ae01-fd7585a5ef49` (INR 980,000 transfer).
 
 Create Case → Investigate → Fetch Report → review evidence and screening → Submit
-Decision → Fetch Audit Trail. A Transaction ID is required for transaction-based
+Decision → Fetch Audit Trail. Both APPROVE and REJECT require a COMPLETE
+investigation and a valid evidence-backed report with recommendations. Triage
+(ESCALATE or authorized REQUEST_MORE_INFO) remains available when evidence is
+missing or a run failed; all decisions wait for active investigations to finish.
+A Transaction ID is required for transaction-based
 evidence; clearing it intentionally yields an incomplete investigation. The UI
 recognizes `INCOMPLETE_INSUFFICIENT_EVIDENCE` and does not claim completion.
 REQUEST_MORE_INFO is restricted to the assigned analyst; the senior demo token

@@ -87,6 +87,7 @@ class AuditEventEntry:
     input_summary: dict[str, Any] | None
     output_summary: dict[str, Any] | None
     occurred_at: datetime | None
+    investigation_run_id: uuid.UUID | None = None
 
 
 @dataclass(frozen=True)
@@ -276,7 +277,7 @@ def get_case_audit_trail(engine: Engine, case_id: uuid.UUID) -> CaseAuditTrail:
         audit_event_rows = conn.execute(
             text(
                 "SELECT audit_event_id, actor_type, actor_id, action, "
-                "input_summary, output_summary, occurred_at "
+                "input_summary, output_summary, occurred_at, investigation_run_id "
                 "FROM audit_events WHERE case_id = :cid "
                 "ORDER BY occurred_at ASC"
             ),
@@ -291,6 +292,7 @@ def get_case_audit_trail(engine: Engine, case_id: uuid.UUID) -> CaseAuditTrail:
                 input_summary=r[4],
                 output_summary=r[5],
                 occurred_at=r[6],
+                investigation_run_id=r[7],
             )
             for r in audit_event_rows
         )

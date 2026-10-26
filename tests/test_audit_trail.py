@@ -291,6 +291,13 @@ def test_multiple_investigation_runs_all_present(
         case_id = _seed_alert_case(superuser_engine, cid)
 
         run_1 = create_investigation_run(app_role_engine, case_id)
+        with superuser_engine.begin() as conn:
+            conn.execute(
+                text("UPDATE investigation_runs "
+                     "SET status='FAILED', completed_at=now() "
+                     "WHERE investigation_run_id=:rid"),
+                {"rid": run_1.investigation_run_id},
+            )
         run_2 = create_investigation_run(app_role_engine, case_id)
 
         trail = get_case_audit_trail(app_role_engine, case_id)

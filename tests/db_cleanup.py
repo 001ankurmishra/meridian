@@ -15,6 +15,9 @@ def clean_investigation_run_dependencies(
     if investigation_run_id:
         params = {"rid": str(investigation_run_id)}
         conn.execute(
+            text("DELETE FROM audit_events WHERE investigation_run_id = :rid"), params
+        )
+        conn.execute(
             text("DELETE FROM recommendations WHERE investigation_run_id = :rid"),
             params,
         )
@@ -39,6 +42,9 @@ def clean_investigation_run_dependencies(
             params,
         )
     else:
+        conn.execute(
+            text("DELETE FROM audit_events WHERE investigation_run_id IS NOT NULL")
+        )
         conn.execute(text("DELETE FROM recommendations"))
         conn.execute(text("DELETE FROM findings"))
         conn.execute(text("DELETE FROM evidence"))

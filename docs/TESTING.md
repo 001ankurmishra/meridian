@@ -200,3 +200,10 @@ before admission (real PostgreSQL), and fail-closed ambiguous historical reports
 The supported start path must retain the case row lock through its INSERT commit.
 `test_db_migrations.py` verifies effective and exercised source-write denial while
 retaining alert intake INSERT and required case/investigation/audit writes.
+
+`test_decision_state_gate.py` covers all four actions across five investigation
+states and five actor categories (assigned/unassigned analyst, senior analyst,
+compliance manager, admin), plus corrupt COMPLETE reports and a real concurrent
+decision/start race. `test_decision_run_link.py` verifies persisted run provenance
+and ambiguity rejection. Existing audit-failure rollback tests use valid supported
+reports, so they reach the actual audit insertion boundary.

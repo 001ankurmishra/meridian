@@ -306,6 +306,9 @@ if st.button("Fetch Audit Trail"):
                         f"**{occurred}** | Action: **{action}** "
                         f"| Actor: {actor_t} ({actor_i})"
                     )
+                    st.write(
+                        f"Investigation run: {ae.get('investigation_run_id') or 'None'}"
+                    )
                     st.write("Input:")
                     st.json(ae.get("input_summary") or {})
                     st.write("Output:")
@@ -320,6 +323,11 @@ st.divider()
 
 # --- HUMAN DECISION ---
 st.header("5. Human Decision")
+st.caption(
+    "APPROVE and REJECT require a COMPLETE investigation and a valid report "
+    "with recommendations. Triage remains available for missing, incomplete "
+    "or failed investigations under your role permissions. Wait for active runs."
+)
 st.info(
     "REQUEST_MORE_INFO is restricted to the assigned analyst; a senior analyst "
     "token alone does not permit it. Assignment administration is not available "
