@@ -190,3 +190,13 @@ Per `CLAUDE.md` §3 Step 6: a coding agent must never report a test as passing w
 ## 7. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` (source of the safety-critical requirements), `docs/DATA_AND_DATASET_STRATEGY.md` (fixture generation), `docs/EVALUATION.md` (fixtures reused as evaluation ground truth), `docs/SECURITY.md` (security review checklist feeding test cases).
+
+
+## Portfolio integrity regression gates
+
+`test_run_integrity.py` exercises sequential duplicate rejection, explicit FAILED
+retry, closed-case rejection, overlapping HTTP investigation requests synchronized
+before admission (real PostgreSQL), and fail-closed ambiguous historical reports.
+The supported start path must retain the case row lock through its INSERT commit.
+`test_db_migrations.py` verifies effective and exercised source-write denial while
+retaining alert intake INSERT and required case/investigation/audit writes.
