@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-26",
+  "use_scope": "Local noncommercial research only; full text and chunks are not redistributed in Git",
+  "terms_url": "https://www.bis.org/about/terms-conditions",
+  "permission_basis": "Terms section 2(a): download/display/print/photocopy/redistribute for noncommercial purposes. Publication notices retain copyright and permit brief attributed excerpts. No commercial redistribution permission claimed.",
+  "sources": [
+    {
+      "id": "bis-aml-2020",
+      "filename": "d505.pdf",
+      "title": "Sound management of risks related to money laundering and financing of terrorism",
+      "publisher": "Basel Committee on Banking Supervision / BIS",
+      "publication_date": "2020-07-02",
+      "version": "January 2014, revised July 2020",
+      "effective_date": null,
+      "jurisdiction": "International supervisory guidance; domestic implementation not established",
+      "document_type": "external_reference",
+      "status": "PUBLISHED_REFERENCE",
+      "currency_note": "2020 publication remains linked by the 2026 draft consolidation. The draft is not treated as an adopted replacement.",
+      "url": "https://www.bis.org/publications/202007-guidelines-sound-management-risks-related-money-laundering-and-financing-terrorism-revisions-supervisory.pdf",
+      "landing_url": "https://www.bis.org/publications/202007-guidelines-sound-management-risks-related-money-laundering-and-financing-terrorism-revisions-supervisory-cooperation",
+      "sha256": "1cc3c40c9de0e5d1272f4b86a11a7babd4847b1083ed30d0bc0bac14117bf1a6",
+      "pages": 62,
+      "verified_blank_pdf_pages": [4],
+      "copyright": "Copyright BIS 2020; all rights reserved; brief attributed excerpts permitted",
+      "scope": "Whole text excluding cover/copyright pages; includes supervisory and account-opening annexes"
+    },
+    {
+      "id": "bis-core-2024",
+      "filename": "d573.pdf",
+      "title": "Core Principles for effective banking supervision",
+      "publisher": "Basel Committee on Banking Supervision / BIS",
+      "publication_date": "2024-04-25",
+      "version": "April 2024",
+      "effective_date": null,
+      "jurisdiction": "International supervisory standard; domestic applicability not established",
+      "document_type": "external_reference",
+      "status": "PUBLISHED_REFERENCE",
+      "currency_note": "Official April 2024 publication; no superseding notice found on the official landing page at check date",
+      "url": "https://www.bis.org/publications/202404-standards-core-principles-effective-banking-supervision.pdf",
+      "landing_url": "https://www.bis.org/publications/202404-standards-core-principles-effective-banking-supervision",
+      "sha256": "2b869111df802c3c64cae837d588c3e361b674ced3f9e808a4d0424a8326f2df",
+      "pages": 81,
+      "verified_blank_pdf_pages": [4],
+      "copyright": "Copyright BIS 2024; all rights reserved; brief attributed excerpts permitted",
+      "scope": "Whole text excluding cover/copyright pages; principle 29 plus surrounding supervisory context"
+    }
+  ],
+  "deferred": [
+    {
+      "url": "https://www.bis.org/committees/bcbs/basel-consolidated-guidelines/module/afs/10",
+      "status": "DRAFT_UNDER_CONSULTATION",
+      "reason": "Official page explicitly identifies a consultation draft; not ingested as current published guidance"
+    },
+    {"source": "FATF", "reason": "Individual-document permission/version reconciliation pending; no content ingested"},
+    {"source": "RBI", "reason": "Official-document permission and currency verification pending; no content ingested"}
+  ]
+}

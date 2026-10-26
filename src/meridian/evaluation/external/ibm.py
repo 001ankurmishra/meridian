@@ -12,6 +12,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 from pathlib import Path
 
 HEADER = [
@@ -19,6 +20,13 @@ HEADER = [
     "Amount Received", "Receiving Currency", "Amount Paid", "Payment Currency",
     "Payment Format", "Is Laundering",
 ]
+
+
+@lru_cache(maxsize=65536)
+def parse_timestamp(value: str) -> datetime:
+    if not re.fullmatch(r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}", value):
+        raise ValueError("timestamp format")
+    return datetime.fromisoformat(value.replace("/", "-"))
 
 
 @dataclass(frozen=True)
@@ -29,9 +37,9 @@ class Transaction:
     sender_account: str
     receiver_bank: str
     receiver_account: str
-    received: Decimal
+    received: Decimal | None
     receiving_currency: str
-    paid: Decimal
+    paid: Decimal | None
     payment_currency: str
     payment_format: str
     generator_label: int
@@ -44,13 +52,14 @@ def parse_row(row: list[str], row_number: int) -> Transaction:
             raise ValueError("column count")
         if any(not value or value != value.strip() for value in row):
             raise ValueError("empty or padded field")
-        if not re.fullmatch(r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}", row[0]):
-            raise ValueError("timestamp format")
-        timestamp = datetime.strptime(row[0], "%Y/%m/%d %H:%M")
+        timestamp = parse_timestamp(row[0])
         if any(not re.fullmatch(r"[A-Za-z0-9]+", v) for v in row[1:5]):
             raise ValueError("identifier format")
-        amounts = []
+        amounts: list[Decimal | None] = []
         for index in (5, 7):
+            if row[index] == "(null)":
+                amounts.append(None)
+                continue
             if not re.fullmatch(r"\d+(?:\.\d+)?", row[index]):
                 raise ValueError("amount format")
             amount = Decimal(row[index])

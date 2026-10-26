@@ -24,6 +24,16 @@ def test_positional_accounts_and_exact_amounts() -> None:
     assert tx.generator_label == 1
 
 
+def test_publisher_null_amount_is_unknown_not_imputed() -> None:
+    row = ROW.copy()
+    row[5] = "(null)"
+    row[6] = "Unknown"
+    tx = parse_row(row, 2)
+    assert tx.received is None
+    assert tx.receiving_currency == "Unknown"
+    assert tx.paid == Decimal("4.01")
+
+
 @pytest.mark.parametrize("index,value", [
     (0, "2019/02/30 12:00"), (0, "2019/1/1 0:00"), (1, ""), (2, "A B"),
     (5, "NaN"), (5, "Infinity"), (5, "-1"), (7, "1e3"), (10, "2"),
