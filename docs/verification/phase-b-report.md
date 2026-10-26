@@ -149,3 +149,23 @@ AML accuracy and independent human validation cannot be claimed.
 
 **Next external action requires Ankur's explicit approval:** push this verified
 feature branch to origin. Do not merge into main automatically.
+
+
+## Merge and portfolio-remediation addendum — 2026-10-26
+
+Phase B was subsequently published and merged through
+[PR #40](https://github.com/001ankurmishra/meridian/pull/40).
+The verified merged main commit is
+`53e26dc36453f273c2d61dbee05c64dd9323059c`; its tree matches the Phase B final
+commit. [Post-merge push CI #40260592866](https://github.com/001ankurmishra/meridian/actions/runs/40260592866)
+reported `completed/success`, independently checked through GitHub's API.
+The earlier no-push/no-merge/CI-not-run statements above describe the original
+handoff, not the current repository state.
+
+A subsequent focused audit identified real omissions despite the original 752
+passing tests: repeated investigation admission, missing human-decision run
+prerequisites/provenance, stale demo defaults and unnecessary runtime source-write
+grants. These are being corrected on `feature/portfolio-release-integrity`, based
+on the verified merge. The original Phase B report is retained as historical
+evidence, not used to claim those omissions were already fixed. See
+`portfolio-release-report.md` for final remediation verification.

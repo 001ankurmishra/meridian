@@ -50,6 +50,16 @@ st.warning(
     "Synthetic prototype. Findings and recommendations require authorized human review."
 )
 
+st.info(
+    "First demo: load the synthetic seed, use the senior analyst token, create "
+    "the prefilled large_transaction case, then Investigate and Fetch Report. "
+    "Review evidence and screening before submitting a decision."
+)
+st.caption(
+    "Seeded customer: Rahul Sharma; transaction: INR 980,000 to Tech Solutions Inc. "
+    "These identifiers require the repository's synthetic seed data."
+)
+
 # --- CASE CREATION ---
 st.header("1. Case Creation")
 with st.form("case_create_form"):
@@ -57,12 +67,17 @@ with st.form("case_create_form"):
         "Customer ID (UUID)",
         value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")),
     )
-    alert_type = st.text_input("Alert Type", value="suspicious_transfer")
+    alert_type = st.text_input("Alert Type", value="large_transaction")
     alert_reasons_str = st.text_area(
         "Alert Reasons (JSON)",
         value='{"reason": "High value transfer to new beneficiary"}',
     )
-    txn_id = st.text_input("Transaction ID (UUID, optional)", value="")
+    txn_id = st.text_input(
+        "Transaction ID (UUID; needed for transaction evidence)",
+        value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_to_tech_sol_tx")),
+        help=("Leaving this empty skips transaction analysis and produces "
+              "an incomplete investigation."),
+    )
 
     submitted = st.form_submit_button("Create Case")
     if submitted:
@@ -76,6 +91,11 @@ with st.form("case_create_form"):
             if txn_id.strip():
                 payload["transaction_id"] = txn_id.strip()
 
+            if not txn_id.strip():
+                st.warning(
+                    "No Transaction ID: transaction evidence will be missing. "
+                    "This case cannot complete the seeded transaction demonstration."
+                )
             resp = requests.post(
                 f"{API_BASE}/cases",
                 json=payload,
@@ -120,7 +140,7 @@ if st.button("Investigate"):
                 investigation_status = resp.json().get("status")
                 if investigation_status == "COMPLETE":
                     st.success("Investigation complete. Human review is required.")
-                elif investigation_status == "INCOMPLETE":
+                elif investigation_status == "INCOMPLETE_INSUFFICIENT_EVIDENCE":
                     st.warning(
                         "Investigation incomplete. Review missing evidence."
                     )
@@ -286,6 +306,9 @@ if st.button("Fetch Audit Trail"):
                         f"**{occurred}** | Action: **{action}** "
                         f"| Actor: {actor_t} ({actor_i})"
                     )
+                    st.write(
+                        f"Investigation run: {ae.get('investigation_run_id') or 'None'}"
+                    )
                     st.write("Input:")
                     st.json(ae.get("input_summary") or {})
                     st.write("Output:")
@@ -300,6 +323,16 @@ st.divider()
 
 # --- HUMAN DECISION ---
 st.header("5. Human Decision")
+st.caption(
+    "APPROVE and REJECT require a COMPLETE investigation and a valid report "
+    "with recommendations. Triage remains available for missing, incomplete "
+    "or failed investigations under your role permissions. Wait for active runs."
+)
+st.info(
+    "REQUEST_MORE_INFO is restricted to the assigned analyst; a senior analyst "
+    "token alone does not permit it. Assignment administration is not available "
+    "in this demo. Existing backend role checks govern every decision."
+)
 with st.form("decision_form"):
     action = st.selectbox(
         "Action",

@@ -202,6 +202,8 @@ def test_actor_identity_rejected_and_real_actor_audited(
                 )
                 == "OPEN"
             )
+        from tests.decision_helpers import seed_supported_report
+        seed_supported_report(superuser_engine, case)
         response = client.post(
             f"/cases/{case}/decision", headers=headers, json={"action": "APPROVE"}
         )
@@ -217,6 +219,12 @@ def test_actor_identity_rejected_and_real_actor_audited(
             conn.execute(
                 text("DELETE FROM audit_events WHERE case_id = :id"), {"id": case}
             )
+            from tests.db_cleanup import clean_investigation_run_dependencies
+            run_ids = conn.execute(text(
+                "SELECT investigation_run_id FROM investigation_runs WHERE case_id=:id"
+            ), {"id": case}).scalars().all()
+            for run_id in run_ids:
+                clean_investigation_run_dependencies(conn, run_id)
             conn.execute(text("DELETE FROM cases WHERE case_id = :id"), {"id": case})
 
 
@@ -227,8 +235,11 @@ def test_decision_audit_failure_rolls_back_case(
     monkeypatch: pytest.MonkeyPatch,
 ):
     from meridian.review import decisions
+    from tests.db_cleanup import clean_investigation_run_dependencies
+    from tests.decision_helpers import seed_supported_report
 
     case = _seed_case(superuser_engine, "OPEN")
+    run = seed_supported_report(superuser_engine, case)
 
     def fail(*args, **kwargs):
         raise RuntimeError("injected audit failure")
@@ -255,4 +266,5 @@ def test_decision_audit_failure_rolls_back_case(
             record_human_decision(app_role_engine, case, user, "APPROVE")
     finally:
         with superuser_engine.begin() as conn:
+            clean_investigation_run_dependencies(conn, run)
             conn.execute(text("DELETE FROM cases WHERE case_id = :id"), {"id": case})

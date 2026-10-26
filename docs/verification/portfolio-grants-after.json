@@ -1,0 +1,200 @@
+{
+  "accounts": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "agent_runs": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "alembic_version": {
+    "SELECT": false,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "alerts": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "api_tokens": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "audit_events": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "beneficiaries": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "cases": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": true,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "customers": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "document_chunks": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "documents": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "entities": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "evidence": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "findings": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "graph_relationships": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "investigation_runs": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": true,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "recommendations": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "risk_signals": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "screening_results": {
+    "SELECT": true,
+    "INSERT": true,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "transactions": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "users": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  },
+  "watchlist_entries": {
+    "SELECT": true,
+    "INSERT": false,
+    "UPDATE": false,
+    "DELETE": false,
+    "TRUNCATE": false,
+    "REFERENCES": false,
+    "TRIGGER": false
+  }
+}

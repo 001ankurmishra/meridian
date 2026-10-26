@@ -4,6 +4,10 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Engine, text
 
+from meridian.agents.report.report_assembly import (
+    InsufficientEvidenceError,
+    assemble_report,
+)
 from meridian.audit.audit_events import record_audit_event
 from meridian.review.errors import (
     DecisionValidationError,
@@ -125,6 +129,44 @@ def record_human_decision(
             if reason is None or not reason.strip():
                 raise DecisionValidationError(f"Reason is required for action {action}")
 
+        # Bind the human action to an unambiguous persisted run while the
+        # case lock excludes concurrent run admission. Retain failed history.
+        runs = conn.execute(
+            text("SELECT investigation_run_id, status FROM investigation_runs "
+                 "WHERE case_id = :cid "
+                 "ORDER BY started_at DESC NULLS LAST, investigation_run_id DESC "
+                 "FOR SHARE"),
+            {"cid": case_id},
+        ).all()
+        supported = [run for run in runs if run.status != "FAILED"]
+        if len(supported) > 1:
+            raise DecisionValidationError("Ambiguous investigation history.")
+        selected_run = supported[0] if supported else (runs[0] if runs else None)
+        investigation_run_id = (
+            selected_run.investigation_run_id if selected_run is not None else None
+        )
+        investigation_status = selected_run.status if selected_run is not None else None
+
+        if any(run.status == "IN_PROGRESS" for run in runs):
+            raise DecisionValidationError(
+                "Wait for the active investigation to finish."
+            )
+        if action in {"APPROVE", "REJECT"}:
+            if investigation_status != "COMPLETE" or investigation_run_id is None:
+                raise DecisionValidationError(
+                    "APPROVE and REJECT require a COMPLETE investigation."
+                )
+            try:
+                report = assemble_report(conn, investigation_run_id)
+            except (InsufficientEvidenceError, ValueError):
+                raise DecisionValidationError(
+                    "Investigation report is not valid for a final decision."
+                ) from None
+            if not report.recommendations:
+                raise DecisionValidationError(
+                    "A final decision requires an evidence-backed recommendation."
+                )
+
         # F. Capture decided_at
         decided_at = datetime.now(timezone.utc)
 
@@ -183,7 +225,10 @@ def record_human_decision(
             "REQUEST_MORE_INFO": "CASE_MORE_INFO_REQUESTED",
         }
 
-        input_summary = {"requested_action": action, "reason": reason}
+        input_summary = {
+            "requested_action": action, "reason": reason,
+            "investigation_status": investigation_status,
+        }
 
         output_summary = {
             "from_status": current_status,
@@ -200,7 +245,7 @@ def record_human_decision(
             input_summary=input_summary,
             output_summary=output_summary,
             occurred_at=decided_at,
-            investigation_run_id=None,
+            investigation_run_id=investigation_run_id,
         )
 
         return HumanDecisionResult(

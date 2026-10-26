@@ -1,10 +1,11 @@
 """Report assembly primitive."""
 
 import uuid
+from contextlib import nullcontext
 from dataclasses import dataclass
 from typing import List
 
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.report.screening_classification import (
     SanctionsAgentRunInfo,
@@ -61,12 +62,12 @@ class InvestigationReport:
 
 
 def assemble_report(
-    engine: Engine, investigation_run_id: uuid.UUID
+    engine: Engine | Connection, investigation_run_id: uuid.UUID
 ) -> InvestigationReport:
     """Assemble a deterministic investigation report from persisted records.
 
     Args:
-        engine: Application-role SQLAlchemy Engine.
+        engine: Application-role Engine or an existing transaction Connection.
         investigation_run_id: The UUID of the investigation run.
 
     Returns:
@@ -78,7 +79,10 @@ def assemble_report(
         InsufficientEvidenceError: If any retrieved finding fails the evidence
             sufficiency gate.
     """
-    with engine.begin() as conn:
+    # A human decision supplies its existing transaction so validation and
+    # case/audit persistence share one commit boundary.
+    context = engine.begin() if isinstance(engine, Engine) else nullcontext(engine)
+    with context as conn:
         # 1. Fetch investigation run details
         run_row = conn.execute(
             text(

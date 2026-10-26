@@ -56,7 +56,7 @@ def orchestrate_investigation(engine: Engine, case_id: uuid.UUID) -> str:
 
     Raises:
         InvestigationError: If the case does not exist, is not OPEN, or already
-            has an investigation run.
+            has a non-failed investigation run. Explicit FAILED retries are allowed.
         Exception: Any hard failure from an agent, after recording the run as FAILED.
     """
     with engine.begin() as conn:

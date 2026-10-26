@@ -90,7 +90,10 @@ def test_ui_smoke_startup(live_server_url: str) -> None:
     assert not at.exception
 
 
-def test_ui_smoke_happy_path(live_server_url: str, ui_smoke_engine: Engine) -> None:
+@pytest.mark.parametrize("with_transaction", [True, False])
+def test_ui_smoke_happy_path(
+    live_server_url: str, ui_smoke_engine: Engine, with_transaction: bool
+) -> None:
     from meridian.identity.tokens import issue_token
     # seed a user and get token
     uid = uuid.uuid4()
@@ -109,9 +112,14 @@ def test_ui_smoke_happy_path(live_server_url: str, ui_smoke_engine: Engine) -> N
     try:
         payload: dict[str, Any] = {
             "customer_id": str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_sharma")),
-            "alert_type": "suspicious_transfer",
+            "alert_type": "large_transaction",
             "alert_reasons": {"reason": "Test happy path"},
         }
+
+        if with_transaction:
+            payload["transaction_id"] = str(
+                uuid.uuid5(uuid.NAMESPACE_OID, "rahul_to_tech_sol_tx")
+            )
 
         create_resp = requests.post(
             f"{live_server_url}/cases", json=payload, headers=headers
@@ -132,6 +140,9 @@ def test_ui_smoke_happy_path(live_server_url: str, ui_smoke_engine: Engine) -> N
             f"{live_server_url}/cases/{case_id}/investigate", headers=headers
         )
         assert inv_resp.status_code == 200
+        assert inv_resp.json()["status"] == (
+            "COMPLETE" if with_transaction else "INCOMPLETE_INSUFFICIENT_EVIDENCE"
+        )
 
         at = AppTest.from_file("../ui/streamlit_app.py")
         at.run(timeout=10)
@@ -145,24 +156,45 @@ def test_ui_smoke_happy_path(live_server_url: str, ui_smoke_engine: Engine) -> N
                 b.click().run()
                 break
 
-        assert any(
-            "No computed risk signals for this investigation run" in m.value
-            for m in at.markdown
-        )
+        if with_transaction:
+            assert any("Signal Type" in m.value for m in at.markdown)
+        else:
+            assert any(
+                "No computed risk signals for this investigation run" in m.value
+                for m in at.markdown
+            )
 
         at.selectbox(key="action").select("APPROVE").run()
 
         at.button(key="submit_decision_btn").click().run()
 
         assert not at.exception
+        if not with_transaction:
+            assert not at.success
+            assert any("HTTP 422" in message.value for message in at.error)
+            with ui_smoke_engine.connect() as conn:
+                assert conn.execute(
+                    text("SELECT status FROM cases WHERE case_id=:cid"),
+                    {"cid": case_id},
+                ).scalar_one() == "OPEN"
+            # Form edits are submitted together, as in the browser.
+            at.selectbox(key="action").select("ESCALATE")
+            at.button(key="submit_decision_btn").click().run()
         success_msgs = [s.value for s in at.success]
-        assert any("Decision submitted successfully" in m for m in success_msgs)
+        assert any("Decision submitted successfully" in m for m in success_msgs), (
+            [item.value for item in at.error], [item.value for item in at.info],
+            at.selectbox(key="action").value, at.text_input(key="active_case_id").value,
+        )
 
         with ui_smoke_engine.connect() as conn:
             status = conn.execute(
                 text("SELECT status FROM cases WHERE case_id = :cid"), {"cid": case_id}
             ).scalar()
-            assert status == "CLOSED_APPROVED"
+            assert status == ("CLOSED_APPROVED" if with_transaction else "ESCALATED")
+            assert conn.execute(
+                text("SELECT investigation_run_id FROM audit_events "
+                     "WHERE case_id=:cid"), {"cid": case_id},
+            ).scalar_one() is not None
     finally:
         _cleanup_case_data(ui_smoke_engine, case_id, None, uid)
 

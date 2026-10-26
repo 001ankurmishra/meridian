@@ -145,9 +145,16 @@ def get_report(
             detail="No investigation run found for case.",
         )
 
-    # Sort ASC so [-1] is the most recent
-    sorted_runs = sorted(trail.investigation_runs, key=lambda r: r.started_at)
-    most_recent_run_id = sorted_runs[-1].investigation_run_id
+    # Legacy data may predate atomic run admission. Never guess between
+    # multiple supported runs; preserve history and fail closed for review.
+    supported = [r for r in trail.investigation_runs if r.status != "FAILED"]
+    if len(supported) > 1:
+        raise HTTPException(status_code=422, detail="Ambiguous investigation history.")
+    selected = supported[0] if supported else max(
+        trail.investigation_runs,
+        key=lambda r: (r.started_at, str(r.investigation_run_id)),
+    )
+    most_recent_run_id = selected.investigation_run_id
 
     try:
         report = assemble_report(engine=engine, investigation_run_id=most_recent_run_id)

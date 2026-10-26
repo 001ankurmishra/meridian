@@ -134,3 +134,21 @@ Testing requirement: `docs/TESTING.md` requires adversarial test cases with inje
 ## 7. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` (behavioral/evidence constraints), `docs/OBSERVABILITY_AND_AUDIT.md` (logging detail), `docs/TESTING.md` §"Security Testing", `docs/DATABASE_SCHEMA.md` (redaction-relevant columns).
+
+
+### Portfolio source-grant correction
+
+Forward migration `c832e05a1201` revokes application INSERT/UPDATE on `entities`
+and `graph_relationships`, and UPDATE on `alerts`. Current production paths only
+read graph source rows; graph loading uses the loader role. Alert intake still
+requires INSERT, which is retained. No historical migration is changed. Effective
+permissions across all public tables were inspected, not inferred from old SQL;
+`verification/portfolio-grants-before.json` records the pre-migration matrix.
+Case, investigation, evidence and audit writes retain their established grants.
+
+
+Final human dispositions (APPROVE and REJECT) require a COMPLETE run with a valid
+evidence-backed report and recommendations, per the maintainer's 2026-10-26
+clarification in DESIGN.md. Triage actions preserve existing RBAC and allow
+missing/incomplete/failed investigations. Active runs block all decisions. Audit
+failure or report validation failure cannot leave a changed case status.

@@ -164,6 +164,24 @@ Deferred to Phase 2. Will follow the same documentation pattern above once desig
 
 ## 5. Orchestrator Decision Logic (MVP)
 
+**Implemented run admission (portfolio remediation):** `create_investigation_run`
+locks the case row, checks that it is OPEN and that no non-FAILED run exists,
+and inserts the new IN_PROGRESS run in the same transaction. The lock is not
+released between validation and insertion. This serializes all supported starts
+and human decisions on that case. An explicit retry is permitted only when all
+previous runs FAILED and the case remains OPEN; there is no automatic retry.
+COMPLETE, INCOMPLETE_INSUFFICIENT_EVIDENCE and IN_PROGRESS prevent another start.
+
+No uniqueness constraint is introduced: historical records remain intact. The
+verified local demo contains two runs across two cases and no duplicate non-failed
+case histories; existing schema has only the run primary key. Direct maintenance
+SQL can still bypass service admission. Report retrieval rejects multiple
+non-failed historical runs as ambiguous rather than silently selecting the latest.
+With only FAILED runs it selects deterministically by timestamp and UUID, then
+applies the existing report sufficiency gate. A new policy for re-investigating
+incomplete/completed cases is outside this fix.
+
+
 **PROPOSAL for MVP implementation:**
 
 ```

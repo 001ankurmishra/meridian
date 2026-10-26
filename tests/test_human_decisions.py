@@ -11,6 +11,7 @@ from meridian.review.errors import (
     InvalidCaseTransitionError,
     UnauthorizedDecisionError,
 )
+from tests.decision_helpers import seed_supported_report
 
 
 def _seed_user(superuser_engine: Engine, role: str) -> uuid.UUID:
@@ -174,6 +175,8 @@ def test_valid_transitions(
             assigned_analyst_id=actor_id if assigned else None,
         )
 
+        if action in {"APPROVE", "REJECT"}:
+            seed_supported_report(superuser_engine, case_id)
         reason = "A valid reason" if needs_reason else None
 
         result = record_human_decision(
@@ -357,6 +360,8 @@ def test_authorization_boundaries(
 
         case_id = _seed_case(superuser_engine, status, assigned_analyst_id=assigned_id)
 
+        if should_pass and action in {"APPROVE", "REJECT"}:
+            seed_supported_report(superuser_engine, case_id)
         if should_pass:
             record_human_decision(app_role_engine, case_id, actor_id, action, "test")
         else:
@@ -450,6 +455,7 @@ def test_closed_more_info_closed_at_behavior(
             "CLOSED_MORE_INFO",
             closed_at=datetime(2020, 1, 1, tzinfo=timezone.utc),
         )
+        seed_supported_report(superuser_engine, c2)
         res2 = record_human_decision(app_role_engine, c2, actor_id, "APPROVE")
 
         with superuser_engine.connect() as conn:

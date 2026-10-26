@@ -53,7 +53,24 @@ returned token ID:
 docker compose run --rm maintenance python -m meridian.identity.cli revoke TOKEN_ID
 ```
 
-The senior analyst can perform the whole demonstration without an assignment
+After entering the token, the first-run form is prefilled with the seeded values:
+
+- Customer ID: `04544721-686b-5e18-b4ad-1599f66d6cb3` (synthetic Rahul Sharma).
+- Alert type: `large_transaction`.
+- Transaction ID: `beafcbac-3048-5134-ae01-fd7585a5ef49` (INR 980,000 transfer).
+
+Create Case → Investigate → Fetch Report → review evidence and screening → Submit
+Decision → Fetch Audit Trail. Both APPROVE and REJECT require a COMPLETE
+investigation and a valid evidence-backed report with recommendations. Triage
+(ESCALATE or authorized REQUEST_MORE_INFO) remains available when evidence is
+missing or a run failed; all decisions wait for active investigations to finish.
+A Transaction ID is required for transaction-based
+evidence; clearing it intentionally yields an incomplete investigation. The UI
+recognizes `INCOMPLETE_INSUFFICIENT_EVIDENCE` and does not claim completion.
+REQUEST_MORE_INFO is restricted to the assigned analyst; the senior demo token
+cannot perform that action, and there is no assignment administration UI.
+
+The senior analyst can perform the supported approval demonstration without an assignment
 workflow. Analyst assignment management remains deferred under ADR-0007.
 Use `large_transaction` for the seeded worked example; `new_beneficiary` and
 `rapid_movement` are also documented policy query types. Legacy `AML_*` fixture

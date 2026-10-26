@@ -31,7 +31,12 @@ def context(
     try:
         case = setup_case(superuser_engine, setup_alert(superuser_engine, cid, tid))
         run = create_investigation_run(app_role_engine, case).investigation_run_id
-        other = create_investigation_run(app_role_engine, case).investigation_run_id
+        other_case = setup_case(
+            superuser_engine, setup_alert(superuser_engine, cid, tid)
+        )
+        other = create_investigation_run(
+            app_role_engine, other_case
+        ).investigation_run_id
         agent = setup_agent_run(superuser_engine, run)
         yield tid, run, other, agent
     finally:

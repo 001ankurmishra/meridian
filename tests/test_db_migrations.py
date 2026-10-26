@@ -202,7 +202,7 @@ def test_app_role_privileges_read_write(
 ) -> None:
     """
     Test that meridian_app CAN perform intended writes on:
-    entities, graph_relationships, alerts, cases, investigation_runs
+    alerts (INSERT only), cases, investigation_runs
     """
     with superuser_engine.begin() as conn:
         cust_id = conn.execute(
@@ -240,35 +240,6 @@ def test_app_role_privileges_read_write(
 
 
     with app_role_engine.connect() as conn:
-        # entities
-        ent_id = conn.execute(
-            text(
-                "INSERT INTO entities (entity_id, entity_type, reference_id) "
-                "VALUES (gen_random_uuid(), 'customer', :cust_id) "
-                "RETURNING entity_id"
-            ),
-            {"cust_id": cust_id},
-        ).scalar()
-
-        ent_id2 = conn.execute(
-            text(
-                "INSERT INTO entities (entity_id, entity_type, reference_id) "
-                "VALUES (gen_random_uuid(), 'account', :acc_id) "
-                "RETURNING entity_id"
-            ),
-            {"acc_id": acc_id},
-        ).scalar()
-
-        # graph_relationships
-        conn.execute(
-            text(
-                "INSERT INTO graph_relationships (relationship_id, source_entity_id, "
-                "target_entity_id, relationship_type) "
-                "VALUES (gen_random_uuid(), :e1, :e2, 'owns')"
-            ),
-            {"e1": ent_id, "e2": ent_id2},
-        )
-
         # alerts
         alert_id = conn.execute(
             text(
@@ -301,7 +272,7 @@ def test_app_role_privileges_read_write(
 
         # Test SELECT on all workflow tables
         rw_tables = [
-            "entities", "graph_relationships", "alerts",
+            "alerts",
             "cases", "investigation_runs"
         ]
         for table in rw_tables:
@@ -309,14 +280,12 @@ def test_app_role_privileges_read_write(
             assert len(res) >= 1
 
         # Test UPDATE on all workflow tables
-        conn.execute(text("UPDATE entities SET created_at = NOW()"))
-        conn.execute(text("UPDATE graph_relationships SET created_at = NOW()"))
-        conn.execute(text("UPDATE alerts SET created_at = NOW()"))
         conn.execute(
             text("UPDATE cases SET status = 'IN_REVIEW' WHERE case_id = :case_id"),
             {"case_id": case_id},
         )
-        conn.execute(text("UPDATE investigation_runs SET created_at = NOW()"))
+        conn.execute(text("UPDATE investigation_runs SET created_at = NOW() "
+                          "WHERE case_id = :cid"), {"cid": case_id})
         conn.commit()
 
         # Test DELETE fails on all workflow tables
@@ -325,4 +294,32 @@ def test_app_role_privileges_read_write(
                 conn.execute(text(f"DELETE FROM {table}"))
                 conn.commit()
             assert "permission denied" in str(excinfo.value).lower()
+            conn.rollback()
+
+    # Leave no downstream references for later guarded seed-loading tests.
+    with superuser_engine.begin() as conn:
+        conn.execute(
+            text("DELETE FROM investigation_runs WHERE case_id=:c"), {"c": case_id}
+        )
+        conn.execute(text("DELETE FROM cases WHERE case_id=:c"), {"c": case_id})
+        conn.execute(text("DELETE FROM alerts WHERE alert_id=:a"), {"a": alert_id})
+
+
+
+@pytest.mark.parametrize("table", ["entities", "graph_relationships", "alerts"])
+def test_runtime_source_grants_are_minimal(app_role_engine, table):
+    with app_role_engine.connect() as conn:
+        for privilege in ("SELECT", "INSERT", "UPDATE", "DELETE", "TRUNCATE"):
+            allowed = conn.execute(text(
+                "SELECT has_table_privilege(current_user, :table, :privilege)"
+            ), {"table": table, "privilege": privilege}).scalar_one()
+            assert allowed is (privilege == "SELECT" or
+                               (table == "alerts" and privilege == "INSERT"))
+        # Exercise actual writes; an empty table must not conceal broad grants.
+        with pytest.raises(Exception, match="permission denied"):
+            conn.execute(text(f"UPDATE {table} SET created_at = now() WHERE false"))
+        conn.rollback()
+        if table != "alerts":
+            with pytest.raises(Exception, match="permission denied"):
+                conn.execute(text(f"INSERT INTO {table} DEFAULT VALUES"))
             conn.rollback()

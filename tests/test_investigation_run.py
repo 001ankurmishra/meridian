@@ -147,4 +147,4 @@ def test_create_investigation_run_invalid_case(app_role_engine: Engine) -> None:
     invalid_case_id = uuid.uuid4()
     with pytest.raises(Exception) as excinfo:
         create_investigation_run(app_role_engine, invalid_case_id)
-    assert "foreign key constraint" in str(excinfo.value).lower()
+    assert "not found" in str(excinfo.value).lower()

@@ -93,3 +93,14 @@ This system makes it possible to detect *after the fact* that an unsupported cla
 ## 7. Related Documents
 
 `docs/SECURITY.md` §"Data Retention & Redaction", `docs/DATABASE_SCHEMA.md` §4.11/§4.17, `docs/AI_SAFETY_AND_GUARDRAILS.md` (what triggers a logged failure state), `docs/TESTING.md` (reproducibility test cases).
+
+
+### Portfolio human-decision provenance
+
+Human-decision events now populate the existing `investigation_run_id` foreign
+key with the uniquely supported run, or the deterministic latest FAILED run when
+triage follows failure. A case with no run retains null. `input_summary` snapshots
+`investigation_status`; the audit API exposes the run ID alongside the event.
+The case lock, run selection, eligible report validation, disposition update and
+audit INSERT share one transaction. Historical ambiguous run sets fail closed.
+This adds provenance without rewriting existing audit rows.
