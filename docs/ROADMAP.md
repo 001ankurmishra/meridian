@@ -4,6 +4,24 @@
 
 ---
 
+## Phase B verification checkpoint — 2026-10-26
+
+The synthetic MVP workflow has now been demonstrated on a fresh local Docker
+deployment: intake, investigation, resolvable evidence, policy references,
+synthetic watchlist screening, authorized human decision and audit reconstruction.
+The final local suite passed 752 tests. This verifies the scoped prototype workflow,
+not every planned feature or production readiness. See
+[the Phase B verification report](verification/phase-b-report.md) for evidence.
+
+Implemented additions include evidence/failure safety, restricted token lifecycle
+and user deactivation, Streamlit screening states, the approved prototype policy
+gate, unified evaluation and separated maintenance/runtime deployment. Graph and
+ER primitives retain their existing scope. Adverse media, richer graph analytics,
+ER persistence, composite calibration, assignment administration and production
+operations remain deferred. Human comparison remains NOT PERFORMED.
+
+---
+
 ## Phase 0 — Foundation
 
 **Goal:** A working, documented, tested skeleton — nothing user-facing yet.

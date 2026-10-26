@@ -265,6 +265,12 @@ def main() -> None:
     docs_inserted, chunks_inserted = ingest_policy_corpus(loader_engine)
     print(f"Policy corpus loaded: {docs_inserted} documents, {chunks_inserted} chunks.")
 
+    from meridian.loader.watchlist_corpus import get_synthetic_watchlist_corpus
+    from meridian.loader.watchlist_ingest import ingest_watchlist_version
+
+    result = ingest_watchlist_version(loader_engine, get_synthetic_watchlist_corpus())
+    print(f"Synthetic watchlist loaded: "
+          f"{result.watchlist_name}/{result.watchlist_version}.")
     print("Load complete.")
 
 

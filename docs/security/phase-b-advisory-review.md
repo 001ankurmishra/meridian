@@ -40,3 +40,22 @@ Verification: targeted lock/sync completed on Python 3.11; full `pytest -q tests
 passed 748 tests (three framework deprecation warnings). `pip-audit --format json`
 reported no known vulnerabilities. See `advisories-after.json`. Linux image
 validation remains part of deployment verification.
+
+
+### Built Linux image verification
+
+The actual non-root Linux/arm64 image was built and exercised through fresh
+migrations, synthetic seed loading and authenticated HTTP investigation/review.
+Its 97 installed Python distributions were exported directly from
+`importlib.metadata`, then scanned with:
+
+```bash
+uv run --frozen --no-sync pip-audit --disable-pip --no-deps -r /tmp/meridian-image-requirements.txt -f json -o docs/security/image-advisories.json
+```
+
+Result: **zero known Python dependency vulnerabilities** at this scan.
+The fixed requirements represent the installed image, not a new dependency
+resolution. OS/base-image vulnerability scanning is NOT PERFORMED; this result
+is not a claim that the entire image is vulnerability-free. The PyPI Linux torch
+lock includes large CUDA-related packages despite CPU inference; image-size
+optimization is deferred rather than changing the verified dependency variant.

@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ "main" ]
   push:
-    branches: [ "main", "task-0.2-migrations" ]
+    branches: [ "main", "feature/**", "task-0.2-migrations" ]
 
 jobs:
   test:
@@ -26,6 +26,9 @@ jobs:
           --health-retries 5
 
     env:
+      UV_NO_SYNC: "1"
+      UV_PYTHON: "3.11"
+      HF_HUB_OFFLINE: "0"
       PGPORT: 55432
       POSTGRES_PORT: 55432
       DATABASE_URL: postgresql+psycopg://meridian_user:meridian_pass@localhost:55432/meridian_test
@@ -78,7 +81,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
         with:
-          version: "latest"
+          version: "0.12.5"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -89,20 +92,19 @@ jobs:
         run: uv sync --frozen --group ui
 
       - name: Run Ruff (Lint)
-        run: uv run ruff check .
+        run: uv run --frozen --no-sync ruff check .
 
       - name: Run Mypy (Type Check)
-        run: uv run mypy src/
+        run: uv run --frozen --no-sync mypy src/
 
       - name: Run Alembic Migrations
-        run: uv run alembic upgrade head
+        run: uv run --frozen --no-sync alembic upgrade head
 
       - name: Run Pytest
-        run: uv run pytest tests/
+        run: uv run --frozen --no-sync pytest tests/
 
       - name: Run pip-audit (Dependency Scan)
-        run: uv run pip-audit
-        continue-on-error: true # Report only, non-blocking as per Phase 0 Task 0.1 spec
+        run: uv run --frozen --no-sync pip-audit
 
   verify-docker-init:
     runs-on: ubuntu-latest

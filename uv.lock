@@ -987,6 +987,9 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "ruff" },
 ]
+maintenance = [
+    { name = "alembic" },
+]
 ui = [
     { name = "requests" },
     { name = "streamlit" },
@@ -1014,6 +1017,7 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.23.6" },
     { name = "ruff", specifier = ">=0.4.4" },
 ]
+maintenance = [{ name = "alembic", specifier = ">=1.19.2" }]
 ui = [
     { name = "requests", specifier = ">=2.31.0" },
     { name = "streamlit", specifier = ">=1.66.1" },
