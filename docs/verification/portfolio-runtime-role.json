@@ -1,0 +1,41 @@
+{
+  "role": {
+    "rolname": "meridian_app",
+    "rolsuper": false,
+    "rolinherit": true,
+    "rolcreaterole": false,
+    "rolcreatedb": false,
+    "rolreplication": false,
+    "rolbypassrls": false
+  },
+  "memberships": [],
+  "public_schema": {
+    "USAGE": true,
+    "CREATE": false
+  },
+  "database": {
+    "CONNECT": true,
+    "CREATE": false,
+    "TEMP": true
+  },
+  "effective_column_privileges": {
+    "entities": {
+      "SELECT": true,
+      "INSERT": false,
+      "UPDATE": false,
+      "REFERENCES": false
+    },
+    "graph_relationships": {
+      "SELECT": true,
+      "INSERT": false,
+      "UPDATE": false,
+      "REFERENCES": false
+    },
+    "alerts": {
+      "SELECT": true,
+      "INSERT": true,
+      "UPDATE": false,
+      "REFERENCES": false
+    }
+  }
+}
