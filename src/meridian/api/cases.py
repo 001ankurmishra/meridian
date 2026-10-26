@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine
 
 from meridian.agents.report.report_assembly import (
@@ -56,6 +56,8 @@ def get_engine() -> Engine:
 
 
 class CaseCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     customer_id: uuid.UUID
     alert_type: str
     alert_reasons: Dict[str, Any] | List[Any]
@@ -73,6 +75,8 @@ class InvestigateResponse(BaseModel):
 
 
 class DecisionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     action: str
     reason: Optional[str] = None
 

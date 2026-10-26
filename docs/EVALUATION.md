@@ -165,6 +165,102 @@ The v0.4 corpus currently has a maximum observed outbound chain depth of 3. Ther
 
 The currently implemented threshold value is `confidence_threshold = 0.01` in `src/meridian/agents/policy/policy_agent.py`. Its methodology tier is `PROTOTYPE`. This value is explicitly an unvalidated placeholder; it was not derived from any evaluation, sample, or tuning process. The precision/recall tradeoff this threshold implies is currently unknown and unmeasured. This threshold will eventually be calibrated using the 20–50 labeled alert-pattern → expected-policy-chunk evaluation set described above. Once that evaluation exists and the threshold is properly tuned against it, its tier will be updated to `EXPERIMENTALLY_CALIBRATED`.
 
+ADR-0009 (accepted by Ankur 2026-10-26) adds a query-level maximum-cosine
+threshold of 0.620313, selected only from the labeled DEV examples. The original
+RRF threshold and ranking are unchanged. This added gate is PROTOTYPE, not
+calibrated; it cannot establish policy applicability or validate each citation.
+The paired baseline/gate HELDOUT configuration is locked in
+`docs/evaluation/policy_retrieval_eval_v1.plan.json` before measurement.
+
+### RAG evaluation protocol (policy_retrieval_eval_v1) — FROZEN 2026-10-25; locked measurement recorded
+
+> **Protocol Status:** FROZEN by explicit approval from Ankur on 2026-10-25. No measurement performed at freeze.
+> Approval and both reviewed/frozen payload hashes are recorded in `docs/evaluation/policy_retrieval_eval_v1.freeze.json`. Frozen canonical SHA-256: `993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053`. Labels are maintainer-approved, not independently validated.
+> Passing automated integrity tests proves structure, binding, and mathematical validity only, NOT that human or AI judgments are substantively correct.
+
+#### 1. Protocol Metadata and Preconditions
+* **Methodology Tier:** PROTOTYPE
+* **Evaluation Version:** `policy_retrieval_eval_v1`
+* **Seed:** `policy_retrieval_eval_v1`
+* **Corpus Identifier:** `POLICY_CORPUS_V1` (4 documents, 10 chunks)
+* **Model Name:** `BAAI/bge-small-en-v1.5`
+* **Model Snapshot:** `5c38ec7c405ec4b44b94cc5a9bb96e735b38267a` (pinned for model and tokenizer; evaluation rejects revision mismatch)
+* **Retrieval Parameters:** `retrieval_k = 60`, `retrieval_top_k = 5`
+* **A0 Tie-Break Contract:** RRF fused ranking total order: items are ordered by `(rrf_score DESC, document_title ASC, document_version ASC, chunk_index ASC, chunk_id ASC)`; SQL title/version use C collation. Logical reload stability requires unique title/version/index tuples.
+* **Chunk Identity:** Chunks are referenced exclusively by literal tuples: `(title, version, chunk_index, text_sha256)`. Database UUIDs (`chunk_id`) are never used for evaluation ground truth.
+
+#### 2. Cohorts and Statuses
+* **Cohort C1 (PRIMARY, n=3):** Production query path (`large_transaction`, `new_beneficiary`, `rapid_movement`), where `alert_type` is passed verbatim to policy retrieval. Descriptive only. Never split (`split = NONE`).
+* **Cohort C2 (PROVISIONAL, n=5):** Legacy query strings (`AML_GENERAL`, `AML_STRUCTURING`, `AML_RAPID_MOVEMENT`, `AML_CIRCULAR`, `AML_MULE`) present in the legacy fixture generator. This protocol does not claim the legacy workflow is supported; inclusion in runtime evaluation requires maintainer confirmation. Never split (`split = NONE`). Evaluated strictly by literal meaning; applicability is `UNDETERMINED` where literal meaning is not an unambiguous investigative subject; borderline flags and notes are assigned where in doubt. Missing corpus coverage is never relabeled as "no applicable policy". All C2 queries carry abstention `NOT_ASSESSED`.
+* **Cohort C3 (ROBUSTNESS, n=11):** Out-of-domain robustness probes. Arbitrary non-empty alert types are production-reachable. Contains 10 out-of-domain queries (e.g. `zzzz qqqq`, `weather forecast for tomorrow`, `chocolate cake recipe`, etc.) labeled `NOT_APPLICABLE_OUT_OF_DOMAIN`, `OUT_OF_DOMAIN`, and `SHOULD_ABSTAIN`. Contains the empty string `""` exactly once, labeled `UNDETERMINED`, `NOT_COVERED`, and `NOT_ASSESSED`, with rationale noting that alert intake rejects empty or whitespace `alert_type` at the intake validation boundary so it serves as a behavior probe only. Generic words are not labeled as negatives.
+* **Cohort C4 (EXPLORATORY, n=20):** Authored paraphrase queries (>=3 per each of the four corpus topics: large transaction review, new beneficiary review, rapid movement, and evidence/documentation standards) and >=4 in-domain coverage-gap queries (applicable financial investigation subjects with no matching procedure in the synthetic corpus, labeled `APPLICABLE` + `NOT_COVERED` or `PARTIALLY_COVERED` + `NOT_ASSESSED`, with grade-1 notes where supporting guidance exists). Never mix C4 into C1 metrics.
+* **Total Query Count:** 39 queries (within the required [38, 50] range).
+
+#### 3. Split Rules
+* **C1 and C2:** `split = NONE`.
+* **C3 and C4:** Assigned deterministically via `assign_split(seed, query_id) = SHA-256(f"{seed}:{query_id}")` first byte parity (even = DEV, odd = HELDOUT), yielding >= 4 DEV and >= 4 HELDOUT in each cohort (C3: 5 DEV, 6 HELDOUT; C4: 9 DEV, 11 HELDOUT).
+* **Usage Policy:** DEV set only is permitted for any future gate exploration or threshold calibration; HELDOUT is measured once per protocol version; tuning on HELDOUT voids the evaluation set.
+
+#### 4. Four-Field Label Model and Grade Rubric
+Every query is labeled across four dimensions:
+1. `policy_applicability` ∈ {`APPLICABLE`, `NOT_APPLICABLE_OUT_OF_DOMAIN`, `UNDETERMINED`}: Domain judgment derived from the query's meaning alone, independent of synthetic corpus contents and of chunk grades. `APPLICABLE` = names/describes a subject a financial investigation procedure would in principle govern. `NOT_APPLICABLE_OUT_OF_DOMAIN` = no investigation subject. `UNDETERMINED` = meaning not established by query alone (opaque legacy strings, generic words, empty string).
+2. `corpus_coverage` ∈ {`COVERED`, `PARTIALLY_COVERED`, `NOT_COVERED`, `OUT_OF_DOMAIN`}: Labeler assertion about the synthetic corpus, cross-checked against chunk grades.
+3. `abstention_ground_truth` ∈ {`SHOULD_RETRIEVE`, `SHOULD_ABSTAIN`, `NOT_ASSESSED`}: Correct system decision for evaluation purposes only (never an input to labeling).
+4. `judgments`: Exactly one `Judgment(chunk_ref, grade ∈ {0,1,2}, note, borderline)` per chunk for all 10 chunks in the corpus.
+   * **Grade 2:** The chunk text itself states a procedure or standard specific to this query's subject.
+   * **Grade 1:** The chunk text provides substantive supporting guidance an analyst handling this query would apply; a non-empty `note` naming the specific supporting element is REQUIRED for every grade 1.
+   * **Grade 0:** Otherwise. Generic boilerplate (e.g. the illustrative synthetic policy disclaimer) never earns a grade.
+   * **Pairwise Rule:** No document receives a blanket grade across queries — each (query, chunk) pair is judged independently.
+   * **Borderline Flag:** `borderline = True` requires an explanatory note (<= 200 characters).
+   * **Applicability Invariant:** Absence of a grade-2 chunk or lack of a matching synthetic document never establishes non-applicability.
+
+#### 5. Validation Rules (V1–V8)
+The validator enforces these invariants without deriving applicability or abstention from chunk grades:
+* **V1:** `applicability = NOT_APPLICABLE_OUT_OF_DOMAIN` ⇒ `coverage = OUT_OF_DOMAIN`, all grades 0, `cohort = C3`.
+* **V2:** `coverage = OUT_OF_DOMAIN` ⇒ `applicability = NOT_APPLICABLE_OUT_OF_DOMAIN`.
+* **V3:** `coverage = COVERED` iff some grade == 2; `PARTIALLY_COVERED` iff no grade 2 and some grade 1; `NOT_COVERED` ⇒ all grades 0 and `applicability` ∈ {`APPLICABLE`, `UNDETERMINED`}.
+* **V4:** `SHOULD_ABSTAIN` ⇒ `applicability = NOT_APPLICABLE_OUT_OF_DOMAIN`, `coverage = OUT_OF_DOMAIN`, `cohort = C3`. A missing grade-2 chunk or coverage `NOT_COVERED` NEVER implies `SHOULD_ABSTAIN` or non-applicability.
+* **V5:** `SHOULD_RETRIEVE` ⇒ `applicability = APPLICABLE`, `coverage = COVERED`, `cohort` ∈ {`C1`, `C4`}.
+* **V6:** `applicability = APPLICABLE` with `coverage` ∈ {`NOT_COVERED`, `PARTIALLY_COVERED`} ⇒ `abstention = NOT_ASSESSED`.
+* **V7:** `applicability = UNDETERMINED` ⇒ `NOT_ASSESSED`; every `C2` query ⇒ `NOT_ASSESSED`.
+* **V8:** every `C3` query with `NOT_APPLICABLE_OUT_OF_DOMAIN` ⇒ `SHOULD_ABSTAIN`.
+
+#### 6. Metrics and Expected Random Baselines
+The evaluation metrics and closed-form random baselines are defined verbatim below:
+
+N = chunk count. Ranking = total order from the A0 contract. R = number of relevant chunks: strict relevance = grade 2 (R2), lenient = grade>=1 (R1+). Queries with R=0 are excluded from that relevance definition's metrics; queries with IDCG=0 excluded from nDCG; exclusion counts reported. Hit@k, Precision@k=(#rel in top k)/k, Recall@k=(#rel in top k)/R, RR=1/rank of first relevant (MRR = mean), DCG@k = sum_{i=1..k} grade(pi_i)/log2(i+1) with linear gains, nDCG@k = DCG@k/IDCG@k (IDCG = DCG of grades sorted descending), k ∈ {1,3,5}. Random-ordering expectations (uniform over all N! orderings; C(a,b)=0 if b>a): E[Precision@k]=R/N; E[Recall@k]=k/N; E[Hit@k]=1 − C(N−R,k)/C(N,k); E[RR]=sum_{j=1..N−R+1}(1/j)*C(N−j,R−1)/C(N,R); E[nDCG@k]=((G/N)*sum_{i=1..k}1/log2(i+1))/IDCG@k with G=sum of grades. Method: all but nDCG in exact rational arithmetic (fractions.Fraction, math.comb); nDCG with math.log2 float64 reported to 6 decimals. Cohort baseline = unweighted mean of per-query baselines over the same included queries; "lift" = observed mean − baseline mean; cohorts never pooled; no confidence intervals, no significance claims, no ROC-AUC, no F1. Worked example (N=10,R=3): E[P@k]=0.3, E[R@5]=0.5, E[Hit@5]=11/12, E[RR]=3601/6720≈0.535863; plus an nDCG example (grades: one 2, two 1, rest 0, k=5; expected ≈0.3767 — compute with your test oracle and quote the exact 6-decimal value; if it differs from 0.3767 beyond rounding, report it).
+
+*Note on Worked Example nDCG:* Computed via the closed-form oracle, the exact 6-decimal expectation for the worked example (vector with one 2, two 1s, seven 0s, $N=10$, $k=5$) is `0.376688` (which rounds to `0.3767` at 4 decimal places).
+
+#### 7. Abstention Evaluation Definition
+* **System Decision:** The current production output of `retrieve_policy_evidence`.
+* **Reported Metrics:**
+  * False-citation rate on C3 `SHOULD_ABSTAIN` queries.
+  * Abstention rate on `SHOULD_RETRIEVE` queries.
+  * Descriptive top-1 and top-5-min RRF score tables.
+  * Separate reporting for `SHOULD_RETRIEVE`, `SHOULD_ABSTAIN`, and `NOT_ASSESSED`.
+  * `NOT_ASSESSED` queries are strictly excluded from accuracy-style counts.
+
+#### 8. Structural Reachability Property (Derived from Code, Not Measured)
+The semantic retrieval component returns an ordered list that ranks every chunk in the corpus.
+In Reciprocal Rank Fusion (RRF) with $k = 60$, any chunk appearing in the semantic ranking at position $r \in [1, 5]$ receives an RRF score contribution of:
+$$\text{RRF score} \ge \frac{1}{60 + 5} = \frac{1}{65} \approx 0.015385 > 0.01$$
+Because this contribution exceeds the current threshold value of `confidence_threshold = 0.01`, for any non-empty corpus containing at least 5 chunks, every top-5 fused result will have a score strictly greater than 0.01.
+Therefore, the current production threshold cannot yield `PolicyEvidenceInsufficient` on a non-empty corpus.
+This property is **DERIVED FROM CODE, NOT MEASURED**. The future baseline measurement task must empirically verify this property against the database.
+
+#### 9. Architectural Boundaries and Governance
+* **No Threshold Derived:** No threshold has been selected, tuned, or calibrated.
+* **ADR Required for Changes:** Any relevance gate or new retrieval diagnostics is a retrieval-architecture change requiring an ADR prior to implementation.
+* **Prohibited Claims:** No claims may be made regarding measured retrieval quality, statistical significance, calibration, or operational effectiveness until maintainer approval and baseline execution.
+
+#### 10. Known Limitations
+1. **Corpus Size:** With $N=10$ synthetic policy chunks, chance recall is high ($E[\text{Recall}@5] = 0.5$ for any relevant chunk under uniform random ordering).
+2. **Labeler Provenance:** Labels were created with AI assistance and approved by Ankur for the recorded review hash. This is maintainer review, not independent validation.
+3. **Descriptive Cohorts:** Cohort C1 ($n=3$) and C2 ($n=5$) are small and descriptive only; C2 is provisional.
+4. **Tokenizer Dependency:** Chunking depends on cached tokenizer files (`transformers.AutoTokenizer` for `BAAI/bge-small-en-v1.5`).
+5. **Split Granularity Limitation:** DEV/HELDOUT assignment hashes individual query IDs (`assign_split(seed, query_id)`). Related paraphrases of the same alert topic may therefore occur in both splits. This evaluates query-level holdout behavior, not generalization to independent scenario families. Grouped scenario-family splitting is deferred to a future protocol revision.
+
 ---
 
 ## 5. Entity Resolution Evaluation
@@ -980,3 +1076,55 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 ## 11. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` §5 (confidence tiers used in reports), `docs/TESTING.md` (fixture reuse for regression), `docs/DATA_AND_DATASET_STRATEGY.md` (fixture generation), `docs/DECISIONS.md` (ADR needed if evaluation methodology changes materially).
+
+
+## Phase B unified execution (2026-10-26, PROTOTYPE)
+
+`evaluation/phase-b-unified.json` records actual execution of the v0.2 amount,
+v0.3 transaction-signal, v0.4 graph, v0.5 entity-resolution and synthetic sanctions
+baselines. It reuses the immutable paired policy result rather than running
+HELDOUT again. Human comparison: **NOT PERFORMED**.
+
+Run only against the marked disposable `meridian_test` database on loopback
+port 55432, with the three role URLs documented in TESTING.md exported:
+
+```bash
+PYTHONPATH=src HF_HUB_OFFLINE=1 uv run --frozen --no-sync python -m meridian.evaluation.run --output /tmp/meridian-evaluation.json
+```
+
+The runner clears source fixtures in that disposable database, refuses downstream
+alerts, and cleans its fixture data afterward. Existing output files are not
+overwritten. Do not run it concurrently with database tests.
+
+Measured limitations are material: v0.2 amount-deviation eval ROC-AUC is 0.479167
+(4 positives, 12 negatives). ER precision is 7/8 and overall recall 7/15; the
+seven cases within the exact-name/exact-DOB rule's scope were found. Sanctions
+produced its expected four candidates, including a designed false positive and
+one missed ground-truth positive; candidate matching is not a sanctions decision.
+These are synthetic structural checks, not real-world AML effectiveness.
+
+### Single locked policy comparison
+
+Ankur accepted ADR-0009 and the fixed 0.620313 prototype cosine gate before the
+paired HELDOUT run. The result and completion receipt are
+`evaluation/policy_retrieval_eval_v1.heldout.json` and
+`evaluation/policy_retrieval_eval_v1.heldout-receipt.json`.
+
+| Cohort | Original RRF gate | Approved cosine gate |
+|---|---|---|
+| HELDOUT C3 assessed negatives (5) | Retrieved all 5 | Abstained on all 5 |
+| HELDOUT C4 assessed positives (8) | Retrieved all 8 | Retrieved all 8 |
+| C1 descriptive alert types (3) | Retrieved all 3 | Retrieved all 3 |
+
+One C3 and three C4 HELDOUT queries are NOT_ASSESSED and excluded from abstention
+accuracy claims. C4 strict Hit@1=0.875, MRR=0.9375, precision@5=0.525 and
+recall@5=0.958333 are identical for both systems because ranking is unchanged.
+C1 strict Hit@1 and MRR are 1.0; precision@5=0.533333 and recall@5=1.0.
+C2 remains provisional and was not executed. Full per-query rankings and metrics
+are retained in the artifacts. No threshold was tuned on HELDOUT.
+
+The gate uses a tiny DEV sample (five assessed negatives, four positives), is
+**not calibrated**, and does not establish policy applicability or citation
+correctness. Query-level splits can share scenario families. Missing-coverage
+queries marked NOT_ASSESSED remain a known limitation. Do not rerun the frozen
+HELDOUT protocol or represent these labels as independently validated.

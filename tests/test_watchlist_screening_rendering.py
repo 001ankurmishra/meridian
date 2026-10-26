@@ -32,6 +32,7 @@ from meridian.orchestration.investigation_run import create_investigation_run
 from meridian.orchestration.screening_results_persistence import (
     record_screening_result,
 )
+from tests.source_helpers import seed_source
 from tests.test_report_assembly import (
     _cleanup_seeded_data,
     assert_no_forbidden_language,
@@ -558,7 +559,7 @@ def test_assemble_report_screening_not_recorded(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=ar_id,
         )
         record_finding(
@@ -616,7 +617,7 @@ def test_assemble_report_screening_error(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -673,7 +674,7 @@ def test_assemble_report_inconsistent_missing_result_row(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -743,7 +744,7 @@ def test_assemble_report_and_audit_trail_candidate_matches_found(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         ev_watchlist = record_evidence(
@@ -751,7 +752,7 @@ def test_assemble_report_and_audit_trail_candidate_matches_found(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_WATCHLIST_ENTRY,
             reference_table="watchlist_entries",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "watchlist_entries"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
 
@@ -858,7 +859,7 @@ def test_assemble_report_no_candidate_match(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -927,7 +928,7 @@ def test_assemble_report_not_performed_abstention(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -996,7 +997,7 @@ def test_assemble_report_inconsistent_candidate_count_mismatch(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -1054,7 +1055,7 @@ def test_assemble_report_screening_error_with_candidate_finding(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         ev_watchlist = record_evidence(
@@ -1062,7 +1063,7 @@ def test_assemble_report_screening_error_with_candidate_finding(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_WATCHLIST_ENTRY,
             reference_table="watchlist_entries",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "watchlist_entries"),
             produced_by_agent_run_id=sanctions_ar_id,
         )
         record_finding(
@@ -1118,7 +1119,7 @@ def test_assemble_report_no_row_no_agent_run_with_candidate_finding(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_POLICY_CHUNK,
             reference_table="document_chunks",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "document_chunks"),
             produced_by_agent_run_id=other_ar_id,
         )
         ev_watchlist = record_evidence(
@@ -1126,7 +1127,7 @@ def test_assemble_report_no_row_no_agent_run_with_candidate_finding(
             investigation_run_id=inv_run_id,
             evidence_type=EVIDENCE_TYPE_WATCHLIST_ENTRY,
             reference_table="watchlist_entries",
-            reference_id=uuid.uuid4(),
+            reference_id=seed_source(superuser_engine, "watchlist_entries"),
             produced_by_agent_run_id=other_ar_id,
         )
         record_finding(

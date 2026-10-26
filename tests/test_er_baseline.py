@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 from sqlalchemy import Engine, text
@@ -37,9 +38,7 @@ def test_er_baseline_determinism(tmp_path: Path, superuser_engine: Engine) -> No
             try:
                 subprocess_res = subprocess.run(
                     [
-                        "uv",
-                        "run",
-                        "python",
+                        sys.executable,
                         "-m",
                         "meridian.fixtures.er_baseline",
                     ],

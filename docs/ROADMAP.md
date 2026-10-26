@@ -4,6 +4,24 @@
 
 ---
 
+## Phase B verification checkpoint — 2026-10-26
+
+The synthetic MVP workflow has now been demonstrated on a fresh local Docker
+deployment: intake, investigation, resolvable evidence, policy references,
+synthetic watchlist screening, authorized human decision and audit reconstruction.
+The final local suite passed 752 tests. This verifies the scoped prototype workflow,
+not every planned feature or production readiness. See
+[the Phase B verification report](verification/phase-b-report.md) for evidence.
+
+Implemented additions include evidence/failure safety, restricted token lifecycle
+and user deactivation, Streamlit screening states, the approved prototype policy
+gate, unified evaluation and separated maintenance/runtime deployment. Graph and
+ER primitives retain their existing scope. Adverse media, richer graph analytics,
+ER persistence, composite calibration, assignment administration and production
+operations remain deferred. Human comparison remains NOT PERFORMED.
+
+---
+
 ## Phase 0 — Foundation
 
 **Goal:** A working, documented, tested skeleton — nothing user-facing yet.
@@ -111,6 +129,7 @@ Scope (Features F11–F14):
 
 - **Sanctions/Watchlist Screening (Task 24):** Task 24 is complete. Implemented: `screening_results` schema migration (`e82f1b4a9c3d`), `SanctionsAgent` dispatch with static tool calls, pinned watchlist constants (`meridian_synthetic_watchlist` `v1`), orchestrator integration with two-stage persistence, authoring of evidence and candidate findings, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`).
 - **Next Priority (RAG Evaluation):** The documented next priority is RAG evaluation (evaluating policy retrieval accuracy via a labeled query set against the policy corpus, calibrating `confidence_threshold` per `docs/EVALUATION.md` §4). Implementation of RAG evaluation has not yet begun.
+- **2026-10-24 (RAG Evaluation Protocol Freeze Preparation):** Protocol and labeled fixture added as PROPOSED / NOT FROZEN (`docs/EVALUATION.md` §4, `src/meridian/fixtures/policy_retrieval_eval_set.py`); measurement, threshold calibration, and retrieval changes have not begun; threshold behavior (inability to trigger `PolicyEvidenceInsufficient` on a non-empty corpus under current RRF minimum) is documented as derived from code, not measured.
 
 ---
 

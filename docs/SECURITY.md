@@ -49,7 +49,7 @@ Key rule: **LLM output is never trusted as an authorization signal.** An agent r
 | **Secrets exposure** | No secrets in source control; environment-variable-based config with a documented `.env.example`; secrets scanning in CI (Phase 3). |
 | **Model manipulation** | Model/provider selection is abstracted (`docs/ARCHITECTURE.md` §6); output from the model is validated against expected schema before being used downstream (e.g., a "finding" object must match a defined structure — reject and flag if it doesn't). |
 | **Untrusted external content** | Any externally sourced content (documents, alert payloads) is validated and provenance-tagged before entering the evidence pipeline. |
-| **Hallucinated evidence / fabricated citations** | Evidence records must reference real rows in the database (`findings.evidence_ids` FK-validated); a citation with no resolvable source record is a hard validation failure, not a warning. |
+| **Hallucinated evidence / fabricated citations** | Evidence records must reference real rows in the database (application validation of source pointers and same-run finding/evidence links, rechecked at report assembly); a citation with no resolvable source record is a hard validation failure, not a warning. |
 
 ---
 
@@ -68,7 +68,28 @@ Enforced server-side on every case-mutating endpoint; the UI hiding a control is
 
 **Implementation status:** Task 20 (ADR-0007) implemented a DEMO grade authentication model using opaque bearer tokens (server-side SHA-256 hash storage in `api_tokens`). The acting user is derived from the validated token on all protected case routes (`POST /cases`, `POST /cases/{id}/investigate`, `GET /cases/{id}/report`, `POST /cases/{id}/decision`, `GET /cases/{id}/audit-trail`). Case visibility rules (e.g., 404 Not Found for unassigned analysts) are enforced server-side.
 
-**Explicit Limitations:** This is not production IAM. There is no automated rate limiting, no account lockout, no refresh token rotation, and no TLS applied locally. The `/health` endpoint remains unauthenticated and uses a privileged database connection.
+**Explicit Limitations:** This is not production IAM. There is no automated rate limiting, no account lockout, no refresh token rotation, and no TLS applied locally. The `/health` endpoint remains unauthenticated and uses only the application database role.
+
+
+Phase B identity controls:
+- Runtime uses only `APP_DATABASE_URL`; it has SELECT-only access to `users` and
+  `api_tokens`. `DATABASE_URL` is migration-only; API startup does not require it.
+- Provision/revoke/deactivate with `PYTHONPATH=src uv run --frozen --no-sync python
+  -m meridian.identity.cli` using an explicitly exported `MAINTENANCE_DATABASE_URL`.
+  Subcommands: `issue EMAIL --ttl HOURS`, `revoke TOKEN_ID`, `revoke-all EMAIL`,
+  `deactivate EMAIL`. Supply privileged credentials through the local environment,
+  never chat, source code or a runtime container. Issuance displays the bearer
+  secret once; use a private terminal. Maximum TTL is 168 hours.
+- Issuance, revocation and deactivation record atomic audit events without token
+  secrets, hashes, labels or email addresses. The authenticated maintenance actor
+  is the database session principal; this does not identify an individual human
+  sharing that database credential.
+- `users.is_active` defaults true for existing identities. Deactivation atomically
+  revokes tokens, rejects subsequent issuance and denies verification. Issuance
+  serializes against deactivation on the user row. No self-service reactivation
+  or new assignment workflow is introduced; ADR-0007's assignment deferral stays.
+- Case and decision bodies reject extra fields, including supplied actor identity.
+  Human decisions retain their existing RBAC and atomic case-update/audit behavior.
 
 ---
 

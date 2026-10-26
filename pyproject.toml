@@ -17,8 +17,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+maintenance = ["alembic>=1.19.2"]
 dev = [
-    "alembic>=1.19.2",
+    {include-group = "maintenance"},
     "httpx>=0.27.0",
     "mypy>=1.10.0",
     "pip-audit>=2.7.3",
@@ -27,7 +28,7 @@ dev = [
     "ruff>=0.4.4",
 ]
 ui = [
-    "streamlit>=1.28",
+    "streamlit>=1.66.1",
     "requests>=2.31.0",
 ]
 
@@ -58,3 +59,13 @@ disallow_untyped_defs = true
 module = ["numpy", "numpy.*"]
 follow_imports = "skip"
 follow_imports_for_stubs = true
+
+# Security floors for transitive dependencies reviewed during Phase B.
+[tool.uv]
+constraint-dependencies = [
+    "certifi>=2026.10.19",
+    "filelock>=4.2.1",
+    "setuptools>=84.1.0",
+    "urllib3>=2.8.0",
+    "pillow>=13.0.0",
+]

@@ -8,6 +8,7 @@ from sqlalchemy import Engine, text
 
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from tests.db_cleanup import clean_investigation_run_dependencies
+from tests.source_helpers import empty_graph_execution
 from tests.test_transaction_agent_dispatch import (
     _seed_account,
     _seed_customer,
@@ -62,7 +63,7 @@ def test_wired_path_velocity_and_age(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
 
@@ -175,7 +176,7 @@ def test_atomicity_rollback(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(
@@ -245,7 +246,7 @@ def test_wired_path_velocity_edge_cases(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(
@@ -311,7 +312,7 @@ def test_wired_path_beneficiary_age_edge_cases(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(
@@ -379,7 +380,7 @@ def test_wired_path_beneficiary_age_unknown(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(
@@ -446,7 +447,7 @@ def test_wired_path_beneficiary_earliest_non_null(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(
@@ -516,7 +517,7 @@ def test_wired_path_beneficiary_age_added_after_unknown(
     import meridian.orchestration.graph_agent_dispatch as graph_agent
     import meridian.orchestration.policy_agent_dispatch as policy_agent
 
-    monkeypatch.setattr(graph_agent, "_execute_graph_agent", lambda *a, **kw: None)
+    monkeypatch.setattr(graph_agent, "_execute_graph_agent", empty_graph_execution)
 
     from meridian.agents.policy.policy_agent import PolicyEvidenceFound
     monkeypatch.setattr(

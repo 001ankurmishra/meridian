@@ -683,6 +683,8 @@ def test_policy_agent_evidence_preservation(
     with superuser_engine.begin() as conn:
         conn.execute(sa.text("TRUNCATE document_chunks, documents CASCADE"))
 
+    from meridian.agents.policy.retrieval import embed_query
+
     did = uuid.uuid4()
     with loader_role_engine.begin() as conn:
         conn.execute(
@@ -697,7 +699,7 @@ def test_policy_agent_evidence_preservation(
                 "INSERT INTO document_chunks (chunk_id, document_id, chunk_text, chunk_index, embedding) "
                 "VALUES (gen_random_uuid(), :did, 'specific text on structuring and smurfing', 0, cast(:emb as vector(384)))"
             ),
-            {"did": str(did), "emb": str([0.1] * 384)},
+            {"did": str(did), "emb": str(embed_query("structuring and smurfing"))},
         )
 
     with Session(app_role_engine) as session:

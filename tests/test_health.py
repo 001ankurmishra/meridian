@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 
-from meridian.db.session import engine, get_db
+from meridian.db.session import get_db
 from meridian.main import app
 
 client = TestClient(app)
@@ -48,12 +48,9 @@ def test_health_check_db_unavailable() -> None:
         app.dependency_overrides.clear()
 
 
-def test_pgvector_extension_exists() -> None:
+def test_pgvector_extension_exists(app_role_engine: Engine) -> None:
     # Verify that the vector extension is available in the database
-    with engine.connect() as conn:
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-        conn.commit()
-
+    with app_role_engine.connect() as conn:
         result = conn.execute(
             text("SELECT extversion FROM pg_extension WHERE extname = 'vector';")
         )

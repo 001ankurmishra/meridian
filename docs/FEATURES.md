@@ -76,7 +76,7 @@ MVP: a simple, clearly labeled PROTOTYPE scoring combining a handful of signals 
 
 F11 deterministic sanctions and watchlist screening is implemented and wired (Tasks 23–24, ADR-0008).
 
-The data layer (`watchlist_entries` and `screening_results` tables), atomic version loader, read-only reader, exact normalized-name matcher (`exact_norm_name_v1`), synthetic corpus, `SanctionsAgent` dispatch, orchestrator two-stage persistence, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`) are implemented. Streamlit/UI visualization remains a prototype component.
+The data layer (`watchlist_entries` and `screening_results` tables), atomic version loader, read-only reader, exact normalized-name matcher (`exact_norm_name_v1`), synthetic corpus, `SanctionsAgent` dispatch, orchestrator two-stage persistence, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`) are implemented. Streamlit displays the authoritative seven-state screening section and persisted screening result in the audit view. It distinguishes complete, incomplete and failed investigations, shows uncertainty, and bounds API connection/read timeouts. A timed-out mutation may still finish; the UI directs the reviewer to the audit trail before retrying. The authenticated human-decision workflow remains a prototype component.
 
 Candidate generation uses exact normalized-name matching via the existing normalization behavior and matching rule `exact_norm_name_v1`.
 

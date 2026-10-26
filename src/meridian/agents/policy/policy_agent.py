@@ -1,3 +1,4 @@
+import math
 import uuid
 from dataclasses import dataclass
 from typing import List, Union
@@ -41,6 +42,7 @@ def retrieve_policy_evidence(
     # PROTOTYPE-tier threshold. Requires calibration via labeled query set
     # per docs/EVALUATION.md §4. NOT a final or evaluated threshold.
     confidence_threshold: float = 0.01,
+    absolute_similarity_threshold: float | None = 0.620313,
 ) -> PolicyAgentResult:
     """
     Retrieves policy evidence candidates and applies a minimum confidence threshold.
@@ -48,6 +50,21 @@ def retrieve_policy_evidence(
     otherwise PolicyEvidenceInsufficient.
     """
     candidates = retrieve_candidates(session, query, k=k, top_k=top_k)
+
+    if absolute_similarity_threshold is not None:
+        if not math.isfinite(absolute_similarity_threshold) or not (
+            -1 <= absolute_similarity_threshold <= 1
+        ):
+            raise ValueError("Invalid absolute similarity threshold.")
+        maximum = (
+            candidates[0].get("query_max_cosine_similarity") if candidates else None
+        )
+        if (
+            maximum is None
+            or not math.isfinite(maximum)
+            or maximum < absolute_similarity_threshold
+        ):
+            return PolicyEvidenceInsufficient()
 
     citations = []
     for candidate in candidates:

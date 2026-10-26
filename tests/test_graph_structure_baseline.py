@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 from sqlalchemy import Engine
 
@@ -23,9 +24,7 @@ def test_determinism(tmp_path, superuser_engine: Engine):
             try:
                 subprocess_res = subprocess.run(
                     [
-                        "uv",
-                        "run",
-                        "python",
+                        sys.executable,
                         "-m",
                         "meridian.fixtures.graph_structure_baseline",
                     ],

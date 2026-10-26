@@ -274,7 +274,7 @@ def test_record_finding_rejects_unresolvable_evidence_id(
 
         random_evidence_id = uuid.uuid4()
 
-        with pytest.raises(ValueError, match="do not exist in the evidence table"):
+        with pytest.raises(ValueError, match="same investigation"):
             record_finding(
                 engine=app_role_engine,
                 investigation_run_id=inv_run.investigation_run_id,
@@ -488,7 +488,7 @@ def test_record_finding_with_connection_uses_caller_connection(
 
         # Verify invalid evidence throws error inside the connection
         with app_role_engine.begin() as conn:
-            with pytest.raises(ValueError, match="do not exist in the evidence table"):
+            with pytest.raises(ValueError, match="same investigation"):
                 record_finding_with_connection(
                     conn,
                     inv_run.investigation_run_id,

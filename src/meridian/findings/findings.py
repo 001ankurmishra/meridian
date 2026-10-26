@@ -75,15 +75,16 @@ def record_finding_with_connection(
         result = conn.execute(
             text(
                 "SELECT count(evidence_id) FROM evidence "
-                "WHERE evidence_id = ANY(:evidence_ids)"
+                "WHERE evidence_id = ANY(:evidence_ids) "
+                "AND investigation_run_id = :run_id"
             ),
-            {"evidence_ids": evidence_ids},
+            {"evidence_ids": evidence_ids, "run_id": investigation_run_id},
         ).scalar()
 
         unique_evidence_ids = set(evidence_ids)
         if result != len(unique_evidence_ids):
             raise ValueError(
-                "One or more provided evidence_ids do not exist in the evidence table."
+                "Evidence IDs must exist and belong to the same investigation."
             )
 
     conn.execute(

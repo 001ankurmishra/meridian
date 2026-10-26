@@ -1,0 +1,24 @@
+# Keep credentials and host state out of image layers.
+.git
+.env
+.env.*
+!.env.example
+.venv
+env
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+coverage.xml
+scratch
+*.pem
+*.key
+.DS_Store
+
+**/.env
+**/.env.*
+**/*.pem
+**/*.key

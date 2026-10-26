@@ -40,6 +40,7 @@ from typing import Any
 from sqlalchemy import Engine, text
 
 from meridian.audit.errors import CaseNotFoundError
+from meridian.audit.safety import safe_stored_error
 
 
 @dataclass(frozen=True)
@@ -191,7 +192,7 @@ def get_case_audit_trail(engine: Engine, case_id: uuid.UUID) -> CaseAuditTrail:
                     tool_calls=r[3] if r[3] is not None else {},
                     started_at=r[4],
                     completed_at=r[5],
-                    error=r[6],
+                    error=safe_stored_error(r[6]),
                 )
                 for r in agent_run_rows
             )

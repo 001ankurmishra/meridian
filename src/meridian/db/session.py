@@ -1,21 +1,17 @@
 from collections.abc import Generator
+from functools import lru_cache
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 
-from meridian.config import settings
+from meridian.case_management.alert_intake import get_app_engine
 
-engine = create_engine(
-    settings.database_url,
-    pool_pre_ping=True,
-)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+@lru_cache()
+def get_runtime_engine() -> Engine:
+    return get_app_engine()
 
 
 def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
+    with Session(get_runtime_engine()) as db:
         yield db
-    finally:
-        db.close()

@@ -826,8 +826,8 @@ def test_pinned_watchlist_constants_and_ast_guards() -> None:
             raise AssertionError(f"Dynamic env lookup found in dispatch: {node.attr}")
 
 
-def test_record_agent_run_remains_unmodified() -> None:
-    """Verify record_agent_run implementation in agent_run_tracking.py is untouched."""
+def test_record_agent_run_uses_bounded_errors() -> None:
+    """Verify tracking persists bounded diagnostics without raw exception text."""
     tracking_path = (
         Path(__file__).resolve().parent.parent
         / "src"
@@ -837,5 +837,6 @@ def test_record_agent_run_remains_unmodified() -> None:
     )
     content = tracking_path.read_text()
     assert "def record_agent_run(" in content
-    assert '"error": str(e),' in content
+    assert '"error": error_code(e),' in content
+    assert '"error": str(e),' not in content
     assert "INSERT INTO agent_runs (" in content

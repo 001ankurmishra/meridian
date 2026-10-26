@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import typing
 import uuid
 from collections import defaultdict
@@ -83,7 +84,7 @@ sys.stdout.write(h)
             f.write(script)
 
         subprocess_res = subprocess.run(
-            ["uv", "run", "python", "run_gen.py"],
+            [sys.executable, "run_gen.py"],
             env=env,
             cwd=cwd,
             capture_output=True,

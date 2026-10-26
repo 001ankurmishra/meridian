@@ -251,7 +251,7 @@ def test_graph_agent_dispatch_entity_not_found(
             assert row[0] == "GraphAgent"
             assert row[1] == "FAILED"
             assert row[2] is not None
-            assert "No entity with entity_type='account'" in row[2]
+            assert row[2] == "AGENT_ERROR"
 
     finally:
         _cleanup_data(superuser_engine, cid)
@@ -291,7 +291,7 @@ def test_graph_agent_dispatch_invalid_hops(
             assert len(ar_rows) == 1
             assert ar_rows[0][0] == "GraphAgent"
             assert ar_rows[0][1] == "FAILED"
-            assert "max_hops must be >= 1" in ar_rows[0][2]
+            assert ar_rows[0][2] == "AGENT_ERROR"
 
     finally:
         _cleanup_data(superuser_engine, cid)

@@ -1,0 +1,47 @@
+{
+  "uid": 10001,
+  "database_role": "meridian_app",
+  "privileged_runtime_credentials_absent": true,
+  "repository_secret_files_absent": true,
+  "source_evidence_references_validated": 28,
+  "identity_write_grants": {
+    "users": {
+      "INSERT": false,
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    },
+    "api_tokens": {
+      "INSERT": false,
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    }
+  },
+  "append_only_mutation_grants": {
+    "audit_events": {
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    },
+    "evidence": {
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    },
+    "screening_results": {
+      "UPDATE": false,
+      "DELETE": false,
+      "TRUNCATE": false
+    }
+  },
+  "seed_counts": {
+    "customers": 104,
+    "transactions": 509,
+    "documents": 4,
+    "document_chunks": 10,
+    "watchlist_entries": 10,
+    "cases": 2
+  },
+  "active_verification_tokens": 0
+}

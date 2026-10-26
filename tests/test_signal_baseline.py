@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import typing
 from decimal import Decimal
 
@@ -177,7 +178,7 @@ print(canonical_json(report), end="")
 
             try:
                 subprocess_res = subprocess.run(
-                    ["uv", "run", "python", "run_cli.py"],
+                    [sys.executable, "run_cli.py"],
                     env=env,
                     cwd=cwd,
                     capture_output=True,

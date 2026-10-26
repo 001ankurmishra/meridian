@@ -5,7 +5,9 @@ import uuid
 
 from sqlalchemy import Engine, create_engine, text
 
+from meridian.audit.safety import error_code
 from meridian.identity.tokens import (
+    deactivate_user,
     issue_token,
     revoke_all_tokens_for_user,
     revoke_token,
@@ -13,14 +15,14 @@ from meridian.identity.tokens import (
 
 
 def get_engine() -> Engine:
-    db_url = os.environ.get("APP_DATABASE_URL")
+    db_url = os.environ.get("MAINTENANCE_DATABASE_URL")
     if not db_url:
         print(
-            "Error: APP_DATABASE_URL environment variable is not set.",
+            "Error: MAINTENANCE_DATABASE_URL environment variable is not set.",
             file=sys.stderr,
         )
         sys.exit(1)
-    return create_engine(db_url)
+    return create_engine(db_url, hide_parameters=True)
 
 
 def cmd_issue(args: argparse.Namespace) -> None:
@@ -82,8 +84,12 @@ def cmd_revoke_all(args: argparse.Namespace) -> None:
         sys.exit(1)
 
     user_id = user_row[0]
-    count = revoke_all_tokens_for_user(engine, user_id)
-    print(f"Revoked {count} tokens for user {args.email}.")
+    if args.command == "deactivate":
+        changed = deactivate_user(engine, user_id)
+        print("User deactivated." if changed else "User already inactive.")
+    else:
+        count = revoke_all_tokens_for_user(engine, user_id)
+        print(f"Revoked {count} tokens.")
 
 
 def main() -> None:
@@ -111,8 +117,16 @@ def main() -> None:
     parser_revoke_all.add_argument("email", help="Target user's email")
     parser_revoke_all.set_defaults(func=cmd_revoke_all)
 
+    parser_deactivate = subparsers.add_parser("deactivate", help="Deactivate a user")
+    parser_deactivate.add_argument("email", help="Target user's email")
+    parser_deactivate.set_defaults(func=cmd_revoke_all)
+
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except Exception as exc:
+        print(f"Maintenance operation failed: {error_code(exc)}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

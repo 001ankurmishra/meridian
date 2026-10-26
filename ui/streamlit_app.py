@@ -5,9 +5,34 @@ import uuid
 import requests
 import streamlit as st
 
-st.set_page_config(page_title="Meridian Phase 1 UI", layout="wide")
+st.set_page_config(page_title="Meridian Investigation Review", layout="wide")
 
 API_BASE = os.environ.get("MERIDIAN_API_BASE_URL", "http://localhost:8000")
+REQUEST_TIMEOUT = (5, 60)
+INVESTIGATION_TIMEOUT = (5, 120)
+
+
+def show_request_failure(operation, response):
+    st.error(f"{operation} could not be completed (HTTP {response.status_code}).")
+    if response.status_code == 401:
+        st.info("Credentials are missing, invalid, revoked or expired.")
+    elif response.status_code == 403:
+        st.info("Your role is not authorized for this action.")
+    elif response.status_code == 404:
+        st.info("The record is unavailable or you do not have access.")
+    elif response.status_code == 422:
+        st.info("Check the supplied values and the current case state.")
+    request_id = response.headers.get("X-Request-ID")
+    if request_id:
+        st.text(f"Request ID: {request_id}")
+
+
+def show_connection_failure():
+    st.error("The API did not respond within the request limits or is unavailable.")
+    st.info(
+        "A submitted operation may still finish. Check the audit trail before retrying."
+    )
+
 
 st.sidebar.header("Authentication")
 api_token = st.sidebar.text_input(
@@ -20,7 +45,10 @@ if not api_token:
 
 headers = {"Authorization": f"Bearer {api_token}"}
 
-st.title("Meridian: Phase 1 Human-Approval UI")
+st.title("Meridian: Human Investigation Review")
+st.warning(
+    "Synthetic prototype. Findings and recommendations require authorized human review."
+)
 
 # --- CASE CREATION ---
 st.header("1. Case Creation")
@@ -48,7 +76,12 @@ with st.form("case_create_form"):
             if txn_id.strip():
                 payload["transaction_id"] = txn_id.strip()
 
-            resp = requests.post(f"{API_BASE}/cases", json=payload, headers=headers)
+            resp = requests.post(
+                f"{API_BASE}/cases",
+                json=payload,
+                headers=headers,
+                timeout=REQUEST_TIMEOUT,
+            )
             if resp.status_code == 201:
                 data = resp.json()
                 st.success("Case created successfully!")
@@ -56,11 +89,11 @@ with st.form("case_create_form"):
                 st.write(f"**case_id**: `{data.get('case_id')}`")
                 st.session_state["current_case_id"] = data.get("case_id")
             else:
-                st.error(f"Failed to create case. HTTP {resp.status_code}: {resp.text}")
+                show_request_failure("Case creation", resp)
         except json.JSONDecodeError:
             st.error("Invalid JSON in Alert Reasons.")
-        except requests.RequestException as e:
-            st.error(f"API Connection Error: {e}")
+        except requests.RequestException:
+            show_connection_failure()
 
 st.divider()
 
@@ -79,16 +112,30 @@ if st.button("Investigate"):
     with st.spinner("Investigating..."):
         try:
             resp = requests.post(
-                f"{API_BASE}/cases/{case_id_input}/investigate", headers=headers
+                f"{API_BASE}/cases/{case_id_input}/investigate",
+                headers=headers,
+                timeout=INVESTIGATION_TIMEOUT,
             )
             if resp.status_code == 200:
-                st.success(
-                    f"Investigation complete. Status: {resp.json().get('status')}"
-                )
+                investigation_status = resp.json().get("status")
+                if investigation_status == "COMPLETE":
+                    st.success("Investigation complete. Human review is required.")
+                elif investigation_status == "INCOMPLETE":
+                    st.warning(
+                        "Investigation incomplete. Review missing evidence."
+                    )
+                elif investigation_status == "FAILED":
+                    st.error(
+                        "Investigation failed. Check the audit trail."
+                    )
+                else:
+                    st.warning(
+                        "Completion is not confirmed. Check the audit trail."
+                    )
             else:
-                st.error(f"Investigation failed. HTTP {resp.status_code}: {resp.text}")
-        except requests.RequestException as e:
-            st.error(f"API Connection Error: {e}")
+                show_request_failure("Investigation", resp)
+        except requests.RequestException:
+            show_connection_failure()
 
 st.divider()
 
@@ -96,7 +143,11 @@ st.divider()
 st.header("3. Report")
 if st.button("Fetch Report"):
     try:
-        resp = requests.get(f"{API_BASE}/cases/{case_id_input}/report", headers=headers)
+        resp = requests.get(
+            f"{API_BASE}/cases/{case_id_input}/report",
+            headers=headers,
+            timeout=REQUEST_TIMEOUT,
+        )
         if resp.status_code == 200:
             report = resp.json()
             st.subheader("Summary")
@@ -108,6 +159,24 @@ if st.button("Fetch Report"):
             comp_status = report.get("evidence_completeness_status")
             st.write(f"**Evidence Completeness Status**: {comp_status}")
             st.write(f"**Confidence**: {report.get('confidence_text')}")
+
+            if comp_status != "COMPLETE":
+                st.warning(
+                    "This report does not establish a complete investigation."
+                )
+            st.subheader("Watchlist Screening")
+            screening = report.get("watchlist_screening")
+            if not isinstance(screening, dict) or not screening.get("rendered_text"):
+                st.warning("Screening information unavailable. Not determined.")
+            else:
+                # Use the authoritative backend classification for all seven states.
+                st.text(f"Screening state: {screening.get('state')}")
+                st.write(screening["rendered_text"])
+                st.caption(
+                    "Exact-name candidate screening on a synthetic watchlist. "
+                    "A candidate is not a confirmed identity. "
+                    "No candidate does not mean clearance."
+                )
 
             st.subheader("Computed Risk Signals")
             risk_signals = report.get("risk_signals", [])
@@ -164,9 +233,9 @@ if st.button("Fetch Report"):
                 "Report unavailable — insufficient evidence for this investigation run"
             )
         else:
-            st.error(f"Failed to fetch report. HTTP {resp.status_code}: {resp.text}")
-    except requests.RequestException as e:
-        st.error(f"API Connection Error: {e}")
+            show_request_failure("Report retrieval", resp)
+    except requests.RequestException:
+        show_connection_failure()
 
 st.divider()
 
@@ -175,7 +244,9 @@ st.header("4. Audit Trail")
 if st.button("Fetch Audit Trail"):
     try:
         resp = requests.get(
-            f"{API_BASE}/cases/{case_id_input}/audit-trail", headers=headers
+            f"{API_BASE}/cases/{case_id_input}/audit-trail",
+            headers=headers,
+            timeout=REQUEST_TIMEOUT,
         )
         if resp.status_code == 200:
             trail = resp.json()
@@ -194,6 +265,12 @@ if st.button("Fetch Audit Trail"):
 
                     st.write("**Evidence:**")
                     st.json(ir.get("evidence", []))
+
+                    st.write("**Screening Result:**")
+                    st.json(ir.get("screening_result"))
+
+                    st.write("**Recommendations:**")
+                    st.json(ir.get("recommendations", []))
 
                     st.write("**Findings:**")
                     st.json(ir.get("findings", []))
@@ -215,11 +292,9 @@ if st.button("Fetch Audit Trail"):
                     st.json(ae.get("output_summary") or {})
 
         else:
-            st.error(
-                f"Failed to fetch audit trail. HTTP {resp.status_code}: {resp.text}"
-            )
-    except requests.RequestException as e:
-        st.error(f"API Connection Error: {e}")
+            show_request_failure("Audit retrieval", resp)
+    except requests.RequestException:
+        show_connection_failure()
 
 st.divider()
 
@@ -249,13 +324,14 @@ with st.form("decision_form"):
                     f"{API_BASE}/cases/{case_id_input}/decision",
                     json=payload,
                     headers=headers,
+                    timeout=REQUEST_TIMEOUT,
                 )
                 if resp.status_code == 200:
                     st.success("Decision submitted successfully.")
                     st.write(f"**New Status**: {resp.json().get('new_status')}")
                 elif resp.status_code in [422, 403]:
-                    st.error(f"{resp.json().get('detail')}")
+                    show_request_failure("Decision", resp)
                 else:
-                    st.error(f"Decision failed. HTTP {resp.status_code}: {resp.text}")
-            except requests.RequestException as e:
-                st.error(f"API Connection Error: {e}")
+                    show_request_failure("Decision", resp)
+            except requests.RequestException:
+                show_connection_failure()

@@ -202,7 +202,7 @@ def test_app_role_privileges_read_write(
 ) -> None:
     """
     Test that meridian_app CAN perform intended writes on:
-    entities, graph_relationships, alerts, cases, investigation_runs, users
+    entities, graph_relationships, alerts, cases, investigation_runs
     """
     with superuser_engine.begin() as conn:
         cust_id = conn.execute(
@@ -228,6 +228,16 @@ def test_app_role_privileges_read_write(
             ),
             {"acc_id": acc_id},
         ).scalar()
+
+        # Identity provisioning requires maintenance privileges
+        user_id = conn.execute(
+            text(
+                "INSERT INTO users (user_id, email, role) "
+                "VALUES (gen_random_uuid(), 'test@test.com', 'analyst') "
+                "RETURNING user_id"
+            )
+        ).scalar()
+
 
     with app_role_engine.connect() as conn:
         # entities
@@ -269,15 +279,6 @@ def test_app_role_privileges_read_write(
             {"cust_id": cust_id, "txn_id": txn_id},
         ).scalar()
 
-        # users
-        user_id = conn.execute(
-            text(
-                "INSERT INTO users (user_id, email, role) "
-                "VALUES (gen_random_uuid(), 'test@test.com', 'analyst') "
-                "RETURNING user_id"
-            )
-        ).scalar()
-
         # cases
         case_id = conn.execute(
             text(
@@ -298,16 +299,16 @@ def test_app_role_privileges_read_write(
         )
         conn.commit()
 
-        # Test SELECT on all 6 tables
+        # Test SELECT on all workflow tables
         rw_tables = [
             "entities", "graph_relationships", "alerts",
-            "cases", "investigation_runs", "users"
+            "cases", "investigation_runs"
         ]
         for table in rw_tables:
             res = conn.execute(text(f"SELECT * FROM {table}")).fetchall()
             assert len(res) >= 1
 
-        # Test UPDATE on all 6 tables
+        # Test UPDATE on all workflow tables
         conn.execute(text("UPDATE entities SET created_at = NOW()"))
         conn.execute(text("UPDATE graph_relationships SET created_at = NOW()"))
         conn.execute(text("UPDATE alerts SET created_at = NOW()"))
@@ -316,10 +317,9 @@ def test_app_role_privileges_read_write(
             {"case_id": case_id},
         )
         conn.execute(text("UPDATE investigation_runs SET created_at = NOW()"))
-        conn.execute(text("UPDATE users SET created_at = NOW()"))
         conn.commit()
 
-        # Test DELETE fails on all 6 tables
+        # Test DELETE fails on all workflow tables
         for table in rw_tables:
             with pytest.raises(Exception) as excinfo:
                 conn.execute(text(f"DELETE FROM {table}"))

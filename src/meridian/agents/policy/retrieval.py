@@ -4,11 +4,15 @@ import sqlalchemy as sa
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
+from meridian.agents.policy.model_config import MODEL_NAME, MODEL_REVISION
+
 # Load the model locally. CPU only.
 # This will trigger a download on first run if not cached.
 # Model inference uses NO external embedding API and NO API key.
 # Dimension: 384
-embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5")
+embedding_model = SentenceTransformer(
+    MODEL_NAME, revision=MODEL_REVISION, device="cpu", trust_remote_code=False,
+)
 
 
 def embed_document_chunk(chunk_text: str) -> List[float]:
@@ -175,7 +179,8 @@ def retrieve_candidates(
             d.is_synthetic,
             c.document_id,
             c.chunk_index,
-            c.chunk_text
+            c.chunk_text,
+            1 - (c.embedding <=> cast(:embedding as vector(384))) as cosine_similarity
         FROM document_chunks c
         JOIN documents d ON c.document_id = d.document_id
         ORDER BY
@@ -194,6 +199,10 @@ def retrieve_candidates(
         row.chunk_id: rank for rank, row in enumerate(semantic_results, start=1)
     }
 
+    query_max_cosine = max(
+        (float(row.cosine_similarity) for row in semantic_results
+         if row.cosine_similarity is not None), default=None,
+    )
     metadata = {}
     for row in semantic_results:
         metadata[row.chunk_id] = {
@@ -205,6 +214,7 @@ def retrieve_candidates(
             "is_synthetic": row.is_synthetic,
             "chunk_index": row.chunk_index,
             "chunk_text": row.chunk_text,
+            "query_max_cosine_similarity": query_max_cosine,
         }
     for row in lexical_results:
         if row.chunk_id not in metadata:
@@ -217,6 +227,7 @@ def retrieve_candidates(
                 "is_synthetic": row.is_synthetic,
                 "chunk_index": row.chunk_index,
                 "chunk_text": row.chunk_text,
+                "query_max_cosine_similarity": query_max_cosine,
             }
 
     # 3. Reciprocal Rank Fusion (RRF) with deterministic total ordering

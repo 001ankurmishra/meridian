@@ -251,7 +251,7 @@ def test_execution_failure(app_role_engine: Engine, superuser_engine: Engine) ->
             assert ar_rows[0][0] == "TransactionAgent"
             assert ar_rows[0][1] == "FAILED"
             assert ar_rows[0][2] is not None
-            assert "no source_account_id" in ar_rows[0][2]
+            assert ar_rows[0][2] == "AGENT_ERROR"
 
     finally:
         _cleanup_seeded_data(superuser_engine, cid)

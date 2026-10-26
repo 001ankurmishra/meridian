@@ -263,7 +263,12 @@ No `UPDATE`/`DELETE` permitted on this table at the application-role level; enfo
 | `user_id` UUID PK | |
 | `email` text | |
 | `role` text | analyst / senior_analyst / compliance_manager / admin |
+| `is_active` boolean NOT NULL DEFAULT true | Deactivation denies token issuance and verification |
 | `created_at` timestamptz | |
+
+The runtime application role has SELECT-only access to `users` and `api_tokens`;
+identity mutations require the privileged maintenance connection. Lifecycle audit
+events have null `case_id` and identify the authenticated database principal.
 
 Fine-grained permission mapping (which role can approve/escalate/close) documented in `docs/SECURITY.md` §"Authorization Model."
 

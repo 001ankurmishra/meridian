@@ -68,7 +68,7 @@ from meridian.evidence.evidence import (
 )
 from meridian.loader.watchlist_corpus import get_synthetic_watchlist_corpus
 from meridian.loader.watchlist_ingest import ingest_watchlist_version
-from meridian.orchestration.graph_agent_dispatch import GraphAgentDispatchResult
+from meridian.orchestration.graph_agent_dispatch import GraphAgentExecutionResult
 from meridian.orchestration.investigation_orchestrator import orchestrate_investigation
 from meridian.orchestration.sanctions_agent_dispatch import (
     REASON_DATABASE_ERROR,
@@ -79,6 +79,7 @@ from meridian.orchestration.screening_results_persistence import (
     record_screening_result,
 )
 from tests.db_cleanup import clean_investigation_run_dependencies
+from tests.source_helpers import cleanup_reference_sources, seed_source
 
 PROHIBITED_EXPRESSIONS: tuple[str, ...] = (
     "sanctioned customer",
@@ -102,6 +103,7 @@ def _cleanup_all(superuser_engine: Engine) -> None:
         conn.execute(text("DELETE FROM accounts"))
         conn.execute(text("DELETE FROM customers"))
         conn.execute(text("DELETE FROM watchlist_entries"))
+    cleanup_reference_sources(superuser_engine)
 
 
 @pytest.fixture(autouse=True)
@@ -221,20 +223,19 @@ def test_criterion_1_exact_agent_run_id_propagation(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -247,7 +248,7 @@ def test_criterion_1_exact_agent_run_id_propagation(
                     document_id=uuid.uuid4(),
                     document_type="policy",
                     chunk_text="text",
-                    chunk_id=uuid.uuid4(),
+                    chunk_id=seed_source(superuser_engine, "document_chunks"),
                     title="Policy A",
                     version="1.0",
                     chunk_index=1,
@@ -388,20 +389,19 @@ def test_criterion_2_three_persisted_domain_outcomes(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -470,20 +470,19 @@ def test_criterion_3_screened_customer_evidence_for_all_three_outcomes(
                 historical_average=Decimal("10"),
                 deviation_multiple=Decimal("10"),
                 historical_transaction_count=1,
-                source_transaction_ids=(uuid.uuid4(),),
+                source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
                 currency="INR",
             )
-            m_graph.return_value = GraphAgentDispatchResult(
-                investigation_run_id=uuid.uuid4(),
-                result=SubgraphResult(
+            m_graph.return_value = GraphAgentExecutionResult(
+                subgraph=SubgraphResult(
                     start_entity_id=uuid.uuid4(),
                     max_hops=3,
                     node_entity_ids=(uuid.uuid4(),),
                     relationship_ids=(uuid.uuid4(),),
                     truncated=False,
                 ),
-                cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-                chain_result=ChainDepthComputed(
+                cycle=CycleNotFound(account_id=uuid.uuid4()),
+                chain=ChainDepthComputed(
                     account_id=uuid.uuid4(),
                     depth=0,
                     chain_entity_ids=(),
@@ -572,20 +571,19 @@ def test_criterion_4_candidate_linkage_and_ad10_wording(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -708,20 +706,19 @@ def test_criterion_4_no_findings_or_recommendations_for_no_match_or_abstention(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -806,20 +803,19 @@ def test_criteria_5_and_6_atomic_stage_2_rollback_and_stage_1_independence(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -943,20 +939,19 @@ def test_criterion_7_state_4_ordinary_technical_failure_is_non_fatal(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -1054,20 +1049,19 @@ def test_criterion_7_state_5_stage_1_persistence_failure_is_fatal(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -1235,17 +1229,16 @@ def test_criterion_9_completion_prerequisites_unaffected_by_f11(
             source_account_id=uuid.uuid4(),
             reason="insufficient historical transactions",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -1285,20 +1278,19 @@ def test_criterion_10_authoring_reentrancy_guards(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),
@@ -1443,20 +1435,19 @@ def test_mandatory_no_f11_risk_signals_created(
             historical_average=Decimal("10"),
             deviation_multiple=Decimal("10"),
             historical_transaction_count=1,
-            source_transaction_ids=(uuid.uuid4(),),
+            source_transaction_ids=(seed_source(superuser_engine, "transactions"),),
             currency="INR",
         )
-        m_graph.return_value = GraphAgentDispatchResult(
-            investigation_run_id=uuid.uuid4(),
-            result=SubgraphResult(
+        m_graph.return_value = GraphAgentExecutionResult(
+            subgraph=SubgraphResult(
                 start_entity_id=uuid.uuid4(),
                 max_hops=3,
                 node_entity_ids=(uuid.uuid4(),),
                 relationship_ids=(uuid.uuid4(),),
                 truncated=False,
             ),
-            cycle_result=CycleNotFound(account_id=uuid.uuid4()),
-            chain_result=ChainDepthComputed(
+            cycle=CycleNotFound(account_id=uuid.uuid4()),
+            chain=ChainDepthComputed(
                 account_id=uuid.uuid4(),
                 depth=0,
                 chain_entity_ids=(),

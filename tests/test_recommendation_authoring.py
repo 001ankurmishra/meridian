@@ -709,7 +709,18 @@ def _patch_agents(
         return policy_result
 
     m_tx.side_effect = tx_side_effect
-    m_graph.return_value = None
+    from meridian.orchestration.graph_agent_dispatch import GraphAgentDispatchResult
+    from tests.source_helpers import empty_graph_execution
+
+    def graph_side_effect(engine, inv_id, account_id, max_hops, **kwargs):
+        result = empty_graph_execution(engine, account_id, max_hops)
+        _seed_agent_run(engine, inv_id, "GraphAgent", kwargs["agent_run_id"])
+        return GraphAgentDispatchResult(
+            investigation_run_id=inv_id, result=result.subgraph,
+            cycle_result=result.cycle, chain_result=result.chain,
+        )
+
+    m_graph.side_effect = graph_side_effect
     if policy_result is not None:
         m_policy.side_effect = policy_side_effect
     else:

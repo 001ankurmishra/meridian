@@ -3,6 +3,8 @@ from typing import List, cast
 
 from transformers import AutoTokenizer
 
+from meridian.agents.policy.model_config import MODEL_NAME, MODEL_REVISION
+
 TARGET_MIN = 300
 TARGET_MAX = 400
 OVERLAP_MIN = 45
@@ -11,7 +13,7 @@ BGE_MODEL_MAX = 512
 MERIDIAN_SAFETY_CEILING = 480
 
 tokenizer = AutoTokenizer.from_pretrained(
-    "BAAI/bge-small-en-v1.5"
+    MODEL_NAME, revision=MODEL_REVISION, trust_remote_code=False
 )
 
 

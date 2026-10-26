@@ -46,16 +46,16 @@ def record_recommendation_with_connection(
         result = conn.execute(
             text(
                 "SELECT count(finding_id) FROM findings "
-                "WHERE finding_id = ANY(:finding_ids)"
+                "WHERE finding_id = ANY(:finding_ids) "
+                "AND investigation_run_id = :run_id"
             ),
-            {"finding_ids": based_on_finding_ids},
+            {"finding_ids": based_on_finding_ids, "run_id": investigation_run_id},
         ).scalar()
 
         unique_finding_ids = set(based_on_finding_ids)
         if result != len(unique_finding_ids):
             raise ValueError(
-                "One or more provided finding IDs do not exist in the "
-                "findings table."
+                "Finding IDs must exist and belong to the same investigation."
             )
 
     conn.execute(
@@ -102,9 +102,7 @@ def record_recommendation(
 ) -> RecommendationRecord:
     """Record a recommendation.
 
-    Note: The persistence layer intentionally does not impose a restriction
-    that the recommendation's investigation_run_id must match the
-    investigation_run_id of the findings it references.
+    Referenced findings must belong to this investigation.
 
     Args:
         engine: Application-role SQLAlchemy Engine.

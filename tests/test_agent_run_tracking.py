@@ -288,7 +288,7 @@ def test_record_agent_run_failure(
             ).fetchall()
             assert len(rows) == 1
             assert rows[0][0] == "FAILED"
-            assert "deliberate test failure" in rows[0][1]
+            assert rows[0][1] == "INVALID_INPUT"
             assert rows[0][2] == {}
 
     finally:
