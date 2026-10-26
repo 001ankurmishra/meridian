@@ -172,7 +172,7 @@ calibrated; it cannot establish policy applicability or validate each citation.
 The paired baseline/gate HELDOUT configuration is locked in
 `docs/evaluation/policy_retrieval_eval_v1.plan.json` before measurement.
 
-### RAG evaluation protocol (policy_retrieval_eval_v1) — FROZEN 2026-10-25; measurement pending
+### RAG evaluation protocol (policy_retrieval_eval_v1) — FROZEN 2026-10-25; locked measurement recorded
 
 > **Protocol Status:** FROZEN by explicit approval from Ankur on 2026-10-25. No measurement performed at freeze.
 > Approval and both reviewed/frozen payload hashes are recorded in `docs/evaluation/policy_retrieval_eval_v1.freeze.json`. Frozen canonical SHA-256: `993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053`. Labels are maintainer-approved, not independently validated.
@@ -256,7 +256,7 @@ This property is **DERIVED FROM CODE, NOT MEASURED**. The future baseline measur
 
 #### 10. Known Limitations
 1. **Corpus Size:** With $N=10$ synthetic policy chunks, chance recall is high ($E[\text{Recall}@5] = 0.5$ for any relevant chunk under uniform random ordering).
-2. **Labeler Provenance:** Labels were created with AI assistance and are pending human maintainer audit and approval.
+2. **Labeler Provenance:** Labels were created with AI assistance and approved by Ankur for the recorded review hash. This is maintainer review, not independent validation.
 3. **Descriptive Cohorts:** Cohort C1 ($n=3$) and C2 ($n=5$) are small and descriptive only; C2 is provisional.
 4. **Tokenizer Dependency:** Chunking depends on cached tokenizer files (`transformers.AutoTokenizer` for `BAAI/bge-small-en-v1.5`).
 5. **Split Granularity Limitation:** DEV/HELDOUT assignment hashes individual query IDs (`assign_split(seed, query_id)`). Related paraphrases of the same alert topic may therefore occur in both splits. This evaluates query-level holdout behavior, not generalization to independent scenario families. Grouped scenario-family splitting is deferred to a future protocol revision.
@@ -1076,3 +1076,55 @@ The `v0.1`, `v0.2`, and `v0.3` synthetic fixture corpora (`src/meridian/fixtures
 ## 11. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` §5 (confidence tiers used in reports), `docs/TESTING.md` (fixture reuse for regression), `docs/DATA_AND_DATASET_STRATEGY.md` (fixture generation), `docs/DECISIONS.md` (ADR needed if evaluation methodology changes materially).
+
+
+## Phase B unified execution (2026-10-26, PROTOTYPE)
+
+`evaluation/phase-b-unified.json` records actual execution of the v0.2 amount,
+v0.3 transaction-signal, v0.4 graph, v0.5 entity-resolution and synthetic sanctions
+baselines. It reuses the immutable paired policy result rather than running
+HELDOUT again. Human comparison: **NOT PERFORMED**.
+
+Run only against the marked disposable `meridian_test` database on loopback
+port 55432, with the three role URLs documented in TESTING.md exported:
+
+```bash
+PYTHONPATH=src HF_HUB_OFFLINE=1 uv run --frozen --no-sync python -m meridian.evaluation.run --output /tmp/meridian-evaluation.json
+```
+
+The runner clears source fixtures in that disposable database, refuses downstream
+alerts, and cleans its fixture data afterward. Existing output files are not
+overwritten. Do not run it concurrently with database tests.
+
+Measured limitations are material: v0.2 amount-deviation eval ROC-AUC is 0.479167
+(4 positives, 12 negatives). ER precision is 7/8 and overall recall 7/15; the
+seven cases within the exact-name/exact-DOB rule's scope were found. Sanctions
+produced its expected four candidates, including a designed false positive and
+one missed ground-truth positive; candidate matching is not a sanctions decision.
+These are synthetic structural checks, not real-world AML effectiveness.
+
+### Single locked policy comparison
+
+Ankur accepted ADR-0009 and the fixed 0.620313 prototype cosine gate before the
+paired HELDOUT run. The result and completion receipt are
+`evaluation/policy_retrieval_eval_v1.heldout.json` and
+`evaluation/policy_retrieval_eval_v1.heldout-receipt.json`.
+
+| Cohort | Original RRF gate | Approved cosine gate |
+|---|---|---|
+| HELDOUT C3 assessed negatives (5) | Retrieved all 5 | Abstained on all 5 |
+| HELDOUT C4 assessed positives (8) | Retrieved all 8 | Retrieved all 8 |
+| C1 descriptive alert types (3) | Retrieved all 3 | Retrieved all 3 |
+
+One C3 and three C4 HELDOUT queries are NOT_ASSESSED and excluded from abstention
+accuracy claims. C4 strict Hit@1=0.875, MRR=0.9375, precision@5=0.525 and
+recall@5=0.958333 are identical for both systems because ranking is unchanged.
+C1 strict Hit@1 and MRR are 1.0; precision@5=0.533333 and recall@5=1.0.
+C2 remains provisional and was not executed. Full per-query rankings and metrics
+are retained in the artifacts. No threshold was tuned on HELDOUT.
+
+The gate uses a tiny DEV sample (five assessed negatives, four positives), is
+**not calibrated**, and does not establish policy applicability or citation
+correctness. Query-level splits can share scenario families. Missing-coverage
+queries marked NOT_ASSESSED remain a known limitation. Do not rerun the frozen
+HELDOUT protocol or represent these labels as independently validated.

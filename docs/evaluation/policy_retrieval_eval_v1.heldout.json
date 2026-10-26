@@ -1,0 +1,1335 @@
+{
+  "absolute_gate": 0.620313,
+  "cohorts": {
+    "C3": {
+      "abstention_counts": {
+        "NOT_ASSESSED": 1,
+        "SHOULD_ABSTAIN/RETRIEVE": 5
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 6,
+          "included": 0
+        },
+        "lenient": {
+          "excluded": 6,
+          "included": 0
+        },
+        "strict": {
+          "excluded": 6,
+          "included": 0
+        }
+      },
+      "queries": 6
+    },
+    "C4": {
+      "abstention_counts": {
+        "NOT_ASSESSED": 3,
+        "SHOULD_RETRIEVE/RETRIEVE": 8
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 3,
+          "included": 8,
+          "nDCG@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "nDCG@3": {
+            "lift": 0.5632900567908025,
+            "observed": 0.8536187366099389,
+            "random": 0.29032867981913646
+          },
+          "nDCG@5": {
+            "lift": 0.506818841148911,
+            "observed": 0.9085318690186693,
+            "random": 0.4017130278697583
+          }
+        },
+        "lenient": {
+          "Hit@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "Hit@3": {
+            "lift": 0.3354166666666667,
+            "observed": 1.0,
+            "random": 0.6645833333333333
+          },
+          "Hit@5": {
+            "lift": 0.11805555555555547,
+            "observed": 1.0,
+            "random": 0.8819444444444445
+          },
+          "P@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "P@3": {
+            "lift": 0.5166666666666666,
+            "observed": 0.7916666666666666,
+            "random": 0.275
+          },
+          "P@5": {
+            "lift": 0.25,
+            "observed": 0.525,
+            "random": 0.275
+          },
+          "RR": {
+            "lift": 0.4284377755731923,
+            "observed": 0.9375,
+            "random": 0.5090622244268077
+          },
+          "Recall@1": {
+            "lift": 0.23333333333333334,
+            "observed": 0.3333333333333333,
+            "random": 0.09999999999999999
+          },
+          "Recall@3": {
+            "lift": 0.5541666666666667,
+            "observed": 0.8541666666666666,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.45833333333333337,
+            "observed": 0.9583333333333334,
+            "random": 0.5
+          },
+          "excluded": 3,
+          "included": 8
+        },
+        "strict": {
+          "Hit@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "Hit@3": {
+            "lift": 0.3354166666666667,
+            "observed": 1.0,
+            "random": 0.6645833333333333
+          },
+          "Hit@5": {
+            "lift": 0.11805555555555547,
+            "observed": 1.0,
+            "random": 0.8819444444444445
+          },
+          "P@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "P@3": {
+            "lift": 0.5166666666666666,
+            "observed": 0.7916666666666666,
+            "random": 0.275
+          },
+          "P@5": {
+            "lift": 0.25,
+            "observed": 0.525,
+            "random": 0.275
+          },
+          "RR": {
+            "lift": 0.4284377755731923,
+            "observed": 0.9375,
+            "random": 0.5090622244268077
+          },
+          "Recall@1": {
+            "lift": 0.23333333333333334,
+            "observed": 0.3333333333333333,
+            "random": 0.09999999999999999
+          },
+          "Recall@3": {
+            "lift": 0.5541666666666667,
+            "observed": 0.8541666666666666,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.45833333333333337,
+            "observed": 0.9583333333333334,
+            "random": 0.5
+          },
+          "excluded": 3,
+          "included": 8
+        }
+      },
+      "queries": 11
+    }
+  },
+  "device": "cpu",
+  "environment": {
+    "lock_sha256": "557b65af1e8f8cb37bdc253b85e90352e589c646a694cce371663e1c65b65d12",
+    "packages": {
+      "pgvector": "0.5.0",
+      "sentence-transformers": "6.0.1",
+      "torch": "2.14.0",
+      "transformers": "5.17.0"
+    },
+    "platform": "macOS-27.0.1-arm64-arm-64bit",
+    "python": "3.11.13"
+  },
+  "frozen_sha256": "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053",
+  "gate_cohorts": {
+    "C3": {
+      "abstention_counts": {
+        "NOT_ASSESSED": 1,
+        "SHOULD_ABSTAIN/ABSTAIN": 5
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 6,
+          "included": 0
+        },
+        "lenient": {
+          "excluded": 6,
+          "included": 0
+        },
+        "strict": {
+          "excluded": 6,
+          "included": 0
+        }
+      },
+      "queries": 6
+    },
+    "C4": {
+      "abstention_counts": {
+        "NOT_ASSESSED": 3,
+        "SHOULD_RETRIEVE/RETRIEVE": 8
+      },
+      "metrics": {
+        "graded": {
+          "excluded": 3,
+          "included": 8,
+          "nDCG@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "nDCG@3": {
+            "lift": 0.5632900567908025,
+            "observed": 0.8536187366099389,
+            "random": 0.29032867981913646
+          },
+          "nDCG@5": {
+            "lift": 0.506818841148911,
+            "observed": 0.9085318690186693,
+            "random": 0.4017130278697583
+          }
+        },
+        "lenient": {
+          "Hit@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "Hit@3": {
+            "lift": 0.3354166666666667,
+            "observed": 1.0,
+            "random": 0.6645833333333333
+          },
+          "Hit@5": {
+            "lift": 0.11805555555555547,
+            "observed": 1.0,
+            "random": 0.8819444444444445
+          },
+          "P@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "P@3": {
+            "lift": 0.5166666666666666,
+            "observed": 0.7916666666666666,
+            "random": 0.275
+          },
+          "P@5": {
+            "lift": 0.25,
+            "observed": 0.525,
+            "random": 0.275
+          },
+          "RR": {
+            "lift": 0.4284377755731923,
+            "observed": 0.9375,
+            "random": 0.5090622244268077
+          },
+          "Recall@1": {
+            "lift": 0.23333333333333334,
+            "observed": 0.3333333333333333,
+            "random": 0.09999999999999999
+          },
+          "Recall@3": {
+            "lift": 0.5541666666666667,
+            "observed": 0.8541666666666666,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.45833333333333337,
+            "observed": 0.9583333333333334,
+            "random": 0.5
+          },
+          "excluded": 3,
+          "included": 8
+        },
+        "strict": {
+          "Hit@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "Hit@3": {
+            "lift": 0.3354166666666667,
+            "observed": 1.0,
+            "random": 0.6645833333333333
+          },
+          "Hit@5": {
+            "lift": 0.11805555555555547,
+            "observed": 1.0,
+            "random": 0.8819444444444445
+          },
+          "P@1": {
+            "lift": 0.6,
+            "observed": 0.875,
+            "random": 0.275
+          },
+          "P@3": {
+            "lift": 0.5166666666666666,
+            "observed": 0.7916666666666666,
+            "random": 0.275
+          },
+          "P@5": {
+            "lift": 0.25,
+            "observed": 0.525,
+            "random": 0.275
+          },
+          "RR": {
+            "lift": 0.4284377755731923,
+            "observed": 0.9375,
+            "random": 0.5090622244268077
+          },
+          "Recall@1": {
+            "lift": 0.23333333333333334,
+            "observed": 0.3333333333333333,
+            "random": 0.09999999999999999
+          },
+          "Recall@3": {
+            "lift": 0.5541666666666667,
+            "observed": 0.8541666666666666,
+            "random": 0.3
+          },
+          "Recall@5": {
+            "lift": 0.45833333333333337,
+            "observed": 0.9583333333333334,
+            "random": 0.5
+          },
+          "excluded": 3,
+          "included": 8
+        }
+      },
+      "queries": 11
+    }
+  },
+  "human_comparison": "NOT PERFORMED",
+  "labels_independently_validated": false,
+  "limitations": "Small synthetic corpus; no calibration or real-world claim. C2 excluded pending confirmation of supported legacy workflow.",
+  "model_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "phase": "HELDOUT",
+  "protocol": "policy_retrieval_eval_v1",
+  "queries": [
+    {
+      "cohort": "C3",
+      "expected_abstention": "NOT_ASSESSED",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_01",
+      "ranking": [
+        3,
+        6,
+        7,
+        4,
+        5,
+        1,
+        9,
+        2,
+        8,
+        0
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "gate_decision": "ABSTAIN",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_03",
+      "ranking": [
+        5,
+        0,
+        4,
+        8,
+        2,
+        7,
+        9,
+        6,
+        3,
+        1
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "gate_decision": "ABSTAIN",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_07",
+      "ranking": [
+        7,
+        4,
+        9,
+        5,
+        3,
+        1,
+        8,
+        6,
+        0,
+        2
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "gate_decision": "ABSTAIN",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_09",
+      "ranking": [
+        4,
+        7,
+        3,
+        1,
+        6,
+        0,
+        2,
+        5,
+        9,
+        8
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "gate_decision": "ABSTAIN",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_10",
+      "ranking": [
+        7,
+        8,
+        9,
+        1,
+        4,
+        5,
+        3,
+        0,
+        2,
+        6
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C3",
+      "expected_abstention": "SHOULD_ABSTAIN",
+      "gate_decision": "ABSTAIN",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c3_11",
+      "ranking": [
+        7,
+        9,
+        5,
+        0,
+        1,
+        8,
+        6,
+        2,
+        4,
+        3
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 0.6131471927654584,
+            "nDCG@5": 0.8503449055347546
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.3333333333333333,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 0.5,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.3333333333333333,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 0.5,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_002",
+      "ranking": [
+        1,
+        4,
+        6,
+        7,
+        0,
+        3,
+        8,
+        2,
+        5,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_004",
+      "ranking": [
+        3,
+        2,
+        4,
+        0,
+        5,
+        1,
+        7,
+        6,
+        8,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 0.0,
+            "nDCG@3": 0.5307212739772434,
+            "nDCG@5": 0.7328286204777911
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 0.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 0.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.6,
+            "RR": 0.5,
+            "Recall@1": 0.0,
+            "Recall@3": 0.6666666666666666,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 0.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 0.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.6,
+            "RR": 0.5,
+            "Recall@1": 0.0,
+            "Recall@3": 0.6666666666666666,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_005",
+      "ranking": [
+        5,
+        4,
+        3,
+        2,
+        6,
+        7,
+        0,
+        1,
+        8,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_006",
+      "ranking": [
+        2,
+        3,
+        4,
+        6,
+        0,
+        5,
+        7,
+        1,
+        8,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 0.7653606369886217,
+            "nDCG@5": 0.7653606369886217
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 0.6666666666666666,
+            "Recall@5": 0.6666666666666666
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 0.6666666666666666,
+            "Recall@5": 0.6666666666666666
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_007",
+      "ranking": [
+        6,
+        7,
+        3,
+        0,
+        1,
+        5,
+        2,
+        4,
+        9,
+        8
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_008",
+      "ranking": [
+        5,
+        6,
+        7,
+        0,
+        3,
+        1,
+        4,
+        2,
+        9,
+        8
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 1.0,
+            "nDCG@5": 1.0
+          },
+          "random": {
+            "nDCG@1": 0.3,
+            "nDCG@3": 0.3,
+            "nDCG@5": 0.41509474171137006
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 1.0,
+            "P@5": 0.6,
+            "RR": 1.0,
+            "Recall@1": 0.3333333333333333,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.3,
+            "Hit@3": 0.7083333333333334,
+            "Hit@5": 0.9166666666666666,
+            "P@1": 0.3,
+            "P@3": 0.3,
+            "P@5": 0.3,
+            "RR": 0.5358630952380953,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_009",
+      "ranking": [
+        7,
+        5,
+        6,
+        3,
+        0,
+        1,
+        4,
+        9,
+        8,
+        2
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "SHOULD_RETRIEVE",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": false,
+          "observed": {
+            "nDCG@1": 1.0,
+            "nDCG@3": 0.9197207891481876,
+            "nDCG@5": 0.9197207891481876
+          },
+          "random": {
+            "nDCG@1": 0.2,
+            "nDCG@3": 0.26131471927654587,
+            "nDCG@5": 0.36156788634492326
+          }
+        },
+        "lenient": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        },
+        "strict": {
+          "excluded": false,
+          "observed": {
+            "Hit@1": 1.0,
+            "Hit@3": 1.0,
+            "Hit@5": 1.0,
+            "P@1": 1.0,
+            "P@3": 0.6666666666666666,
+            "P@5": 0.4,
+            "RR": 1.0,
+            "Recall@1": 0.5,
+            "Recall@3": 1.0,
+            "Recall@5": 1.0
+          },
+          "random": {
+            "Hit@1": 0.2,
+            "Hit@3": 0.5333333333333333,
+            "Hit@5": 0.7777777777777778,
+            "P@1": 0.2,
+            "P@3": 0.2,
+            "P@5": 0.2,
+            "RR": 0.42865961199294533,
+            "Recall@1": 0.1,
+            "Recall@3": 0.3,
+            "Recall@5": 0.5
+          }
+        }
+      },
+      "query_id": "c4_010",
+      "ranking": [
+        8,
+        1,
+        9,
+        6,
+        3,
+        7,
+        0,
+        4,
+        2,
+        5
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_016",
+      "ranking": [
+        7,
+        1,
+        4,
+        0,
+        2,
+        3,
+        6,
+        5,
+        8,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_018",
+      "ranking": [
+        1,
+        3,
+        7,
+        4,
+        0,
+        9,
+        6,
+        2,
+        8,
+        5
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    },
+    {
+      "cohort": "C4",
+      "expected_abstention": "NOT_ASSESSED",
+      "gate_decision": "RETRIEVE",
+      "metrics": {
+        "graded": {
+          "excluded": true
+        },
+        "lenient": {
+          "excluded": true
+        },
+        "strict": {
+          "excluded": true
+        }
+      },
+      "query_id": "c4_019",
+      "ranking": [
+        1,
+        0,
+        8,
+        3,
+        6,
+        2,
+        7,
+        4,
+        5,
+        9
+      ],
+      "split": "HELDOUT",
+      "system_decision": "RETRIEVE"
+    }
+  ],
+  "rrf_threshold": 0.01,
+  "tier": "PROTOTYPE"
+}

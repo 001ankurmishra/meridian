@@ -175,7 +175,9 @@ def test_fixture_smoke_test(
             intake_res = create_alert_and_case(
                 app_role_engine,
                 customer_id,
-                fx["alert_spec"]["alert_type"],
+                # Exercise a documented supported query (C1). Legacy AML_*
+                # strings in this v0.1 manifest remain provisional (C2).
+                "large_transaction",
                 fx["alert_spec"]["alert_reasons"],
                 transaction_id=tx_id,
                 source_system=f"fixture_test_{fx['fixture_id']}"

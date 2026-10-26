@@ -1,0 +1,8 @@
+{
+  "status": "COMPLETED",
+  "frozen_sha256": "993af9703de5b147a5f34ffa4d5bf01eafa025738915a3b0be940199aa78e053",
+  "absolute_gate": 0.620313,
+  "repeats_permitted": false,
+  "result_sha256": "9432fd0ef67202770b7bcdb277429f0646dc8b775cbde7aa592c54492459e299",
+  "result_file": "policy_retrieval_eval_v1.heldout.json"
+}
