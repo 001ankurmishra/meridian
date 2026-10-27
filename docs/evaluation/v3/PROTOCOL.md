@@ -12,7 +12,7 @@ A: preserve existing pinned small embedding + complete PostgreSQL English FTS
 and exact pgvector ranking + RRF k=60, top five, RRF minimum 0.01 and ADR-0009
 query cosine gate 0.620313. A separate DEV-fitted gate is an ablation, not A.
 B: pinned base embedding, identical ranking, with its own DEV-only query gate.
-C: best DEV embedder by mean positive nDCG@5 (ties choose small), rerank the
+C: best DEV embedder by ungated mean positive nDCG@5 (ties choose small), rerank the
 first 50 fused candidates using pinned bge-reranker-base. Report first-stage
 candidate recall separately from top-five quality. Do not prefilter these
 candidates with a gate before reranking. Query/passage reranker-score filtering
