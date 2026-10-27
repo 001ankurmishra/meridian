@@ -1,0 +1,10 @@
+{
+  "documents": 2,
+  "pages": 137,
+  "chunks": 494,
+  "manifest_sha256": "42d37e55b91331af770050a4c47b1af7817b76a824e8b3fa462e92caf77fab64",
+  "chunks_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "pypdf_version": "6.21.2",
+  "chunking": "Page-confined spans; <=400 BGE tokens; <=30 word overlap",
+  "use_scope": "Local noncommercial research only; full text and chunks are not redistributed in Git"
+}

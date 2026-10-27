@@ -64,3 +64,14 @@ def test_wrong_header_is_rejected(tmp_path: Path) -> None:
     path.write_text("wrong,header\n")
     with pytest.raises(ValueError, match="header"):
         list(transactions(path))
+
+
+def test_reader_preserves_signed_source_records(tmp_path: Path) -> None:
+    row = ROW.copy()
+    row[7] = "-4.01"
+    path = tmp_path / "source.csv"
+    with path.open("w", newline="") as stream:
+        csv.writer(stream).writerows([HEADER, row])
+    result = list(transactions(path))
+    assert result[0].paid == Decimal("-4.01")
+    assert result[0].generator_label == 1

@@ -1,0 +1,13 @@
+{
+  "dataset": "IBM AML Dataset A, February 2021",
+  "source_url": "https://ibm.box.com/index.php?rm=box_download_shared_file&shared_name=vqecdqbyuyobc8s0fd8zkf3dp0ba0ed5&file_id=f_780504045395",
+  "publisher_url": "https://github.com/IBM/AML-Data",
+  "license": "CDLA-Sharing-1.0",
+  "license_url": "https://cdla.dev/sharing-1-0/",
+  "retrieved_at": "2026-10-26T14:35:43.613485+00:00",
+  "bytes": 839740068,
+  "sha256": "b58b23154907e95e27a23ec95775cdfaf65ae846d3d4717c611c7d8a45dc8299",
+  "checksum_status": "LOCALLY_OBSERVED; no publisher SHA256 supplied",
+  "validation_status": "DOWNLOADED; row validation pending",
+  "filename": "trans_3000p2_list.txt.bz2"
+}

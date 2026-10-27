@@ -1,0 +1,123 @@
+{
+  "baseline_sha256": "453c4674e2e8264b34367d090e3aa547e1926261071574e1c9f8f6faaeab9e7a",
+  "mechanical_citations_checked": 80,
+  "citation_text_checks": "All returned text hashes matched corpus records; no generated-answer faithfulness test",
+  "source_applicability": {
+    "DEV": {
+      "matching_labeled_source_version": 24,
+      "returned_citations": 30,
+      "limitation": "Source/version agreement alone does not prove passage support or domestic applicability."
+    },
+    "HELDOUT": {
+      "matching_labeled_source_version": 21,
+      "returned_citations": 30,
+      "limitation": "Source/version agreement alone does not prove passage support or domestic applicability."
+    }
+  },
+  "failures": [
+    {
+      "id": "v2-alert_assessment-1",
+      "split": "DEV",
+      "expected": "RETRIEVE",
+      "returned": [
+        "bis-aml-2020:pdf-page-6:chunk-2",
+        "bis-aml-2020:pdf-page-32:chunk-4",
+        "bis-aml-2020:pdf-page-34:chunk-0",
+        "bis-aml-2020:pdf-page-16:chunk-0",
+        "bis-aml-2020:pdf-page-14:chunk-3"
+      ]
+    },
+    {
+      "id": "v2-alert_assessment-2",
+      "split": "DEV",
+      "expected": "RETRIEVE",
+      "returned": [
+        "bis-aml-2020:pdf-page-10:chunk-4",
+        "bis-aml-2020:pdf-page-14:chunk-3",
+        "bis-core-2024:pdf-page-3:chunk-3",
+        "bis-core-2024:pdf-page-52:chunk-2",
+        "bis-aml-2020:pdf-page-6:chunk-2"
+      ]
+    },
+    {
+      "id": "v2-correspondent-1",
+      "split": "HELDOUT",
+      "expected": "RETRIEVE",
+      "returned": [
+        "bis-core-2024:pdf-page-5:chunk-0",
+        "bis-core-2024:pdf-page-24:chunk-0",
+        "bis-core-2024:pdf-page-6:chunk-0",
+        "bis-aml-2020:pdf-page-52:chunk-3",
+        "bis-core-2024:pdf-page-46:chunk-2"
+      ]
+    },
+    {
+      "id": "v2-correspondent-2",
+      "split": "HELDOUT",
+      "expected": "RETRIEVE",
+      "returned": [
+        "bis-aml-2020:pdf-page-52:chunk-3",
+        "bis-aml-2020:pdf-page-29:chunk-0",
+        "bis-core-2024:pdf-page-69:chunk-2",
+        "bis-core-2024:pdf-page-46:chunk-2",
+        "bis-core-2024:pdf-page-5:chunk-0"
+      ]
+    },
+    {
+      "id": "v2-rupee_threshold",
+      "split": "DEV",
+      "expected": "ABSTAIN",
+      "returned": [
+        "bis-aml-2020:pdf-page-16:chunk-3",
+        "bis-aml-2020:pdf-page-14:chunk-1",
+        "bis-aml-2020:pdf-page-39:chunk-3",
+        "bis-aml-2020:pdf-page-19:chunk-4",
+        "bis-aml-2020:pdf-page-16:chunk-0"
+      ]
+    },
+    {
+      "id": "v2-capital_aml",
+      "split": "DEV",
+      "expected": "ABSTAIN",
+      "returned": [
+        "bis-core-2024:pdf-page-46:chunk-2",
+        "bis-aml-2020:pdf-page-34:chunk-3",
+        "bis-core-2024:pdf-page-80:chunk-0",
+        "bis-aml-2020:pdf-page-38:chunk-1",
+        "bis-core-2024:pdf-page-47:chunk-2"
+      ]
+    },
+    {
+      "id": "v2-old_source",
+      "split": "HELDOUT",
+      "expected": "ABSTAIN",
+      "returned": [
+        "bis-core-2024:pdf-page-77:chunk-0",
+        "bis-core-2024:pdf-page-6:chunk-0",
+        "bis-core-2024:pdf-page-74:chunk-0",
+        "bis-core-2024:pdf-page-12:chunk-0",
+        "bis-core-2024:pdf-page-5:chunk-0"
+      ]
+    },
+    {
+      "id": "v2-ten_year",
+      "split": "HELDOUT",
+      "expected": "ABSTAIN",
+      "returned": [
+        "bis-aml-2020:pdf-page-15:chunk-2",
+        "bis-core-2024:pdf-page-67:chunk-2",
+        "bis-aml-2020:pdf-page-6:chunk-2",
+        "bis-core-2024:pdf-page-39:chunk-3",
+        "bis-aml-2020:pdf-page-56:chunk-3"
+      ]
+    }
+  ],
+  "environment": {
+    "python": "3.11.13",
+    "uv_lock_sha256": "0a5544d27ab624b237625224fef5ab51f09ca53c88bb35b56538a1e7e2fd9961",
+    "measurement_code_commit": "febc024",
+    "database": "guarded meridian_test, loopback 55432, temporary tables only",
+    "api_cost_usd": 0,
+    "paid_api_calls": 0
+  }
+}

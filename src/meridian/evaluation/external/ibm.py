@@ -80,14 +80,14 @@ def parse_row(
 
 
 def transactions(path: Path) -> Iterator[Transaction]:
-    """Read bounded-memory records, retaining duplicate rows and source positions."""
+    """Retain source positions, duplicates and signed amounts without imputation."""
     opener = bz2.open if path.suffix == ".bz2" else open
     with opener(path, "rt", encoding="utf-8", newline="") as stream:
         reader = csv.reader(stream, strict=True)
         if next(reader, None) != HEADER:
             raise ValueError("Unexpected IBM CSV header")
         for number, row in enumerate(reader, start=2):
-            yield parse_row(row, number)
+            yield parse_row(row, number, allow_signed=True)
 
 
 def sha256_file(path: Path) -> str:

@@ -1,6 +1,8 @@
 # AI upgrade v2 — external data intake
 
-Status: IMPLEMENTED reader/downloader; Stage 1 acceptance remains INCOMPLETE.
+Historical first-slice status at d40e910. Current measured intake, corpus and baseline
+results are in `baseline-report.md`; native customer/full-graph evaluation remains
+incomplete. The remaining-work list below records the original intake checkpoint.
 Started 2026-10-26 from merged main `af924e539aa228ce3307b9d1fd949c67b261222f`.
 
 ## Financial source
