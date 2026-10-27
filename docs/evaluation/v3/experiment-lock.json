@@ -1,0 +1,14 @@
+{
+  "status": "DEV_EXPERIMENT_RULES_RECORDED",
+  "date": "2026-10-27",
+  "files": {
+    "docs/evaluation/v3/PROTOCOL.md": "3eb9cce5c6b0eee895945d1985f6e4c496e54b0cf57f7bbd8783eae550227441",
+    "docs/evaluation/v3/dev-proposals.json": "d515f3c0d4f8a51992b6f01afa6ff318bacebd3fe5f776da38da884ccb47ac55",
+    "docs/evaluation/v3/models.json": "ff5af1a45166b6b92e09bf394a6a04c5a3dc0ebd993a16cd2a3ae2857e805ddb",
+    "src/meridian/evaluation/external/selection.py": "19576ccbe5f1228ff3dee6c1f49298d882fe1f8877137e658eb8044457e3e409",
+    "src/meridian/evaluation/external/experiment.py": "e065a30599838cf0652048373d2f9c69d6a57dbf46f2c9b31febf45e3ea606c6",
+    "src/meridian/evaluation/external/comparison.py": "c01c7361877730e59b0dc0e9f8c17d3121f80dd75cbec0a22b2597b97b08dde8"
+  },
+  "timing": "Recorded after small DEV run, before base/reranker results inspected. Not a final-test freeze. Original small result contains its own pre-inference config and label hashes.",
+  "final_validation": "BLOCKED: untouched independently reviewed final set unavailable"
+}

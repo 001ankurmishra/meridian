@@ -1,0 +1,9 @@
+{
+  "rule": "Highest ungated positive DEV nDCG@5; ties choose small",
+  "selected": "BAAI/bge-small-en-v1.5",
+  "small_ndcg": 0.7681191572762018,
+  "base_ndcg": 0.7263801639266634,
+  "first_stage_sha256": "27c61eb766b1d9da9bcf743ab8b216b27a776271829041942863695cfc5dbaae",
+  "candidate_depth": 50,
+  "status": "DEV_SELECTION_NOT_FINAL_VALIDATION"
+}

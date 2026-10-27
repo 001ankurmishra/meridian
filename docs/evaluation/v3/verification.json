@@ -1,0 +1,23 @@
+{
+  "integration": {
+    "passed": 98,
+    "seconds": 5.49,
+    "command": "pytest -q tests/test_retrieval_selection.py tests/test_retrieval_comparison.py tests/test_retrieval_experiment.py tests/test_external_retrieval.py tests/test_policy_retrieval.py tests/test_policy_retrieval_determinism.py tests/test_policy_absolute_gate.py tests/test_policy_evaluation.py tests/test_test_guard.py",
+    "database": "guarded meridian_test, loopback 55432, separate roles"
+  },
+  "ruff": "PASS repository-wide",
+  "mypy": {
+    "status": "PASS",
+    "source_files": 106
+  },
+  "new_offline_tests": 26,
+  "full_suite": "NOT_REPEATED",
+  "hardware": {
+    "cpu": "Apple M4",
+    "logical_cpus": 10,
+    "physical_memory_bytes": 17179869184,
+    "inference_threads": 4
+  },
+  "runtime_model_change": false,
+  "docker_browser_verification": "NOT_PERFORMED"
+}
