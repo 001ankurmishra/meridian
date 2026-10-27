@@ -1,0 +1,41 @@
+{
+  "status": "LOCKED_BEFORE_RESERVE",
+  "selected": [
+    "amount",
+    "velocity",
+    "relative_velocity",
+    "reciprocal_24h",
+    "fan_in_24h"
+  ],
+  "budget": 278,
+  "window": [
+    "2019-01-17T00:00:00",
+    "2019-01-24T00:00:00"
+  ],
+  "sample_sha256": "f83babca4a2c3d99f6e0f411819b78eed6f59557a3e25c426ed3bc2a890860a8",
+  "component_split": "Existing v2 DEV components; no reassignment",
+  "direction": "HIGHER for each selected signal; unchanged formulas",
+  "formulas": "Exact selected subset of v4 PROTOCOL.md, verified against frozen feature implementation on targeted fixtures",
+  "definitions_sha256": "59e36fe8c44e02006feffa1a31576d703613523d5a715a18e97c6b1e4936f4cb",
+  "ties": "descending score, ascending original source_row; preserve duplicate source records",
+  "missing": "Unknown values remain null, excluded from known-score ranking; counted as unreviewed for all-positive recall/FN",
+  "budget_rule": "Fixed absolute 278 across all-target and matched-cohort comparisons; secondary legacy ceil(known*.01) metrics labeled separately",
+  "metrics": [
+    "ROC-AUC half-credit ties",
+    "step average precision PR-AUC",
+    "fixed-budget TP FP FN precision recall",
+    "positive known/unknown coverage",
+    "matched-known-cohort comparator metrics",
+    "tie sensitivity bounds"
+  ],
+  "uncertainty": "200 observed-component bootstrap replicates, seed 20261027, fixed budget278; skip undefined AUC/AP replicates and report valid count; NOT_ESTIMABLE if fewer than 2 positive-bearing or 10 total components",
+  "independence": "Temporal generalization only, shared DEV accounts/components; no claim of independent customers or real AML accuracy",
+  "code_sha256": {
+    "src/meridian/evaluation/external/temporal.py": "ada732d3e8bcde9d8757202eb08c0575e606022e7f8f38314a5be84059400ba9",
+    "src/meridian/evaluation/external/financial.py": "426205e9827cc5d731857777fce592875f37158f8acfd88a523c14f162608f7f",
+    "src/meridian/evaluation/external/intelligence.py": "05cefc10f6d3b710726fdbb2db9c1a91bb977c00b256094e84979737ab310897",
+    "src/meridian/evaluation/external/intelligence_eval.py": "847ced358f43a2228dd841deb68026c747bdfc7262b74df5ffc77e7606d41aa5",
+    "src/meridian/evaluation/external/capacity.py": "bf2d74a4be9d673d42b6cb7da5658b344aa2ae1681b63d9eb517954354ccccf5",
+    "src/meridian/evaluation/external/ibm.py": "dc4ce4b9369940993efc74c0bbbe3723ac9bca9241e02ad559ff86fd1b373ac1"
+  }
+}
