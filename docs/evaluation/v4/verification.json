@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "integration_tests": 108,
+  "integration_seconds": 1.95,
+  "premeasurement_targeted_tests": 19,
+  "postmeasurement_tie_tests": 2,
+  "ruff": "PASS repository-wide at integration; PASS scoped tie addition",
+  "mypy": "PASS 108 source files at integration; PASS scoped tie addition",
+  "baseline_DEV_parity": "Exact counts, AUC, AP and TP/FP match immutable v2 baseline",
+  "feature_cache_committed": false,
+  "results_sha256": "636b9673f9ff93c9c15c0e70c4438efb2342a0c7bfef7369780ae5a46bf28f8f",
+  "reserved_temporal_window_measured": false,
+  "old_HELDOUT_rerun": false,
+  "runtime_changes": false,
+  "push": false
+}

@@ -1,0 +1,15 @@
+docs/evaluation/v4/PROTOCOL.md
+docs/evaluation/v4/REPORT.md
+docs/evaluation/v4/REPRODUCE.md
+docs/evaluation/v4/changed-files.txt
+docs/evaluation/v4/evidence-check.json
+docs/evaluation/v4/features.receipt.json
+docs/evaluation/v4/independent-rag-review.md
+docs/evaluation/v4/results.json
+docs/evaluation/v4/tie-sensitivity.json
+docs/evaluation/v4/verification.json
+src/meridian/evaluation/external/capacity.py
+src/meridian/evaluation/external/intelligence.py
+src/meridian/evaluation/external/intelligence_eval.py
+tests/test_capacity_audit.py
+tests/test_external_intelligence.py
