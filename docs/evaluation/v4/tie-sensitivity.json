@@ -1,0 +1,102 @@
+{
+  "amount": {
+    "reviewed": 278,
+    "cutoff": 20.499413255660894,
+    "tied": 1,
+    "tied_positive": 0,
+    "tied_slots": 1,
+    "tp_min": 1,
+    "tp_max": 1,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "velocity": {
+    "reviewed": 278,
+    "cutoff": 4,
+    "tied": 328,
+    "tied_positive": 1,
+    "tied_slots": 58,
+    "tp_min": 0,
+    "tp_max": 1,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "median_ratio": {
+    "reviewed": 278,
+    "cutoff": 36.97884344146686,
+    "tied": 1,
+    "tied_positive": 0,
+    "tied_slots": 1,
+    "tp_min": 0,
+    "tp_max": 0,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "p95_ratio": {
+    "reviewed": 278,
+    "cutoff": 1.7793058547407004,
+    "tied": 1,
+    "tied_positive": 0,
+    "tied_slots": 1,
+    "tp_min": 0,
+    "tp_max": 0,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "relative_velocity": {
+    "reviewed": 278,
+    "cutoff": 14.0,
+    "tied": 242,
+    "tied_positive": 2,
+    "tied_slots": 210,
+    "tp_min": 0,
+    "tp_max": 2,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "counterparty_novelty": {
+    "reviewed": 278,
+    "cutoff": 1.0,
+    "tied": 9816,
+    "tied_positive": 12,
+    "tied_slots": 278,
+    "tp_min": 0,
+    "tp_max": 12,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "incoming_recency": {
+    "reviewed": 278,
+    "cutoff": 0.004424778761061947,
+    "tied": 2,
+    "tied_positive": 0,
+    "tied_slots": 2,
+    "tp_min": 1,
+    "tp_max": 1,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "inflow_amount_match": {
+    "reviewed": 278,
+    "cutoff": 0.4290555806597379,
+    "tied": 1,
+    "tied_positive": 0,
+    "tied_slots": 1,
+    "tp_min": 0,
+    "tp_max": 0,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "reciprocal_24h": {
+    "reviewed": 278,
+    "cutoff": 0.0,
+    "tied": 27186,
+    "tied_positive": 21,
+    "tied_slots": 159,
+    "tp_min": 2,
+    "tp_max": 23,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  },
+  "fan_in_24h": {
+    "reviewed": 278,
+    "cutoff": 1.0,
+    "tied": 1034,
+    "tied_positive": 3,
+    "tied_slots": 127,
+    "tp_min": 2,
+    "tp_max": 5,
+    "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+  }
+}

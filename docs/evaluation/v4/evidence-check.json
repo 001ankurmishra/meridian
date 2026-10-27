@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "target_source_row": 19632856,
+      "witness_source_rows": [
+        18974436,
+        18974437
+      ],
+      "status": "VERIFIED_PRIOR_REVERSE_EDGE",
+      "interpretation": "Observed local two-direction transfer; no illicitness or source-of-funds claim"
+    },
+    {
+      "target_source_row": 20308016,
+      "witness_source_rows": [
+        20258820
+      ],
+      "status": "VERIFIED_PRIOR_REVERSE_EDGE",
+      "interpretation": "Observed local two-direction transfer; no illicitness or source-of-funds claim"
+    }
+  ],
+  "method": "Direct source-row reconstruction of all generator-positive reciprocal witnesses in DEV; not independent label validation"
+}
