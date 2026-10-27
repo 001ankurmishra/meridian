@@ -45,3 +45,13 @@ def test_paired_bootstrap_identical_results_have_zero_delta():
     result = paired_intervals(rows, rows)
     assert result["ndcg_at_5"]["percentile_95"] == [0, 0]
     assert result["abstained"]["delta"] == 0
+
+
+def test_reranking_can_promote_a_deep_first_stage_candidate():
+    from meridian.evaluation.external.comparison import passes_rank_gate
+
+    # Semantic rank 50 alone scores below the runtime RRF floor, but is a valid
+    # member of the explicitly requested 50-candidate reranking experiment.
+    assert passes_rank_gate(1 / 110, reranked=True)
+    assert not passes_rank_gate(1 / 110, reranked=False)
+    assert passes_rank_gate(0.01, reranked=False)

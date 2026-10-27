@@ -37,6 +37,11 @@ def ineligible_request(query: str) -> str | None:
     return None
 
 
+def passes_rank_gate(rrf_score: float, *, reranked: bool) -> bool:
+    """Cross-encoder candidates use their new scores, not a hidden RRF cutoff."""
+    return reranked or rrf_score >= 0.01
+
+
 def fit(protocol: dict[str, Any], scores: dict[str, float]) -> dict[str, Any]:
     return select_dev_threshold(
         [
@@ -200,7 +205,7 @@ def analyze(
                     else [
                         c["chunk_id"]
                         for c in ranking
-                        if c["rrf"] >= 0.01
+                        if passes_rank_gate(c["rrf"], reranked=is_rerank)
                         and (
                             not condition.startswith("dev_passage")
                             or passage_scores[c["chunk_id"]] >= threshold

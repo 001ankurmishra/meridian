@@ -10,5 +10,11 @@
     "src/meridian/evaluation/external/comparison.py": "c01c7361877730e59b0dc0e9f8c17d3121f80dd75cbec0a22b2597b97b08dde8"
   },
   "timing": "Recorded after small DEV run, before base/reranker results inspected. Not a final-test freeze. Original small result contains its own pre-inference config and label hashes.",
-  "final_validation": "BLOCKED: untouched independently reviewed final set unavailable"
+  "final_validation": "BLOCKED: untouched independently reviewed final set unavailable",
+  "pre_reranker_amendment": {
+    "reason": "Allow the full predefined 50-candidate pool to be promoted by cross-encoder scores; do not apply the baseline RRF cutoff after reranking. Baseline embedding variants remain unchanged.",
+    "comparison_sha256": "066415904ec6b71b56eb107bcf05b547c22864cb6c13c6a633be0e43f2963ce9",
+    "timing": "Before reranker measurement output; pinned weights still downloading.",
+    "test": "27 targeted offline tests passed; scoped Ruff/mypy passed."
+  }
 }

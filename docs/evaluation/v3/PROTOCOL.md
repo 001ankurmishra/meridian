@@ -15,7 +15,8 @@ B: pinned base embedding, identical ranking, with its own DEV-only query gate.
 C: best DEV embedder by ungated mean positive nDCG@5 (ties choose small), rerank the
 first 50 fused candidates using pinned bge-reranker-base. Report first-stage
 candidate recall separately from top-five quality. Do not prefilter these
-candidates with a gate before reranking. Query/passage reranker-score filtering
+candidates with a gate before reranking. After reranking, use cross-encoder
+scores rather than the original RRF floor to select from all 50 candidates. Query/passage reranker-score filtering
 is an explicit ablation. No BGE-large download until results justify it.
 
 Fit each exploratory gate to maximize balanced positive acceptance and negative
