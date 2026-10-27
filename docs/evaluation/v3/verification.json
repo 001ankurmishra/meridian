@@ -19,5 +19,17 @@
     "inference_threads": 4
   },
   "runtime_model_change": false,
-  "docker_browser_verification": "NOT_PERFORMED"
+  "docker_browser_verification": "NOT_PERFORMED",
+  "post_pool_correction": {
+    "offline_tests": 27,
+    "ruff": "PASS scoped",
+    "mypy": "PASS comparison module",
+    "integration_repeated": false
+  },
+  "final_score_hashes": {
+    "small.json": "27c61eb766b1d9da9bcf743ab8b216b27a776271829041942863695cfc5dbaae",
+    "base.json": "fb3511eb0dd9882de709317d82577a98360f684d4723cb72ac016abd44cad5bd",
+    "reranker.json": "e33962f6b3e66bc15a39b9c770d63815b8ba08d4c66a67f4a1452bd2feca3ed1",
+    "comparison.json": "7ea4a3ba11b879c1138e7e22df586fb029a4b9c60de6e946cb0b7e14afc81f6b"
+  }
 }

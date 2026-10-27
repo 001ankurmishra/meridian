@@ -37,15 +37,15 @@ passage pairs, returns raw logits, and uses the same float32 CPU/thread setting.
 uv run --frozen --no-sync python -m meridian.evaluation.external.experiment \
   docs/evaluation/v3 scratch/ai-v2/references/chunks-v2.jsonl \
   scratch/ai-v3/reranker.json --model-index 2 \
-  --first-stage scratch/ai-v3/SELECTED_EMBEDDER.json
+  --first-stage scratch/ai-v3/small.json
 uv run --frozen --no-sync python -m meridian.evaluation.external.comparison \
   docs/evaluation/v3 scratch/ai-v2/references/chunks-v2.jsonl \
   scratch/ai-v3/comparison.json scratch/ai-v3/small.json \
   scratch/ai-v3/base.json scratch/ai-v3/reranker.json
 ```
 
-`SELECTED_EMBEDDER` is intentionally a placeholder until measurement establishes
-which candidate wins the predefined rule. Never substitute based on HELDOUT.
+Small won the predefined ungated DEV nDCG rule; the selection receipt is
+`reranker-selection.json`. Never substitute based on HELDOUT.
 Vectors are cached as non-pickle JSON with a configuration digest; analysis and
 reranking reuse scores/candidates without re-encoding the corpus. Model snapshots
 are reused by immutable revision. Outputs are never silently overwritten.

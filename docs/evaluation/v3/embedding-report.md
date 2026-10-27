@@ -1,6 +1,8 @@
 # Stage 3 embedding checkpoint — 2026-10-27
 
-Status: PARTIAL. Embedding comparison measured; reranking is not yet measured.
+Historical checkpoint; see `REPORT.md` for the completed experimental comparison.
+
+Status at this checkpoint: PARTIAL. Embedding comparison measured; reranking is not yet measured.
 No runtime change, push, deployment or final-validation claim.
 
 ## Evaluation identity and limits
