@@ -1,0 +1,34 @@
+{
+  "passed": 124,
+  "warnings": 1,
+  "seconds": 7.34,
+  "python": "3.11",
+  "environment": "existing locked dependencies, uv --frozen --no-sync; guarded disposable loopback55432 meridian_test; application/loader/maintenance role URLs; HF_HUB_OFFLINE=1",
+  "pytest_command": "uv run --frozen --no-sync pytest -q tests/test_copilot.py tests/test_copilot_integration.py tests/test_copilot_benchmark.py tests/test_report_assembly.py tests/test_report_authoring.py tests/test_evidence_integrity.py tests/test_api_auth.py tests/test_identity_tokens.py tests/test_investigation_orchestrator.py tests/test_human_decisions.py",
+  "ruff": "uv run --frozen --no-sync ruff check .: PASS",
+  "mypy": "uv run --frozen --no-sync mypy src/: PASS (113 files)",
+  "code_and_test_hashes": {
+    "src/meridian/copilot/__init__.py": "6e5ae88d3a1559de2142d5444a4075c19b18b9c1b6be2ea39dca2f2c341c094a",
+    "src/meridian/copilot/drafts.py": "035ce8f11658c14d795e14972ada77f40eeb9a1c77442eea3cb7241bb28f4df8",
+    "src/meridian/evaluation/copilot.py": "afd1dac103d63eb6083b4d9ac0f83b61fafb798ab410fb9affb3c6d9162c29b5",
+    "tests/test_copilot.py": "f4d75135a20a21c7c79dcd9fcef8ebe9d1a36182977eacbc648c358b02a76bed",
+    "tests/test_copilot_integration.py": "6624d856aec2dd8531b2e6dbcf72a50a5fc02fb4a41c8001f411e85bd7fe3926",
+    "tests/test_copilot_benchmark.py": "01779e97b22bb521ce8f69c9f03519eb43b5a70ab4107195f2e73158d2fbd33c",
+    "tests/test_report_assembly.py": "3f020afff4d10d70be9c160ef5753d03b90483249346e5bae8945ec3bb7ccc4e",
+    "tests/test_report_authoring.py": "035be8486293f3e47b57f40f546a8551adcb7daf499d85aca635ba3da4dfd461",
+    "tests/test_evidence_integrity.py": "0acf99101dc32c319f5314e79403c3065be52940fc3008c5f88c8cb4dbe2ebee",
+    "tests/test_api_auth.py": "339cfed7da265bf1a0a423bc5831cc37187e39d3c94f3ac65b620923e46120cc",
+    "tests/test_identity_tokens.py": "e2eaf44c99939877e62b87ed42b1eca744543781caa2f89ab8bb9d04c8027c83",
+    "tests/test_investigation_orchestrator.py": "2c48bd4ff85932c6d0d71b42ff1727a595741ffbe89b253f3fc4a8a1d914f378",
+    "tests/test_human_decisions.py": "b6df0ed935e35063421cc694ab68724efa38ab356e87d2a39030128839503d91"
+  },
+  "artifact_hashes": {
+    "docs/evaluation/v5/integration.log": "59c1d632bb5e6ac31927406331a0b402752e4396b046ef120030cdbeed27b74a",
+    "docs/evaluation/v5/mypy.log": "d197d6017d587f21ad64746c2d6847a7ecaac183b973fcf4aa19a188a269cd3f",
+    "docs/evaluation/v5/ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "docs/evaluation/v5/mechanical-results.json": "357ba550110e692d418cc3c44bc728674f622e6f1a106c2b9a35d16c66b40028",
+    "docs/evaluation/v5/benchmark-v1.json": "c4775a01d928dee42639bc87de34cfb4443e626b13d3e944feb86df2171ed3fc"
+  },
+  "api_calls": 0,
+  "semantic_faithfulness": "NOT_MEASURED"
+}

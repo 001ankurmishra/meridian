@@ -1,0 +1,17 @@
+docs/decisions/0003-llm-provider-abstraction.md
+docs/evaluation/v5/PROTOCOL.md
+docs/evaluation/v5/REPORT.md
+docs/evaluation/v5/benchmark-v1.json
+docs/evaluation/v5/integration.log
+docs/evaluation/v5/mechanical-results.json
+docs/evaluation/v5/mypy.log
+docs/evaluation/v5/provider-review.md
+docs/evaluation/v5/ruff.log
+docs/evaluation/v5/verification.json
+src/meridian/copilot/__init__.py
+src/meridian/copilot/drafts.py
+src/meridian/evaluation/copilot.py
+tests/test_copilot.py
+tests/test_copilot_benchmark.py
+tests/test_copilot_integration.py
+docs/evaluation/v5/changed-files.txt

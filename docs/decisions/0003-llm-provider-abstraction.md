@@ -21,3 +21,27 @@ Introduce a thin internal LLM-client interface (e.g., `generate_structured(promp
 - Slightly more upfront interface design work in exchange for provider flexibility later.
 - Every LLM call remains versioned via `prompt_version` and `model_identifier` fields (`docs/DATABASE_SCHEMA.md` §4.11) regardless of provider, preserving auditability (`docs/OBSERVABILITY_AND_AUDIT.md`) independent of this choice.
 - **Action required before Phase 1 implementation begins:** update this ADR's Status to Accepted once a specific provider is chosen, with the rationale recorded.
+
+## Stage 5A scoped implementation and pending amendment (2026-10-27)
+
+Status remains **Proposed**. The maintainer explicitly authorized the offline
+foundation before provider acceptance; this does not accept this ADR or activate
+live inference. `meridian.copilot.drafts` now implements a thin structured-output
+protocol and deterministic mock, separate from the authoritative ReportAgent.
+No live adapter, API route, SDK dependency, migration or runtime dispatch is added.
+
+Proposed amendment for approval: restrict initial use to optional human-reviewed,
+whole-passage extractive drafts from authenticated case/run packages. Preserve
+facts/signals/interpretations/recommendations, exact evidence IDs and uncertainty.
+Do not enable free paraphrase, new financial calculations or policy applicability
+claims. Record prompt version, model identifier and package hash. Invalid output,
+provider failure or timeout discards the entire draft; the deterministic report
+remains usable. Source-text fidelity is not independent factual validation.
+
+Provider proposal: one OpenAI GPT-5.4 mini snapshot adapter; Claude Haiku 5.5 is an
+alternative only. See [provider review](../evaluation/v5/provider-review.md) for
+current official sources, privacy caveats, proposed limits and cost assumptions.
+Before acceptance, obtain explicit provider, privacy/retention, budget and API-use
+approval. Then implement the selected adapter and billing/transport controls,
+review benchmark labels, and measure synthetic outputs before runtime exposure.
+No change to ADR-0005, human decisions, BGE-small or Stage4 signal adoption.
