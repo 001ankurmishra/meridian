@@ -88,3 +88,42 @@ def test_protocol_rejects_unlocked_selection(tmp_path):
     p.write_text(json.dumps({"selected": ["invented"]}))
     with pytest.raises(ValueError, match="definitions"):
         validate_lock(p)
+
+
+def test_unrelated_account_events_cannot_contaminate_sources():
+    data = [tx(1, "2019/01/16 23:00", "B", "A"), tx(2, "2019/01/17 00:00")]
+    unrelated = replace(
+        tx(3, "2019/01/16 23:59", "B", "A", "-9"), sender_bank="2", receiver_bank="2"
+    )
+    assert selected_features(A, data) == selected_features(A, data + [unrelated])
+
+
+def test_duplicate_business_fields_retain_distinct_source_rows():
+    data = [
+        tx(1, "2019/01/16 23:00", "B", "A"),
+        tx(2, "2019/01/17 00:00"),
+        tx(3, "2019/01/17 00:00"),
+    ]
+    results = selected_features(A, data)
+    assert [r["tx"].row_number for r in results] == [2, 3]
+    assert all(r["values"]["velocity"] == 2 for r in results)
+    assert all(r["evidence"]["current_24h_outgoing_rows"] == [2, 3] for r in results)
+
+
+def test_code_lock_rejects_changed_file(tmp_path):
+    from meridian.evaluation.external.temporal import SAMPLE_SHA
+
+    source = tmp_path / "source.py"
+    source.write_text("changed")
+    lock = {
+        "selected": list(SELECTED),
+        "budget": 278,
+        "window": [LOWER.isoformat(), UPPER.isoformat()],
+        "sample_sha256": SAMPLE_SHA,
+        "status": "LOCKED_BEFORE_RESERVE",
+        "code_sha256": {str(source): "wrong"},
+    }
+    p = tmp_path / "lock.json"
+    p.write_text(json.dumps(lock))
+    with pytest.raises(ValueError, match="code lock"):
+        validate_lock(p)

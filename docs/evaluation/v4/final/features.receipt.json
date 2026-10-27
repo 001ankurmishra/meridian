@@ -1,0 +1,8 @@
+{
+  "lock_sha256": "f5ee27e70e32c45bb9dc0c8931d3d558a19d174a8089f02e7fb8f76d9f387272",
+  "sample_sha256": "f83babca4a2c3d99f6e0f411819b78eed6f59557a3e25c426ed3bc2a890860a8",
+  "cache_sha256": "8042852f5c37c44625285e8d64aa0eb883280903846a51e7544368d44d022eac",
+  "targets": 33113,
+  "extraction_seconds": 6.879555875013466,
+  "peak_rss_bytes": 608387072
+}

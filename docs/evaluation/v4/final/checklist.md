@@ -1,12 +1,15 @@
 # Stage 4 closure checklist
 
-Established before reserve measurement: original DEV protocol/code and measurements
-exist; baseline parity recorded; 108 prior integration tests and quality receipts
-exist; eight candidates accounted for. Runtime and old artifacts stay unchanged.
+- COMPLETE: preserved eight-candidate DEV results and two baselines.
+- COMPLETE: selected five configurations locked in23c3061 before one reserve run.
+- COMPLETE: fixed-capacity, known/all-target, common-cohort, uncertainty and tie analyses.
+- COMPLETE: source-row audit, account/time isolation and deterministic artifact IDs.
+- COMPLETE: native contract, graph coverage and integration feasibility assessment.
+- COMPLETE: targeted regression and final199-test guarded integration, Ruff and mypy.
+- COMPLETE: justified per-feature decisions and proposal-only Stage5 entry conditions.
+- BLOCKED BY DATA: external native customer, beneficiary-age and bounded-path accuracy.
+- PENDING independent review: real-world effectiveness and untouched RAG validation.
+- UNCHANGED: runtime signals, BGE-small, accepted ADRs, demo database and old evidence.
 
-Remaining work in this closure: commit reserve lock, run only the selected five
-formulas once, validate evidence/coverage, inspect native compatibility, execute
-one final targeted integration checkpoint, record per-signal decisions and a
-proposal-only Stage 5 entry plan. No new predictive signals, model fitting or
-runtime activation is needed. Data-blocked native graph/customer accuracy must
-be explicitly separated from verified computational regression behavior.
+Research/engineering Stage4 scope is closed; no claim of production adoption or
+independent validation. Full AIv2 goal is not complete and no later stage started.

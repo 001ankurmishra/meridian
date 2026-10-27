@@ -1,0 +1,956 @@
+{
+  "status": "LOCKED_TEMPORAL_CHECK_NOT_INDEPENDENT_CUSTOMER_VALIDATION",
+  "receipt": {
+    "lock_sha256": "f5ee27e70e32c45bb9dc0c8931d3d558a19d174a8089f02e7fb8f76d9f387272",
+    "sample_sha256": "f83babca4a2c3d99f6e0f411819b78eed6f59557a3e25c426ed3bc2a890860a8",
+    "cache_sha256": "8042852f5c37c44625285e8d64aa0eb883280903846a51e7544368d44d022eac",
+    "targets": 33113,
+    "extraction_seconds": 6.879555875013466,
+    "peak_rss_bytes": 608387072
+  },
+  "targets": 33113,
+  "positive_targets": 29,
+  "reports": {
+    "amount": {
+      "total": 33113,
+      "known": 25222,
+      "positive": 11,
+      "negative": 25211,
+      "unknown": 7891,
+      "unknown_positive": 18,
+      "unknown_reasons": {
+        "NO_HISTORY": 3973,
+        "CURRENCY_MISMATCH": 3918
+      },
+      "roc_auc": 0.20760779025028758,
+      "average_precision": 0.00027677497491146344,
+      "review_capacity": 253,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 253,
+      "fn": 11,
+      "tn": 24958,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "fn_all_targets": 29,
+        "precision": 0.0,
+        "recall_all_positives": 0.0
+      },
+      "ties": {
+        "reviewed": 278,
+        "cutoff": 48.63637592404716,
+        "tied": 1,
+        "tied_positive": 0,
+        "tied_slots": 1,
+        "tp_min": 0,
+        "tp_max": 0,
+        "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_COMPONENT_BOOTSTRAP",
+        "positive_components": 11,
+        "components": 12698,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.08736788271394477,
+              0.3448315543034007
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0001443691089770548,
+              0.0005110679665167577
+            ]
+          },
+          "precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "common_cohorts": {
+        "amount": {
+          "candidate": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20760779025028758,
+            "average_precision": 0.00027677497491146344,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20760779025028758,
+            "average_precision": 0.00027677497491146344,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        },
+        "velocity": {
+          "candidate": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20760779025028758,
+            "average_precision": 0.00027677497491146344,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.687809433832995,
+            "average_precision": 0.0008554882827725161,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        }
+      }
+    },
+    "velocity": {
+      "total": 33113,
+      "known": 33113,
+      "positive": 29,
+      "negative": 33084,
+      "unknown": 0,
+      "unknown_positive": 0,
+      "unknown_reasons": {},
+      "roc_auc": 0.7118645746042467,
+      "average_precision": 0.001614650994678448,
+      "review_capacity": 332,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 332,
+      "fn": 29,
+      "tn": 32752,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "fn_all_targets": 29,
+        "precision": 0.0,
+        "recall_all_positives": 0.0
+      },
+      "ties": {
+        "reviewed": 278,
+        "cutoff": 7,
+        "tied": 73,
+        "tied_positive": 0,
+        "tied_slots": 28,
+        "tp_min": 0,
+        "tp_max": 0,
+        "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_COMPONENT_BOOTSTRAP",
+        "positive_components": 25,
+        "components": 12698,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.6611851835740387,
+              0.7613247974306264
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0010071222560016188,
+              0.002559116826768728
+            ]
+          },
+          "precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "common_cohorts": {
+        "amount": {
+          "candidate": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.687809433832995,
+            "average_precision": 0.0008554882827725161,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 25222,
+            "known": 25222,
+            "positive": 11,
+            "negative": 25211,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20760779025028758,
+            "average_precision": 0.00027677497491146344,
+            "review_capacity": 253,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 253,
+            "fn": 11,
+            "tn": 24958,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        },
+        "velocity": {
+          "candidate": {
+            "total": 33113,
+            "known": 33113,
+            "positive": 29,
+            "negative": 33084,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7118645746042467,
+            "average_precision": 0.001614650994678448,
+            "review_capacity": 332,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 332,
+            "fn": 29,
+            "tn": 32752,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 29,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 33113,
+            "known": 33113,
+            "positive": 29,
+            "negative": 33084,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7118645746042467,
+            "average_precision": 0.001614650994678448,
+            "review_capacity": 332,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 332,
+            "fn": 29,
+            "tn": 32752,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 29,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        }
+      }
+    },
+    "relative_velocity": {
+      "total": 33113,
+      "known": 21932,
+      "positive": 12,
+      "negative": 21920,
+      "unknown": 11181,
+      "unknown_positive": 17,
+      "unknown_reasons": {
+        "ZERO_PRIOR_WEEK_COUNT": 11181
+      },
+      "roc_auc": 0.6936663625304136,
+      "average_precision": 0.00300390550992844,
+      "review_capacity": 220,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 220,
+      "fn": 12,
+      "tn": 21700,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "fn_all_targets": 29,
+        "precision": 0.0,
+        "recall_all_positives": 0.0
+      },
+      "ties": {
+        "reviewed": 278,
+        "cutoff": 21.0,
+        "tied": 135,
+        "tied_positive": 0,
+        "tied_slots": 105,
+        "tp_min": 0,
+        "tp_max": 0,
+        "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_COMPONENT_BOOTSTRAP",
+        "positive_components": 8,
+        "components": 12698,
+        "intervals": {
+          "roc_auc": {
+            "valid": 199,
+            "percentile_95": [
+              0.4900308998755113,
+              0.9698739677803065
+            ]
+          },
+          "average_precision": {
+            "valid": 199,
+            "percentile_95": [
+              0.0009479542363613955,
+              0.00964630225080386
+            ]
+          },
+          "precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "common_cohorts": {
+        "amount": {
+          "candidate": {
+            "total": 18615,
+            "known": 18615,
+            "positive": 5,
+            "negative": 18610,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.9731327243417518,
+            "average_precision": 0.00655307994757536,
+            "review_capacity": 187,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 187,
+            "fn": 5,
+            "tn": 18423,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 5,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 18615,
+            "known": 18615,
+            "positive": 5,
+            "negative": 18610,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.24211714132186996,
+            "average_precision": 0.00020182381622448878,
+            "review_capacity": 187,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 187,
+            "fn": 5,
+            "tn": 18423,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 5,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        },
+        "velocity": {
+          "candidate": {
+            "total": 21932,
+            "known": 21932,
+            "positive": 12,
+            "negative": 21920,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6936663625304136,
+            "average_precision": 0.00300390550992844,
+            "review_capacity": 220,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 220,
+            "fn": 12,
+            "tn": 21700,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 12,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 21932,
+            "known": 21932,
+            "positive": 12,
+            "negative": 21920,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7090765663017031,
+            "average_precision": 0.0011828511077785985,
+            "review_capacity": 220,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 220,
+            "fn": 12,
+            "tn": 21700,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 12,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        }
+      }
+    },
+    "reciprocal_24h": {
+      "total": 33113,
+      "known": 32477,
+      "positive": 29,
+      "negative": 32448,
+      "unknown": 636,
+      "unknown_positive": 0,
+      "unknown_reasons": {
+        "TARGET_SELF_TRANSFER": 636
+      },
+      "roc_auc": 0.5330188779500782,
+      "average_precision": 0.0022533270037881055,
+      "review_capacity": 325,
+      "precision_at_capacity": 0.006153846153846154,
+      "recall_at_capacity": 0.06896551724137931,
+      "tp": 2,
+      "fp": 323,
+      "fn": 27,
+      "tn": 32125,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 2,
+        "fp": 276,
+        "fn_all_targets": 27,
+        "precision": 0.007194244604316547,
+        "recall_all_positives": 0.06896551724137931
+      },
+      "ties": {
+        "reviewed": 278,
+        "cutoff": 0.0,
+        "tied": 32380,
+        "tied_positive": 27,
+        "tied_slots": 181,
+        "tp_min": 2,
+        "tp_max": 29,
+        "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_COMPONENT_BOOTSTRAP",
+        "positive_components": 25,
+        "components": 12698,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.4983785469285937,
+              0.5892011754974833
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.000678614392794349,
+              0.00911277797109327
+            ]
+          },
+          "precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.017985611510791366
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.18181818181818182
+            ]
+          }
+        }
+      },
+      "common_cohorts": {
+        "amount": {
+          "candidate": {
+            "total": 24929,
+            "known": 24929,
+            "positive": 11,
+            "negative": 24918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.543989740895592,
+            "average_precision": 0.0016296404639298458,
+            "review_capacity": 250,
+            "precision_at_capacity": 0.004,
+            "recall_at_capacity": 0.09090909090909091,
+            "tp": 1,
+            "fp": 249,
+            "fn": 10,
+            "tn": 24669,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 1,
+              "fp": 277,
+              "fn_all_targets": 10,
+              "precision": 0.0035971223021582736,
+              "recall_all_positives": 0.09090909090909091
+            }
+          },
+          "baseline": {
+            "total": 24929,
+            "known": 24929,
+            "positive": 11,
+            "negative": 24918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20806791731424526,
+            "average_precision": 0.00028018616943144167,
+            "review_capacity": 250,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 250,
+            "fn": 11,
+            "tn": 24668,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        },
+        "velocity": {
+          "candidate": {
+            "total": 32477,
+            "known": 32477,
+            "positive": 29,
+            "negative": 32448,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5330188779500782,
+            "average_precision": 0.0022533270037881055,
+            "review_capacity": 325,
+            "precision_at_capacity": 0.006153846153846154,
+            "recall_at_capacity": 0.06896551724137931,
+            "tp": 2,
+            "fp": 323,
+            "fn": 27,
+            "tn": 32125,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 2,
+              "fp": 276,
+              "fn_all_targets": 27,
+              "precision": 0.007194244604316547,
+              "recall_all_positives": 0.06896551724137931
+            }
+          },
+          "baseline": {
+            "total": 32477,
+            "known": 32477,
+            "positive": 29,
+            "negative": 32448,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7202340721281371,
+            "average_precision": 0.001706235825783798,
+            "review_capacity": 325,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 325,
+            "fn": 29,
+            "tn": 32123,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 29,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        }
+      }
+    },
+    "fan_in_24h": {
+      "total": 33113,
+      "known": 32477,
+      "positive": 29,
+      "negative": 32448,
+      "unknown": 636,
+      "unknown_positive": 0,
+      "unknown_reasons": {
+        "TARGET_SELF_TRANSFER": 636
+      },
+      "roc_auc": 0.6134037271305176,
+      "average_precision": 0.0016397260043196284,
+      "review_capacity": 325,
+      "precision_at_capacity": 0.003076923076923077,
+      "recall_at_capacity": 0.034482758620689655,
+      "tp": 1,
+      "fp": 324,
+      "fn": 28,
+      "tn": 32124,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 1,
+        "fp": 277,
+        "fn_all_targets": 28,
+        "precision": 0.0035971223021582736,
+        "recall_all_positives": 0.034482758620689655
+      },
+      "ties": {
+        "reviewed": 278,
+        "cutoff": 2.0,
+        "tied": 229,
+        "tied_positive": 1,
+        "tied_slots": 188,
+        "tp_min": 0,
+        "tp_max": 1,
+        "interpretation": "Bounds over possible tie orderings; not a confidence interval"
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_COMPONENT_BOOTSTRAP",
+        "positive_components": 25,
+        "components": 12698,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.5118240718477265,
+              0.6874952865761689
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0006781911653129117,
+              0.00331294356400177
+            ]
+          },
+          "precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.01079136690647482
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.08571428571428572
+            ]
+          }
+        }
+      },
+      "common_cohorts": {
+        "amount": {
+          "candidate": {
+            "total": 24929,
+            "known": 24929,
+            "positive": 11,
+            "negative": 24918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6371516756780422,
+            "average_precision": 0.0009598569673889464,
+            "review_capacity": 250,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 250,
+            "fn": 11,
+            "tn": 24668,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          },
+          "baseline": {
+            "total": 24929,
+            "known": 24929,
+            "positive": 11,
+            "negative": 24918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.20806791731424526,
+            "average_precision": 0.00028018616943144167,
+            "review_capacity": 250,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 250,
+            "fn": 11,
+            "tn": 24668,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 11,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        },
+        "velocity": {
+          "candidate": {
+            "total": 32477,
+            "known": 32477,
+            "positive": 29,
+            "negative": 32448,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6134037271305176,
+            "average_precision": 0.0016397260043196284,
+            "review_capacity": 325,
+            "precision_at_capacity": 0.003076923076923077,
+            "recall_at_capacity": 0.034482758620689655,
+            "tp": 1,
+            "fp": 324,
+            "fn": 28,
+            "tn": 32124,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 1,
+              "fp": 277,
+              "fn_all_targets": 28,
+              "precision": 0.0035971223021582736,
+              "recall_all_positives": 0.034482758620689655
+            }
+          },
+          "baseline": {
+            "total": 32477,
+            "known": 32477,
+            "positive": 29,
+            "negative": 32448,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7202340721281371,
+            "average_precision": 0.001706235825783798,
+            "review_capacity": 325,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 325,
+            "fn": 29,
+            "tn": 32123,
+            "fixed_budget": {
+              "budget": 278,
+              "reviewed": 278,
+              "tp": 0,
+              "fp": 278,
+              "fn_all_targets": 29,
+              "precision": 0.0,
+              "recall_all_positives": 0.0
+            }
+          }
+        }
+      }
+    }
+  },
+  "evaluation_seconds": 28.229193999999552,
+  "peak_rss_bytes": 288210944
+}
