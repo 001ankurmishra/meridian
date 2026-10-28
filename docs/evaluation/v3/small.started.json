@@ -1,0 +1,39 @@
+{
+  "model": {
+    "model": "BAAI/bge-small-en-v1.5",
+    "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "tokenizer_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "kind": "embedding",
+    "dimensions": 384,
+    "license": "mit",
+    "official_card": "https://huggingface.co/BAAI/bge-small-en-v1.5/blob/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/README.md",
+    "model_type": "bert",
+    "hidden_size": 384,
+    "max_sequence_length": 512,
+    "weights": [
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "a4fef68c99b10468206a9bc1d54d0112d87c5557",
+        "size": 133466304,
+        "lfs": {
+          "sha256": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+          "size": 133466304,
+          "pointerSize": 134
+        }
+      }
+    ],
+    "trust_remote_code": false,
+    "device": "cpu",
+    "dtype": "float32",
+    "query_prefix": "Represent this sentence for searching relevant passages: ",
+    "normalize_embeddings": true
+  },
+  "corpus_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "protocol_sha256": "8554947d70022080cf4dddcbc3cbb57167f7932b3555689ef5af1a775e17550e",
+  "cpu_threads": 4,
+  "first_stage_sha256": null,
+  "code_sha256": "e065a30599838cf0652048373d2f9c69d6a57dbf46f2c9b31febf45e3ea606c6",
+  "batch_size": 16,
+  "candidate_depth": 50,
+  "rrf_k": 60
+}

@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "targets_checked": 33113,
+  "source_rows_resolved": 56235,
+  "unique_scoped_evidence_keys": 165565,
+  "reciprocal_witness_targets": 97,
+  "positive_witnesses": [
+    {
+      "target_source_row": 21537720,
+      "witness_source_rows": [
+        21501035,
+        21501036
+      ]
+    },
+    {
+      "target_source_row": 26130757,
+      "witness_source_rows": [
+        23756673,
+        23756674
+      ]
+    }
+  ],
+  "checks": [
+    "target account and timestamp",
+    "strict incoming and prior-week bounds",
+    "inclusive outgoing bounds",
+    "no cross-account window contamination",
+    "deterministic artifact keys unique by target and signal",
+    "graph values reconstructed from source rows",
+    "amount-history query exact reconstruction bounds"
+  ],
+  "observed_fanout_diagnostic": {
+    "evaluable_targets": 33113,
+    "minimum": 1,
+    "maximum": 16,
+    "mean": 1.3085495122761452,
+    "scope": "descriptive distinct outgoing counterparties in inclusive24h; no predictive feature added or measured"
+  },
+  "cache_sha256": "8042852f5c37c44625285e8d64aa0eb883280903846a51e7544368d44d022eac",
+  "audit_script_sha256": "b44b120756122b83b4976f5008184324fe3352a8504ea517aa5d1ed1ffc51646"
+}

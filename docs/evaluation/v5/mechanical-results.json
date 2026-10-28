@@ -1,0 +1,130 @@
+{
+  "benchmark_version": "copilot-mechanical-v1",
+  "fixture_sha256": "c4775a01d928dee42639bc87de34cfb4443e626b13d3e944feb86df2171ed3fc",
+  "prompt_version": "meridian-extractive-draft-v1",
+  "model_identifier": "NO_MODEL",
+  "code_sha256": "afd1dac103d63eb6083b4d9ac0f83b61fafb798ab410fb9affb3c6d9162c29b5",
+  "validator_sha256": "035ce8f11658c14d795e14972ada77f40eeb9a1c77442eea3cb7241bb28f4df8",
+  "mechanical_expectations_met": 14,
+  "examples": 14,
+  "observations": [
+    {
+      "id": "exact_amount",
+      "accepted": true,
+      "expected": true,
+      "latency_seconds": 0.0008202500030165538,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "changed_amount",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 1.6541991499252617e-05,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "same_number_wrong_field",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 1.0042000212706625e-05,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "removed_negation",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 7.041991921141744e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "foreign_citation",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 4.749992513097823e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "unsupported_typology",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 7.0829992182552814e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "injection",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 8.999995770864189e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "account_action",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 8.66700429469347e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "unknown_preserved",
+      "accepted": true,
+      "expected": true,
+      "latency_seconds": 8.458009688183665e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "unknown_as_zero",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 6.4580090111121535e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "policy_applicability",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 7.374997949227691e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "abstention",
+      "accepted": true,
+      "expected": true,
+      "latency_seconds": 3.2079988159239292e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "recorded_not_true",
+      "accepted": true,
+      "expected": true,
+      "latency_seconds": 6.624992238357663e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    },
+    {
+      "id": "qualifier_omission",
+      "accepted": false,
+      "expected": false,
+      "latency_seconds": 5.333000444807112e-06,
+      "semantic_reviewer": null,
+      "semantic_verdict": null
+    }
+  ],
+  "input_tokens": null,
+  "output_tokens": null,
+  "estimated_api_cost_usd": null,
+  "actual_api_calls": 0,
+  "semantic_faithfulness": "NOT_MEASURED",
+  "independent_review": "PENDING"
+}

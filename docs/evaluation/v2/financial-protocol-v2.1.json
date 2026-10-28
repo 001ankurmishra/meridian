@@ -1,0 +1,47 @@
+{
+  "protocol": "ibm-2021-account-baseline-v2.1",
+  "status": "DEFINITIONS_LOCKED_BEFORE_METRICS",
+  "dataset_sha256": "b58b23154907e95e27a23ec95775cdfaf65ae846d3d4717c611c7d8a45dc8299",
+  "sample_seed": "meridian-ibm-2021-v2-account-sample-1",
+  "sampling": "SHA256(seed|bank|account), first 8 bytes unsigned big endian modulo 100 == 0; retain all incident rows for selected anchors; score outgoing anchor rows only. No label-conditioned sampling.",
+  "unit": "publisher bank/account pair; never inferred customer identity",
+  "split_seed": "meridian-ibm-2021-components-v2.0",
+  "split_rule": "Weakly connected components of the retained incident graph. Representative is lexicographically smallest bank/account tuple. SHA256(split_seed|representative), first byte modulo 2: 0 DEV, 1 HELDOUT. No rebalancing after looking at labels.",
+  "dev_target_window": [
+    "2019-01-10T00:00:00",
+    "2019-01-17T00:00:00"
+  ],
+  "heldout_target_window": [
+    "2019-01-24T00:00:00",
+    "2019-02-01T00:00:00"
+  ],
+  "time_semantics": "half-open target intervals; source timezone unspecified; historical amount strictly before target; velocity includes all records at target timestamp, consistent with native timestamp semantics",
+  "history": "Only incident rows at or before target timestamp. January-only history is left-censored relative to native 90-day amount window. Full observed history for sampled anchors is retained; no negative downsampling.",
+  "signals": {
+    "account_velocity_24h": "Count same sending bank/account in [target minus 24h, target], inclusive of tied timestamps. Account-unit adaptation of existing CUSTOMER-level formula, not a direct native baseline. Unknown if any paid amount in the window is missing or negative; direction semantics unsupported.",
+    "account_amount_multiple_observed_history": "Paid amount divided by mean prior paid amounts for same sending bank/account in trailing 90 days. Unknown for no history, missing values, mixed currencies, Unknown currency or zero mean. Left-censored diagnostic only, not full 90-day/native customer result. Unknown if target or prior-history paid amount is negative; source signed-amount semantics unsupported."
+  },
+  "native_compatibility": {
+    "customer_amount_and_velocity": "NOT DIRECTLY EVALUABLE: customer/account ownership absent; account-unit adaptation explicitly separate",
+    "beneficiary_age": "NOT EVALUABLE: beneficiary creation timestamps absent",
+    "graph_cycle_and_chain": "NOT DIRECTLY EVALUABLE: sampled ego graph omits unsampled-node outgoing edges; native schema lacks as-of cutoff. Do not score missing paths as negatives. Record reciprocal-cycle witnesses and missing-graph coverage separately, with no native performance claim."
+  },
+  "direction": "HIGHER for both account adaptations, fixed from existing signal protocol",
+  "metrics": [
+    "ROC-AUC with half-credit ties",
+    "average precision (step PR-AUC)",
+    "precision and recall at top 1% review capacity, ceil(n*0.01), ties by source row",
+    "TP FP FN TN at that capacity",
+    "unknown counts and reasons",
+    "per currency and payment format"
+  ],
+  "uncertainty": "200 fixed-seed component bootstrap replicates for AUC/AP when at least 10 evaluable graph components and at least 2 positive-bearing components; otherwise intervals NOT ESTIMABLE. Report positives/negatives/components. No iid transaction CI that ignores graph dependence.",
+  "bootstrap_seed": 20261026,
+  "missing_values": "Never imputed; unknowns excluded from ranking metrics with denominators and reasons reported",
+  "duplicate_policy": "Preserve original records. No transaction ID exists, so exact field duplicates need not be duplicate business events. Same-account/time duplicates necessarily share split and target window. Conflicting labels separately reported.",
+  "leakage_limits": "No observed node or edge crosses component splits. Unobserved edges outside retained graph and hidden common customer ownership may connect components: full-source graph/customer independence is NOT established. No trained model, threshold fitting or risk classification is authorized.",
+  "label_semantics": "IBM generator illicit-origin funds indicator, including transitive transfers; not a legal/regulatory determination",
+  "scenario_metrics": "NOT AVAILABLE: no scenario IDs in original CSV; payment format is not laundering scenario",
+  "freeze_rule": "Commit protocol and code before scoring. Persist sample, split and output SHA256. Do not tune to heldout or silently replace this protocol.",
+  "amendment": "Before any financial metric measurement: source scan discovered signed amounts with undocumented direction semantics. Preserve them; exclude affected signal values as unknown, never negate or impute. Sampling, splits, directions and metrics unchanged from v2.0."
+}

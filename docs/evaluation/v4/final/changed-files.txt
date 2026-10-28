@@ -1,0 +1,17 @@
+docs/evaluation/v4/final/REPORT.md
+docs/evaluation/v4/final/REPRODUCE.md
+docs/evaluation/v4/final/checklist.md
+docs/evaluation/v4/final/features.receipt.json
+docs/evaluation/v4/final/features.started.json
+docs/evaluation/v4/final/integration.log
+docs/evaluation/v4/final/native-compatibility.md
+docs/evaluation/v4/final/reserve-lock.json
+docs/evaluation/v4/final/results.json
+docs/evaluation/v4/final/results.started.json
+docs/evaluation/v4/final/source-audit.json
+docs/evaluation/v4/final/source-audit.py
+docs/evaluation/v4/final/stage5-proposal.md
+docs/evaluation/v4/final/verification.json
+src/meridian/evaluation/external/temporal.py
+tests/test_temporal_reserve.py
+docs/evaluation/v4/final/changed-files.txt

@@ -1,0 +1,92 @@
+{
+  "verified_date": "2026-10-27",
+  "models": [
+    {
+      "model": "BAAI/bge-small-en-v1.5",
+      "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+      "tokenizer_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+      "kind": "embedding",
+      "dimensions": 384,
+      "license": "mit",
+      "official_card": "https://huggingface.co/BAAI/bge-small-en-v1.5/blob/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/README.md",
+      "model_type": "bert",
+      "hidden_size": 384,
+      "max_sequence_length": 512,
+      "weights": [
+        {
+          "rfilename": "model.safetensors",
+          "blobId": "a4fef68c99b10468206a9bc1d54d0112d87c5557",
+          "size": 133466304,
+          "lfs": {
+            "sha256": "3c9f31665447c8911517620762200d2245a2518d6e7208acc78cd9db317e21ad",
+            "size": 133466304,
+            "pointerSize": 134
+          }
+        }
+      ],
+      "trust_remote_code": false,
+      "device": "cpu",
+      "dtype": "float32",
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "normalize_embeddings": true
+    },
+    {
+      "model": "BAAI/bge-base-en-v1.5",
+      "revision": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+      "tokenizer_revision": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+      "kind": "embedding",
+      "dimensions": 768,
+      "license": "mit",
+      "official_card": "https://huggingface.co/BAAI/bge-base-en-v1.5/blob/a5beb1e3e68b9ab74eb54cfd186867f64f240e1a/README.md",
+      "model_type": "bert",
+      "hidden_size": 768,
+      "max_sequence_length": 512,
+      "weights": [
+        {
+          "rfilename": "model.safetensors",
+          "blobId": "c766488f5e160d3128aeaa99bb4ad9083d2ff9e6",
+          "size": 437955512,
+          "lfs": {
+            "sha256": "c7c1988aae201f80cf91a5dbbd5866409503b89dcaba877ca6dba7dd0a5167d7",
+            "size": 437955512,
+            "pointerSize": 134
+          }
+        }
+      ],
+      "trust_remote_code": false,
+      "device": "cpu",
+      "dtype": "float32",
+      "query_prefix": "Represent this sentence for searching relevant passages: ",
+      "normalize_embeddings": true
+    },
+    {
+      "model": "BAAI/bge-reranker-base",
+      "revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+      "tokenizer_revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+      "kind": "cross_encoder",
+      "dimensions": null,
+      "license": "mit",
+      "official_card": "https://huggingface.co/BAAI/bge-reranker-base/blob/2cfc18c9415c912f9d8155881c133215df768a70/README.md",
+      "model_type": "xlm-roberta",
+      "hidden_size": 768,
+      "max_sequence_length": 512,
+      "weights": [
+        {
+          "rfilename": "model.safetensors",
+          "blobId": "2602cf45b8859e9f240d6bd2e01e3d0b22d589c8",
+          "size": 1112206140,
+          "lfs": {
+            "sha256": "ced967c45fd1902eb92716c9ceeca7c95a936770ea9db611f5a841b926e33fbd",
+            "size": 1112206140,
+            "pointerSize": 135
+          }
+        }
+      ],
+      "trust_remote_code": false,
+      "device": "cpu",
+      "dtype": "float32",
+      "query_prefix": null,
+      "normalize_embeddings": false
+    }
+  ]
+}

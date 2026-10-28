@@ -1,0 +1,936 @@
+{
+  "version": "meridian-rag-v3-dev-1",
+  "label_status": "PROPOSED_AI_AUTHORED_NOT_INDEPENDENTLY_VALIDATED",
+  "measurement_scope": "DEV_ONLY",
+  "final_validation": "BLOCKED_PENDING_UNTOUCHED_INDEPENDENTLY_REVIEWED_SET",
+  "corpus_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "grades": {
+    "3": "direct support",
+    "2": "substantial partial support",
+    "1": "topical context only; not relevant for binary metrics",
+    "0": "unjudged or no support"
+  },
+  "binary_relevance_min_grade": 2,
+  "unjudged_policy": "Treat as zero for provisional metrics; incomplete judgments can penalize valid alternatives. Do not amend labels after scoring without a new version.",
+  "queries": [
+    {
+      "id": "dev-risk_factors-1",
+      "family": "risk_factors",
+      "split": "DEV",
+      "query": "Which levels of inherent and residual risk should a bank consider in its AML risk assessment?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-8:chunk-1": 3,
+        "bis-aml-2020:pdf-page-8:chunk-2": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Page 8 paragraph 15 gives risk levels; paragraph 16 expands operational inputs."
+    },
+    {
+      "id": "dev-risk_factors-2",
+      "family": "risk_factors",
+      "split": "DEV",
+      "query": "What country, sector and business-relationship factors inform a bank-wide ML/FT risk profile?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-8:chunk-1": 3,
+        "bis-aml-2020:pdf-page-8:chunk-2": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Page 8 paragraph 15 gives risk levels; paragraph 16 expands operational inputs."
+    },
+    {
+      "id": "dev-board_information-1",
+      "family": "board_information",
+      "split": "DEV",
+      "query": "What qualities should AML risk information sent to the board have?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-9:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 17 continuation specifies timely, complete, understandable and accurate information."
+    },
+    {
+      "id": "dev-board_information-2",
+      "family": "board_information",
+      "split": "DEV",
+      "query": "How should ML/FT risk reporting equip directors to make informed decisions?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-9:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 17 continuation specifies timely, complete, understandable and accurate information."
+    },
+    {
+      "id": "dev-staff_training-1",
+      "family": "staff_training",
+      "split": "DEV",
+      "query": "How should AML training be tailored to employee duties and experience?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-9:chunk-2": 3,
+        "bis-aml-2020:pdf-page-9:chunk-3": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 21 describes tailoring; continuation describes refresher frequency."
+    },
+    {
+      "id": "dev-staff_training-2",
+      "family": "staff_training",
+      "split": "DEV",
+      "query": "Should every employee receive identical financial-crime training regardless of responsibilities?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-9:chunk-2": 3,
+        "bis-aml-2020:pdf-page-9:chunk-3": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 21 describes tailoring; continuation describes refresher frequency."
+    },
+    {
+      "id": "dev-officer_reporting-1",
+      "family": "officer_reporting",
+      "split": "DEV",
+      "query": "To whom should the chief AML/CFT officer have a direct reporting line?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraphs 24 and 25 address reporting and resources."
+    },
+    {
+      "id": "dev-officer_reporting-2",
+      "family": "officer_reporting",
+      "split": "DEV",
+      "query": "What reporting access and resources should the officer responsible for AML receive?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraphs 24 and 25 address reporting and resources."
+    },
+    {
+      "id": "dev-internal_audit-1",
+      "family": "internal_audit",
+      "split": "DEV",
+      "query": "What should internal AML audits evaluate and how should their frequency be determined?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-1": 3,
+        "bis-aml-2020:pdf-page-10:chunk-0": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 26 lists audit scope and risk-based frequency; preceding chunk introduces independent evaluation."
+    },
+    {
+      "id": "dev-internal_audit-2",
+      "family": "internal_audit",
+      "split": "DEV",
+      "query": "Which aspects of compliance controls and staff training should the third line of defence review?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-1": 3,
+        "bis-aml-2020:pdf-page-10:chunk-0": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 26 lists audit scope and risk-based frequency; preceding chunk introduces independent evaluation."
+    },
+    {
+      "id": "dev-monitoring_alternative-1",
+      "family": "monitoring_alternative",
+      "split": "DEV",
+      "query": "What should a bank document if it believes an IT transaction-monitoring system is unnecessary?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-3": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 28 requires documented decision and demonstrably effective alternative."
+    },
+    {
+      "id": "dev-monitoring_alternative-2",
+      "family": "monitoring_alternative",
+      "split": "DEV",
+      "query": "How must a bank justify using an alternative to automated transaction monitoring?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-10:chunk-3": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 28 requires documented decision and demonstrably effective alternative."
+    },
+    {
+      "id": "dev-vendor_parameters-1",
+      "family": "vendor_parameters",
+      "split": "DEV",
+      "query": "Can a bank use vendor monitoring parameters without considering its own risk situation?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-11:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 29 continuation explicitly requires bank-specific risk parameters."
+    },
+    {
+      "id": "dev-vendor_parameters-2",
+      "family": "vendor_parameters",
+      "split": "DEV",
+      "query": "How should default transaction-monitoring settings relate to the bank risk profile?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-11:chunk-0": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 29 continuation explicitly requires bank-specific risk parameters."
+    },
+    {
+      "id": "dev-financial_inclusion-1",
+      "family": "financial_inclusion",
+      "split": "DEV",
+      "query": "How should customer acceptance policies avoid excluding financially disadvantaged people?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-11:chunk-2": 3,
+        "bis-aml-2020:pdf-page-11:chunk-3": 2
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 33 specifies proven lower risk, legal permission and inclusion; continuation stresses access."
+    },
+    {
+      "id": "dev-financial_inclusion-2",
+      "family": "financial_inclusion",
+      "split": "DEV",
+      "query": "When may simplified due diligence be used for lower-risk retail customers?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-11:chunk-2": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 33 specifies proven lower risk, legal permission and inclusion; continuation stresses access."
+    },
+    {
+      "id": "dev-identity_sources-1",
+      "family": "identity_sources",
+      "split": "DEV",
+      "query": "What kinds of sources should verify customer and beneficial-owner identity?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-12:chunk-1": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraphs 36 and 37 require independent reliable sources and representative authority checks."
+    },
+    {
+      "id": "dev-identity_sources-2",
+      "family": "identity_sources",
+      "split": "DEV",
+      "query": "How should a bank verify a representative identity and authority to act for a customer?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-12:chunk-1": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraphs 36 and 37 require independent reliable sources and representative authority checks."
+    },
+    {
+      "id": "dev-numbered_accounts-1",
+      "family": "numbered_accounts",
+      "split": "DEV",
+      "query": "Are confidential numbered accounts exempt from customer due diligence?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-14:chunk-1": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 44 rejects anonymity and preserves oversight access."
+    },
+    {
+      "id": "dev-numbered_accounts-2",
+      "family": "numbered_accounts",
+      "split": "DEV",
+      "query": "Who must be able to access the verified identity behind a numbered account?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-14:chunk-1": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 44 rejects anonymity and preserves oversight access."
+    },
+    {
+      "id": "dev-monitoring_scope-1",
+      "family": "monitoring_scope",
+      "split": "DEV",
+      "query": "Does ongoing monitoring cover only high-risk customers or all business relationships?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-14:chunk-2": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 45 distinguishes universal coverage from risk-sensitive intensity."
+    },
+    {
+      "id": "dev-monitoring_scope-2",
+      "family": "monitoring_scope",
+      "split": "DEV",
+      "query": "How should monitoring intensity vary with risk while covering products and services?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-14:chunk-2": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 45 distinguishes universal coverage from risk-sensitive intensity."
+    },
+    {
+      "id": "dev-record_updates-1",
+      "family": "record_updates",
+      "split": "DEV",
+      "query": "Why should a bank regularly review and update CDD information?",
+      "kind": "direct",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-15:chunk-3": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 54 links current records to effective use and unusual-activity monitoring."
+    },
+    {
+      "id": "dev-record_updates-2",
+      "family": "record_updates",
+      "split": "DEV",
+      "query": "How do accurate current customer records help authorities and transaction monitoring?",
+      "kind": "paraphrase_or_contrast",
+      "expectation": "RETRIEVE",
+      "relevance_grades": {
+        "bis-aml-2020:pdf-page-15:chunk-3": 3
+      },
+      "applicability": {
+        "scope": "international_reference",
+        "source_ids": [
+          "bis-aml-2020"
+        ],
+        "versions": [
+          "January 2014, revised July 2020"
+        ],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Paragraph 54 links current records to effective use and unusual-activity monitoring."
+    },
+    {
+      "id": "dev-negative-01",
+      "family": "negative-out_of_domain-01",
+      "split": "DEV",
+      "query": "How long should bread dough ferment before baking?",
+      "kind": "out_of_domain",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No culinary guidance."
+    },
+    {
+      "id": "dev-negative-02",
+      "family": "negative-out_of_domain-02",
+      "split": "DEV",
+      "query": "What is the orbital period of Neptune?",
+      "kind": "out_of_domain",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No astronomy content."
+    },
+    {
+      "id": "dev-negative-03",
+      "family": "negative-out_of_domain-03",
+      "split": "DEV",
+      "query": "How do I repair a bicycle derailleur?",
+      "kind": "out_of_domain",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No mechanical repair guidance."
+    },
+    {
+      "id": "dev-negative-04",
+      "family": "negative-out_of_domain-04",
+      "split": "DEV",
+      "query": "Which antibiotics cure a bacterial infection?",
+      "kind": "out_of_domain",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No clinical prescribing guidance."
+    },
+    {
+      "id": "dev-negative-05",
+      "family": "negative-unsupported-05",
+      "split": "DEV",
+      "query": "What exact monthly AML training budget has Meridian approved?",
+      "kind": "unsupported",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No internal Meridian budget."
+    },
+    {
+      "id": "dev-negative-06",
+      "family": "negative-unsupported-06",
+      "split": "DEV",
+      "query": "Give Meridian employee access credentials for the monitoring dashboard.",
+      "kind": "unsupported",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No credentials or internal access instructions."
+    },
+    {
+      "id": "dev-negative-07",
+      "family": "negative-unsupported-07",
+      "split": "DEV",
+      "query": "Which transaction ID triggered the latest alert for customer 4821?",
+      "kind": "unsupported",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Reference corpus contains no case records."
+    },
+    {
+      "id": "dev-negative-08",
+      "family": "negative-unsupported-08",
+      "split": "DEV",
+      "query": "What exact vendor configuration does Meridian use for its AML alert engine?",
+      "kind": "unsupported",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No internal configuration supplied."
+    },
+    {
+      "id": "dev-negative-09",
+      "family": "negative-jurisdiction-09",
+      "split": "DEV",
+      "query": "Provide the binding Indian statutory timetable for updating KYC in 2026.",
+      "kind": "jurisdiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "International reference is not current Indian law."
+    },
+    {
+      "id": "dev-negative-10",
+      "family": "negative-jurisdiction-10",
+      "split": "DEV",
+      "query": "Which exact US federal section exempts numbered accounts from due diligence?",
+      "kind": "jurisdiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No verified US statutory source; premise also conflicts with guidance."
+    },
+    {
+      "id": "dev-negative-11",
+      "family": "negative-jurisdiction-11",
+      "split": "DEV",
+      "query": "What is the legally mandatory UK deadline for filing this suspicious activity report?",
+      "kind": "jurisdiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No current UK law or case facts."
+    },
+    {
+      "id": "dev-negative-12",
+      "family": "negative-jurisdiction-12",
+      "split": "DEV",
+      "query": "Under current Singapore law what penalty applies to this bank compliance breach?",
+      "kind": "jurisdiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No current Singapore penalty source or case facts."
+    },
+    {
+      "id": "dev-negative-13",
+      "family": "negative-version-13",
+      "split": "DEV",
+      "query": "Quote the operative wording of the October 2001 Customer due diligence for banks paper.",
+      "kind": "version",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Original 2001 publication absent; mention is not original text."
+    },
+    {
+      "id": "dev-negative-14",
+      "family": "negative-version-14",
+      "split": "DEV",
+      "query": "What does the October 2004 Consolidated KYC risk management document say verbatim?",
+      "kind": "version",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Original 2004 publication absent and superseded."
+    },
+    {
+      "id": "dev-negative-15",
+      "family": "negative-version-15",
+      "split": "DEV",
+      "query": "Give the revised 2026 Basel AML training paragraph adopted this year.",
+      "kind": "version",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No 2026 document in corpus."
+    },
+    {
+      "id": "dev-negative-16",
+      "family": "negative-version-16",
+      "split": "DEV",
+      "query": "Cite the 2025 edition of the Basel Core Principles on supervisory powers.",
+      "kind": "version",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Only 2024 Core Principles ingested."
+    },
+    {
+      "id": "dev-negative-17",
+      "family": "negative-contradiction-17",
+      "split": "DEV",
+      "query": "Find a passage endorsing anonymous numbered bank accounts with no identity verification.",
+      "kind": "contradiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Page 14 paragraph 44 contradicts the requested endorsement."
+    },
+    {
+      "id": "dev-negative-18",
+      "family": "negative-contradiction-18",
+      "split": "DEV",
+      "query": "Show the rule allowing banks to skip all CDD for low-balance accounts.",
+      "kind": "contradiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Simplified measures are not a blanket CDD exemption."
+    },
+    {
+      "id": "dev-negative-19",
+      "family": "negative-contradiction-19",
+      "split": "DEV",
+      "query": "Cite permission to ignore identity verification when a customer cannot attend in person.",
+      "kind": "contradiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Page 12 rejects disregarding verification for non-face-to-face customers."
+    },
+    {
+      "id": "dev-negative-20",
+      "family": "negative-contradiction-20",
+      "split": "DEV",
+      "query": "Find support for letting vendor defaults override a bank own risk assessment.",
+      "kind": "contradiction",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Page 11 requires parameters reflect bank risk."
+    },
+    {
+      "id": "dev-negative-21",
+      "family": "negative-hard_negative-21",
+      "split": "DEV",
+      "query": "What universal numerical AML training hours are required for every employee?",
+      "kind": "hard_negative",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "Tailored training guidance supplies no universal hours."
+    },
+    {
+      "id": "dev-negative-22",
+      "family": "negative-hard_negative-22",
+      "split": "DEV",
+      "query": "What exact software product is mandatory for every bank transaction-monitoring system?",
+      "kind": "hard_negative",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "System adequacy guidance supplies no universally mandated product."
+    },
+    {
+      "id": "dev-negative-23",
+      "family": "negative-hard_negative-23",
+      "split": "DEV",
+      "query": "What uniform numerical amount proves a customer is laundering money?",
+      "kind": "hard_negative",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No such inference or universal amount established."
+    },
+    {
+      "id": "dev-negative-24",
+      "family": "negative-hard_negative-24",
+      "split": "DEV",
+      "query": "Which specific customer should Meridian freeze automatically based on these guidelines?",
+      "kind": "hard_negative",
+      "expectation": "ABSTAIN",
+      "relevance_grades": {},
+      "applicability": {
+        "scope": "unsupported_request",
+        "source_ids": [],
+        "versions": [],
+        "binding_domestic_policy": false
+      },
+      "rationale": "No case evidence; guidelines do not authorize Meridian autonomous actions."
+    }
+  ]
+}

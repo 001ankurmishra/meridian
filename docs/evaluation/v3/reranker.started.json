@@ -1,0 +1,39 @@
+{
+  "model": {
+    "model": "BAAI/bge-reranker-base",
+    "revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+    "tokenizer_revision": "2cfc18c9415c912f9d8155881c133215df768a70",
+    "kind": "cross_encoder",
+    "dimensions": null,
+    "license": "mit",
+    "official_card": "https://huggingface.co/BAAI/bge-reranker-base/blob/2cfc18c9415c912f9d8155881c133215df768a70/README.md",
+    "model_type": "xlm-roberta",
+    "hidden_size": 768,
+    "max_sequence_length": 512,
+    "weights": [
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "2602cf45b8859e9f240d6bd2e01e3d0b22d589c8",
+        "size": 1112206140,
+        "lfs": {
+          "sha256": "ced967c45fd1902eb92716c9ceeca7c95a936770ea9db611f5a841b926e33fbd",
+          "size": 1112206140,
+          "pointerSize": 135
+        }
+      }
+    ],
+    "trust_remote_code": false,
+    "device": "cpu",
+    "dtype": "float32",
+    "query_prefix": null,
+    "normalize_embeddings": false
+  },
+  "corpus_sha256": "2dedab9e14bc868c6e861b86b3bb5c09fae9e4897d6fa6168cec7c5c1393ffa0",
+  "protocol_sha256": "8554947d70022080cf4dddcbc3cbb57167f7932b3555689ef5af1a775e17550e",
+  "cpu_threads": 4,
+  "first_stage_sha256": "27c61eb766b1d9da9bcf743ab8b216b27a776271829041942863695cfc5dbaae",
+  "code_sha256": "e065a30599838cf0652048373d2f9c69d6a57dbf46f2c9b31febf45e3ea606c6",
+  "batch_size": 16,
+  "candidate_depth": 50,
+  "rrf_k": 60
+}

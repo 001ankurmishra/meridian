@@ -1,0 +1,16 @@
+{
+  "sample_sha256": "f83babca4a2c3d99f6e0f411819b78eed6f59557a3e25c426ed3bc2a890860a8",
+  "protocol_sha256": "59e36fe8c44e02006feffa1a31576d703613523d5a715a18e97c6b1e4936f4cb",
+  "feature_code_sha256": "05cefc10f6d3b710726fdbb2db9c1a91bb977c00b256094e84979737ab310897",
+  "runner_sha256": "847ced358f43a2228dd841deb68026c747bdfc7262b74df5ffc77e7606d41aa5",
+  "scope": "DEV_ONLY",
+  "target_window": [
+    "2019-01-10T00:00:00",
+    "2019-01-17T00:00:00"
+  ],
+  "target_rows": 27758,
+  "dev_target_sha256": "be52bb52ed849e682f65cab2b25fb9089e8362b7da8e36c9a02a2f3af9e07755",
+  "cache_sha256": "80313da863e3622f3a2abcdb9d52e84e7aa0e8be04edf9397b3730e93975dfed",
+  "extraction_seconds": 5.623584957997082,
+  "peak_rss_bytes": 502054912
+}

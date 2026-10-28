@@ -1,0 +1,5754 @@
+{
+  "status": "MEASURED_DEV_PROTOTYPE_SIGNALS_ONLY",
+  "receipt": {
+    "sample_sha256": "f83babca4a2c3d99f6e0f411819b78eed6f59557a3e25c426ed3bc2a890860a8",
+    "protocol_sha256": "59e36fe8c44e02006feffa1a31576d703613523d5a715a18e97c6b1e4936f4cb",
+    "feature_code_sha256": "05cefc10f6d3b710726fdbb2db9c1a91bb977c00b256094e84979737ab310897",
+    "runner_sha256": "847ced358f43a2228dd841deb68026c747bdfc7262b74df5ffc77e7606d41aa5",
+    "scope": "DEV_ONLY",
+    "target_window": [
+      "2019-01-10T00:00:00",
+      "2019-01-17T00:00:00"
+    ],
+    "target_rows": 27758,
+    "dev_target_sha256": "be52bb52ed849e682f65cab2b25fb9089e8362b7da8e36c9a02a2f3af9e07755",
+    "cache_sha256": "80313da863e3622f3a2abcdb9d52e84e7aa0e8be04edf9397b3730e93975dfed",
+    "extraction_seconds": 5.623584957997082,
+    "peak_rss_bytes": 502054912
+  },
+  "targets": 27758,
+  "positive_targets": 23,
+  "reports": {
+    "amount": {
+      "total": 27758,
+      "known": 20769,
+      "positive": 14,
+      "negative": 20755,
+      "unknown": 6989,
+      "unknown_positive": 9,
+      "unknown_reasons": {
+        "NO_HISTORY": 4523,
+        "CURRENCY_MISMATCH": 2466
+      },
+      "roc_auc": 0.5469697491138108,
+      "average_precision": 0.002011488210194842,
+      "review_capacity": 208,
+      "precision_at_capacity": 0.004807692307692308,
+      "recall_at_capacity": 0.07142857142857142,
+      "tp": 1,
+      "fp": 207,
+      "fn": 13,
+      "tn": 20548,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 1,
+        "fp": 277,
+        "recall_all_positives": 0.043478260869565216,
+        "precision": 0.0035971223021582736,
+        "tied_at_cutoff": 1
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 10,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.31113416429585616,
+              0.6849433018162914
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0002404875770326845,
+              0.010486464148622839
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.010869565217391304
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.15789473684210525
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5469697491138108,
+            "average_precision": 0.002011488210194842,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.004807692307692308,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 207,
+            "fn": 13,
+            "tn": 20548
+          },
+          "candidate": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5469697491138108,
+            "average_precision": 0.002011488210194842,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.004807692307692308,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 207,
+            "fn": 13,
+            "tn": 20548
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6479419761159101,
+            "average_precision": 0.0010141281167996333,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 208,
+            "fn": 14,
+            "tn": 20547
+          },
+          "candidate": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5469697491138108,
+            "average_precision": 0.002011488210194842,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.004807692307692308,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 207,
+            "fn": 13,
+            "tn": 20548
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 472,
+            "positive": 0,
+            "negative": 472,
+            "unknown": 191,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 117,
+              "CURRENCY_MISMATCH": 74
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 467
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1269,
+            "positive": 2,
+            "negative": 1267,
+            "unknown": 103,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 79,
+              "CURRENCY_MISMATCH": 24
+            },
+            "roc_auc": 0.5449881610102605,
+            "average_precision": 0.00589836234808315,
+            "review_capacity": 13,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 13,
+            "fn": 2,
+            "tn": 1254
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 475,
+            "positive": 1,
+            "negative": 474,
+            "unknown": 126,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 43,
+              "NO_HISTORY": 83
+            },
+            "roc_auc": 0.14135021097046413,
+            "average_precision": 0.0024509803921568627,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 5,
+            "fn": 1,
+            "tn": 469
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 613,
+            "positive": 0,
+            "negative": 613,
+            "unknown": 180,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "CURRENCY_MISMATCH": 69
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 606
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 4575,
+            "positive": 7,
+            "negative": 4568,
+            "unknown": 1624,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 569,
+              "NO_HISTORY": 1055
+            },
+            "roc_auc": 0.6355391543657744,
+            "average_precision": 0.002723705365602389,
+            "review_capacity": 46,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 46,
+            "fn": 7,
+            "tn": 4522
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 648,
+            "positive": 0,
+            "negative": 648,
+            "unknown": 147,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 114,
+              "CURRENCY_MISMATCH": 33
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 641
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 694,
+            "positive": 0,
+            "negative": 694,
+            "unknown": 213,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 154,
+              "CURRENCY_MISMATCH": 59
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 687
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 669,
+            "positive": 2,
+            "negative": 667,
+            "unknown": 159,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 112,
+              "CURRENCY_MISMATCH": 47
+            },
+            "roc_auc": 0.6949025487256372,
+            "average_precision": 0.1691236691236691,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.14285714285714285,
+            "recall_at_capacity": 0.5,
+            "tp": 1,
+            "fp": 6,
+            "fn": 1,
+            "tn": 661
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 536,
+            "positive": 0,
+            "negative": 536,
+            "unknown": 134,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 23,
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 530
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 496,
+            "positive": 0,
+            "negative": 496,
+            "unknown": 145,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "CURRENCY_MISMATCH": 34
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 491
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 642,
+            "positive": 0,
+            "negative": 642,
+            "unknown": 194,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 148,
+              "CURRENCY_MISMATCH": 46
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 635
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 554,
+            "positive": 0,
+            "negative": 554,
+            "unknown": 181,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 115,
+              "CURRENCY_MISMATCH": 66
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 548
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 7477,
+            "positive": 1,
+            "negative": 7476,
+            "unknown": 2782,
+            "unknown_positive": 4,
+            "unknown_reasons": {
+              "NO_HISTORY": 1751,
+              "CURRENCY_MISMATCH": 1031
+            },
+            "roc_auc": 0.2691278758694489,
+            "average_precision": 0.00018298261665141812,
+            "review_capacity": 75,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 75,
+            "fn": 1,
+            "tn": 7401
+          },
+          "Yen": {
+            "total": 903,
+            "known": 615,
+            "positive": 0,
+            "negative": 615,
+            "unknown": 288,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 166,
+              "CURRENCY_MISMATCH": 122
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 608
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1034,
+            "positive": 1,
+            "negative": 1033,
+            "unknown": 522,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 226,
+              "NO_HISTORY": 296
+            },
+            "roc_auc": 0.11519845111326234,
+            "average_precision": 0.001092896174863388,
+            "review_capacity": 11,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 11,
+            "fn": 1,
+            "tn": 1022
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 5757,
+            "positive": 14,
+            "negative": 5743,
+            "unknown": 4741,
+            "unknown_positive": 9,
+            "unknown_reasons": {
+              "NO_HISTORY": 4301,
+              "CURRENCY_MISMATCH": 440
+            },
+            "roc_auc": 0.4405860550732569,
+            "average_precision": 0.003626031584219692,
+            "review_capacity": 58,
+            "precision_at_capacity": 0.017241379310344827,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 57,
+            "fn": 13,
+            "tn": 5686
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 21,
+            "positive": 0,
+            "negative": 21,
+            "unknown": 7,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 5,
+              "NO_HISTORY": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 20
+          },
+          "Cash": {
+            "total": 625,
+            "known": 558,
+            "positive": 0,
+            "negative": 558,
+            "unknown": 67,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 48,
+              "NO_HISTORY": 19
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 552
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2461,
+            "positive": 0,
+            "negative": 2461,
+            "unknown": 347,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 207,
+              "NO_HISTORY": 140
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 25,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 25,
+            "fn": 0,
+            "tn": 2436
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 11725,
+            "positive": 0,
+            "negative": 11725,
+            "unknown": 1811,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 1751,
+              "NO_HISTORY": 60
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 118,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 118,
+            "fn": 0,
+            "tn": 11607
+          },
+          "Wire": {
+            "total": 263,
+            "known": 247,
+            "positive": 0,
+            "negative": 247,
+            "unknown": 16,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 15,
+              "NO_HISTORY": 1
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 244
+          }
+        }
+      }
+    },
+    "velocity": {
+      "total": 27758,
+      "known": 27758,
+      "positive": 23,
+      "negative": 27735,
+      "unknown": 0,
+      "unknown_positive": 0,
+      "unknown_reasons": {},
+      "roc_auc": 0.6894341633942358,
+      "average_precision": 0.001482780123374663,
+      "review_capacity": 278,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 278,
+      "fn": 23,
+      "tn": 27457,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "recall_all_positives": 0.0,
+        "precision": 0.0,
+        "tied_at_cutoff": 328
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 18,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.5933873914815225,
+              0.7711779069298139
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0006676044404912045,
+              0.0025671682334444407
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5469697491138108,
+            "average_precision": 0.002011488210194842,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.004807692307692308,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 207,
+            "fn": 13,
+            "tn": 20548
+          },
+          "candidate": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6479419761159101,
+            "average_precision": 0.0010141281167996333,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 208,
+            "fn": 14,
+            "tn": 20547
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 27758,
+            "known": 27758,
+            "positive": 23,
+            "negative": 27735,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6894341633942358,
+            "average_precision": 0.001482780123374663,
+            "review_capacity": 278,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 278,
+            "fn": 23,
+            "tn": 27457
+          },
+          "candidate": {
+            "total": 27758,
+            "known": 27758,
+            "positive": 23,
+            "negative": 27735,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6894341633942358,
+            "average_precision": 0.001482780123374663,
+            "review_capacity": 278,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 278,
+            "fn": 23,
+            "tn": 27457
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 663,
+            "positive": 0,
+            "negative": 663,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 656
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1372,
+            "positive": 3,
+            "negative": 1369,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7503043584124666,
+            "average_precision": 0.0070780693229672825,
+            "review_capacity": 14,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 14,
+            "fn": 3,
+            "tn": 1355
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 601,
+            "positive": 1,
+            "negative": 600,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7808333333333334,
+            "average_precision": 0.004310344827586207,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 593
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 793,
+            "positive": 0,
+            "negative": 793,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 785
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 6199,
+            "positive": 9,
+            "negative": 6190,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.641554478549632,
+            "average_precision": 0.002193389829181283,
+            "review_capacity": 62,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 62,
+            "fn": 9,
+            "tn": 6128
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 795,
+            "positive": 0,
+            "negative": 795,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 787
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 907,
+            "positive": 0,
+            "negative": 907,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 10,
+            "fn": 0,
+            "tn": 897
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 828,
+            "positive": 2,
+            "negative": 826,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5478208232445521,
+            "average_precision": 0.002800086156497123,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 9,
+            "fn": 2,
+            "tn": 817
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 670,
+            "positive": 1,
+            "negative": 669,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.31689088191330345,
+            "average_precision": 0.0014925373134328358,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 662
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 641,
+            "positive": 1,
+            "negative": 640,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7984375,
+            "average_precision": 0.004366812227074236,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 633
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 836,
+            "positive": 0,
+            "negative": 836,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 827
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 735,
+            "positive": 0,
+            "negative": 735,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 727
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 10259,
+            "positive": 5,
+            "negative": 10254,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.8583674663545934,
+            "average_precision": 0.002346278443787266,
+            "review_capacity": 103,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 103,
+            "fn": 5,
+            "tn": 10151
+          },
+          "Yen": {
+            "total": 903,
+            "known": 903,
+            "positive": 0,
+            "negative": 903,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 10,
+            "fn": 0,
+            "tn": 893
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1556,
+            "positive": 1,
+            "negative": 1555,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7794212218649518,
+            "average_precision": 0.0017482517482517483,
+            "review_capacity": 16,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 16,
+            "fn": 1,
+            "tn": 1539
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 10498,
+            "positive": 23,
+            "negative": 10475,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7967354985991492,
+            "average_precision": 0.008645126933356931,
+            "review_capacity": 105,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 105,
+            "fn": 23,
+            "tn": 10370
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 28,
+            "positive": 0,
+            "negative": 28,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 27
+          },
+          "Cash": {
+            "total": 625,
+            "known": 625,
+            "positive": 0,
+            "negative": 625,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 618
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2808,
+            "positive": 0,
+            "negative": 2808,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 29,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 29,
+            "fn": 0,
+            "tn": 2779
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 13536,
+            "positive": 0,
+            "negative": 13536,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 136,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 136,
+            "fn": 0,
+            "tn": 13400
+          },
+          "Wire": {
+            "total": 263,
+            "known": 263,
+            "positive": 0,
+            "negative": 263,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 260
+          }
+        }
+      }
+    },
+    "median_ratio": {
+      "total": 27758,
+      "known": 13416,
+      "positive": 5,
+      "negative": 13411,
+      "unknown": 14342,
+      "unknown_positive": 18,
+      "unknown_reasons": {
+        "INSUFFICIENT_HISTORY_LT_5": 7353,
+        "NO_HISTORY": 4523,
+        "CURRENCY_MISMATCH": 2466
+      },
+      "roc_auc": 0.5781820893296548,
+      "average_precision": 0.0006052874531866659,
+      "review_capacity": 135,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 135,
+      "fn": 5,
+      "tn": 13276,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "recall_all_positives": 0.0,
+        "precision": 0.0,
+        "tied_at_cutoff": 1
+      },
+      "uncertainty": {
+        "status": "NOT_ESTIMABLE",
+        "positive_components": 1
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6717918126910745,
+            "average_precision": 0.0008308402749129943,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          },
+          "candidate": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5781820893296548,
+            "average_precision": 0.0006052874531866659,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5562821564387443,
+            "average_precision": 0.0005173030965848522,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          },
+          "candidate": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5781820893296548,
+            "average_precision": 0.0006052874531866659,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 301,
+            "positive": 0,
+            "negative": 301,
+            "unknown": 362,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 171,
+              "NO_HISTORY": 117,
+              "CURRENCY_MISMATCH": 74
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 297
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 299,
+            "positive": 0,
+            "negative": 299,
+            "unknown": 1073,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 970,
+              "NO_HISTORY": 79,
+              "CURRENCY_MISMATCH": 24
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 296
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 309,
+            "positive": 0,
+            "negative": 309,
+            "unknown": 292,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 166,
+              "CURRENCY_MISMATCH": 43,
+              "NO_HISTORY": 83
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 305
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 414,
+            "positive": 0,
+            "negative": 414,
+            "unknown": 379,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "INSUFFICIENT_HISTORY_LT_5": 199,
+              "CURRENCY_MISMATCH": 69
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 409
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 3101,
+            "positive": 5,
+            "negative": 3096,
+            "unknown": 3098,
+            "unknown_positive": 4,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 1474,
+              "CURRENCY_MISMATCH": 569,
+              "NO_HISTORY": 1055
+            },
+            "roc_auc": 0.5888242894056848,
+            "average_precision": 0.002755527003692987,
+            "review_capacity": 32,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 32,
+            "fn": 5,
+            "tn": 3064
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 440,
+            "positive": 0,
+            "negative": 440,
+            "unknown": 355,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 208,
+              "NO_HISTORY": 114,
+              "CURRENCY_MISMATCH": 33
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 435
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 512,
+            "positive": 0,
+            "negative": 512,
+            "unknown": 395,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 182,
+              "NO_HISTORY": 154,
+              "CURRENCY_MISMATCH": 59
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 506
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 438,
+            "positive": 0,
+            "negative": 438,
+            "unknown": 390,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 231,
+              "NO_HISTORY": 112,
+              "CURRENCY_MISMATCH": 47
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 433
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 372,
+            "positive": 0,
+            "negative": 372,
+            "unknown": 298,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 23,
+              "INSUFFICIENT_HISTORY_LT_5": 164,
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 368
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 330,
+            "positive": 0,
+            "negative": 330,
+            "unknown": 311,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "INSUFFICIENT_HISTORY_LT_5": 166,
+              "CURRENCY_MISMATCH": 34
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 326
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 439,
+            "positive": 0,
+            "negative": 439,
+            "unknown": 397,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 203,
+              "NO_HISTORY": 148,
+              "CURRENCY_MISMATCH": 46
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 434
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 387,
+            "positive": 0,
+            "negative": 387,
+            "unknown": 348,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 115,
+              "INSUFFICIENT_HISTORY_LT_5": 167,
+              "CURRENCY_MISMATCH": 66
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 383
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 4995,
+            "positive": 0,
+            "negative": 4995,
+            "unknown": 5264,
+            "unknown_positive": 5,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 2482,
+              "NO_HISTORY": 1751,
+              "CURRENCY_MISMATCH": 1031
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 50,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 50,
+            "fn": 0,
+            "tn": 4945
+          },
+          "Yen": {
+            "total": 903,
+            "known": 406,
+            "positive": 0,
+            "negative": 406,
+            "unknown": 497,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 209,
+              "NO_HISTORY": 166,
+              "CURRENCY_MISMATCH": 122
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 401
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 673,
+            "positive": 0,
+            "negative": 673,
+            "unknown": 883,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 226,
+              "INSUFFICIENT_HISTORY_LT_5": 361,
+              "NO_HISTORY": 296
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 666
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 860,
+            "positive": 5,
+            "negative": 855,
+            "unknown": 9638,
+            "unknown_positive": 18,
+            "unknown_reasons": {
+              "NO_HISTORY": 4301,
+              "INSUFFICIENT_HISTORY_LT_5": 4897,
+              "CURRENCY_MISMATCH": 440
+            },
+            "roc_auc": 0.5422222222222223,
+            "average_precision": 0.008086220851706957,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 9,
+            "fn": 5,
+            "tn": 846
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 15,
+            "positive": 0,
+            "negative": 15,
+            "unknown": 13,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 6,
+              "CURRENCY_MISMATCH": 5,
+              "NO_HISTORY": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 14
+          },
+          "Cash": {
+            "total": 625,
+            "known": 312,
+            "positive": 0,
+            "negative": 312,
+            "unknown": 313,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 48,
+              "INSUFFICIENT_HISTORY_LT_5": 246,
+              "NO_HISTORY": 19
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 308
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 1124,
+            "positive": 0,
+            "negative": 1124,
+            "unknown": 1684,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 207,
+              "INSUFFICIENT_HISTORY_LT_5": 1337,
+              "NO_HISTORY": 140
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 12,
+            "fn": 0,
+            "tn": 1112
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 10928,
+            "positive": 0,
+            "negative": 10928,
+            "unknown": 2608,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 797,
+              "CURRENCY_MISMATCH": 1751,
+              "NO_HISTORY": 60
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 110,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 110,
+            "fn": 0,
+            "tn": 10818
+          },
+          "Wire": {
+            "total": 263,
+            "known": 177,
+            "positive": 0,
+            "negative": 177,
+            "unknown": 86,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 15,
+              "INSUFFICIENT_HISTORY_LT_5": 70,
+              "NO_HISTORY": 1
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 2,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "tn": 175
+          }
+        }
+      }
+    },
+    "p95_ratio": {
+      "total": 27758,
+      "known": 13416,
+      "positive": 5,
+      "negative": 13411,
+      "unknown": 14342,
+      "unknown_positive": 18,
+      "unknown_reasons": {
+        "INSUFFICIENT_HISTORY_LT_5": 7353,
+        "NO_HISTORY": 4523,
+        "CURRENCY_MISMATCH": 2466
+      },
+      "roc_auc": 0.6859592871523377,
+      "average_precision": 0.0007924302642142392,
+      "review_capacity": 135,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 135,
+      "fn": 5,
+      "tn": 13276,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "recall_all_positives": 0.0,
+        "precision": 0.0,
+        "tied_at_cutoff": 1
+      },
+      "uncertainty": {
+        "status": "NOT_ESTIMABLE",
+        "positive_components": 1
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6717918126910745,
+            "average_precision": 0.0008308402749129943,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          },
+          "candidate": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6859592871523377,
+            "average_precision": 0.0007924302642142392,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5562821564387443,
+            "average_precision": 0.0005173030965848522,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          },
+          "candidate": {
+            "total": 13416,
+            "known": 13416,
+            "positive": 5,
+            "negative": 13411,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6859592871523377,
+            "average_precision": 0.0007924302642142392,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 135,
+            "fn": 5,
+            "tn": 13276
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 301,
+            "positive": 0,
+            "negative": 301,
+            "unknown": 362,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 171,
+              "NO_HISTORY": 117,
+              "CURRENCY_MISMATCH": 74
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 297
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 299,
+            "positive": 0,
+            "negative": 299,
+            "unknown": 1073,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 970,
+              "NO_HISTORY": 79,
+              "CURRENCY_MISMATCH": 24
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 296
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 309,
+            "positive": 0,
+            "negative": 309,
+            "unknown": 292,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 166,
+              "CURRENCY_MISMATCH": 43,
+              "NO_HISTORY": 83
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 305
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 414,
+            "positive": 0,
+            "negative": 414,
+            "unknown": 379,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "INSUFFICIENT_HISTORY_LT_5": 199,
+              "CURRENCY_MISMATCH": 69
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 409
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 3101,
+            "positive": 5,
+            "negative": 3096,
+            "unknown": 3098,
+            "unknown_positive": 4,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 1474,
+              "CURRENCY_MISMATCH": 569,
+              "NO_HISTORY": 1055
+            },
+            "roc_auc": 0.6947674418604651,
+            "average_precision": 0.0035872965949046314,
+            "review_capacity": 32,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 32,
+            "fn": 5,
+            "tn": 3064
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 440,
+            "positive": 0,
+            "negative": 440,
+            "unknown": 355,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 208,
+              "NO_HISTORY": 114,
+              "CURRENCY_MISMATCH": 33
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 435
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 512,
+            "positive": 0,
+            "negative": 512,
+            "unknown": 395,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 182,
+              "NO_HISTORY": 154,
+              "CURRENCY_MISMATCH": 59
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 506
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 438,
+            "positive": 0,
+            "negative": 438,
+            "unknown": 390,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 231,
+              "NO_HISTORY": 112,
+              "CURRENCY_MISMATCH": 47
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 433
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 372,
+            "positive": 0,
+            "negative": 372,
+            "unknown": 298,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 23,
+              "INSUFFICIENT_HISTORY_LT_5": 164,
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 368
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 330,
+            "positive": 0,
+            "negative": 330,
+            "unknown": 311,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 111,
+              "INSUFFICIENT_HISTORY_LT_5": 166,
+              "CURRENCY_MISMATCH": 34
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 326
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 439,
+            "positive": 0,
+            "negative": 439,
+            "unknown": 397,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 203,
+              "NO_HISTORY": 148,
+              "CURRENCY_MISMATCH": 46
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 434
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 387,
+            "positive": 0,
+            "negative": 387,
+            "unknown": 348,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 115,
+              "INSUFFICIENT_HISTORY_LT_5": 167,
+              "CURRENCY_MISMATCH": 66
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 383
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 4995,
+            "positive": 0,
+            "negative": 4995,
+            "unknown": 5264,
+            "unknown_positive": 5,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 2482,
+              "NO_HISTORY": 1751,
+              "CURRENCY_MISMATCH": 1031
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 50,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 50,
+            "fn": 0,
+            "tn": 4945
+          },
+          "Yen": {
+            "total": 903,
+            "known": 406,
+            "positive": 0,
+            "negative": 406,
+            "unknown": 497,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 209,
+              "NO_HISTORY": 166,
+              "CURRENCY_MISMATCH": 122
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 401
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 673,
+            "positive": 0,
+            "negative": 673,
+            "unknown": 883,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 226,
+              "INSUFFICIENT_HISTORY_LT_5": 361,
+              "NO_HISTORY": 296
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 666
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 860,
+            "positive": 5,
+            "negative": 855,
+            "unknown": 9638,
+            "unknown_positive": 18,
+            "unknown_reasons": {
+              "NO_HISTORY": 4301,
+              "INSUFFICIENT_HISTORY_LT_5": 4897,
+              "CURRENCY_MISMATCH": 440
+            },
+            "roc_auc": 0.5153216374269006,
+            "average_precision": 0.007227684141224957,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 9,
+            "fn": 5,
+            "tn": 846
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 15,
+            "positive": 0,
+            "negative": 15,
+            "unknown": 13,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 6,
+              "CURRENCY_MISMATCH": 5,
+              "NO_HISTORY": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 14
+          },
+          "Cash": {
+            "total": 625,
+            "known": 312,
+            "positive": 0,
+            "negative": 312,
+            "unknown": 313,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 48,
+              "INSUFFICIENT_HISTORY_LT_5": 246,
+              "NO_HISTORY": 19
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 308
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 1124,
+            "positive": 0,
+            "negative": 1124,
+            "unknown": 1684,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 207,
+              "INSUFFICIENT_HISTORY_LT_5": 1337,
+              "NO_HISTORY": 140
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 12,
+            "fn": 0,
+            "tn": 1112
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 10928,
+            "positive": 0,
+            "negative": 10928,
+            "unknown": 2608,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "INSUFFICIENT_HISTORY_LT_5": 797,
+              "CURRENCY_MISMATCH": 1751,
+              "NO_HISTORY": 60
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 110,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 110,
+            "fn": 0,
+            "tn": 10818
+          },
+          "Wire": {
+            "total": 263,
+            "known": 177,
+            "positive": 0,
+            "negative": 177,
+            "unknown": 86,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "CURRENCY_MISMATCH": 15,
+              "INSUFFICIENT_HISTORY_LT_5": 70,
+              "NO_HISTORY": 1
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 2,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 2,
+            "fn": 0,
+            "tn": 175
+          }
+        }
+      }
+    },
+    "relative_velocity": {
+      "total": 27758,
+      "known": 21130,
+      "positive": 9,
+      "negative": 21121,
+      "unknown": 6628,
+      "unknown_positive": 14,
+      "unknown_reasons": {
+        "ZERO_PRIOR_WEEK_COUNT": 6628
+      },
+      "roc_auc": 0.7453719047393589,
+      "average_precision": 0.0020562500731294677,
+      "review_capacity": 212,
+      "precision_at_capacity": 0.0047169811320754715,
+      "recall_at_capacity": 0.1111111111111111,
+      "tp": 1,
+      "fp": 211,
+      "fn": 8,
+      "tn": 20910,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 2,
+        "fp": 276,
+        "recall_all_positives": 0.08695652173913043,
+        "precision": 0.007194244604316547,
+        "tied_at_cutoff": 242
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 4,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 197,
+            "percentile_95": [
+              0.6742063492063493,
+              0.9928862264239248
+            ]
+          },
+          "average_precision": {
+            "valid": 197,
+            "percentile_95": [
+              0.0002521432173474534,
+              0.015213248574313467
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.018115942028985508
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.26666666666666666
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 18831,
+            "known": 18831,
+            "positive": 8,
+            "negative": 18823,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6835387557775062,
+            "average_precision": 0.0008808540084136964,
+            "review_capacity": 189,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 189,
+            "fn": 8,
+            "tn": 18634
+          },
+          "candidate": {
+            "total": 18831,
+            "known": 18831,
+            "positive": 8,
+            "negative": 18823,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7202026775753068,
+            "average_precision": 0.0028153345690960325,
+            "review_capacity": 189,
+            "precision_at_capacity": 0.010582010582010581,
+            "recall_at_capacity": 0.25,
+            "tp": 2,
+            "fp": 187,
+            "fn": 6,
+            "tn": 18636
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 21130,
+            "known": 21130,
+            "positive": 9,
+            "negative": 21121,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6362782696526363,
+            "average_precision": 0.0008050967809332854,
+            "review_capacity": 212,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 212,
+            "fn": 9,
+            "tn": 20909
+          },
+          "candidate": {
+            "total": 21130,
+            "known": 21130,
+            "positive": 9,
+            "negative": 21121,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.7453719047393589,
+            "average_precision": 0.0020562500731294677,
+            "review_capacity": 212,
+            "precision_at_capacity": 0.0047169811320754715,
+            "recall_at_capacity": 0.1111111111111111,
+            "tp": 1,
+            "fp": 211,
+            "fn": 8,
+            "tn": 20910
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 495,
+            "positive": 0,
+            "negative": 495,
+            "unknown": 168,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 168
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 490
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1261,
+            "positive": 2,
+            "negative": 1259,
+            "unknown": 111,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 111
+            },
+            "roc_auc": 0.9980142970611596,
+            "average_precision": 0.2857142857142857,
+            "review_capacity": 13,
+            "precision_at_capacity": 0.15384615384615385,
+            "recall_at_capacity": 1.0,
+            "tp": 2,
+            "fp": 11,
+            "fn": 0,
+            "tn": 1248
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 470,
+            "positive": 0,
+            "negative": 470,
+            "unknown": 131,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 131
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 465
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 615,
+            "positive": 0,
+            "negative": 615,
+            "unknown": 178,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 178
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 608
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 4648,
+            "positive": 6,
+            "negative": 4642,
+            "unknown": 1551,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 1551
+            },
+            "roc_auc": 0.6620170903346259,
+            "average_precision": 0.0019722171982117153,
+            "review_capacity": 47,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 47,
+            "fn": 6,
+            "tn": 4595
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 624,
+            "positive": 0,
+            "negative": 624,
+            "unknown": 171,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 171
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 617
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 701,
+            "positive": 0,
+            "negative": 701,
+            "unknown": 206,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 206
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 693
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 640,
+            "positive": 0,
+            "negative": 640,
+            "unknown": 188,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 188
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 633
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 510,
+            "positive": 0,
+            "negative": 510,
+            "unknown": 160,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 160
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 504
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 472,
+            "positive": 0,
+            "negative": 472,
+            "unknown": 169,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 169
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 467
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 631,
+            "positive": 0,
+            "negative": 631,
+            "unknown": 205,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 205
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 624
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 560,
+            "positive": 0,
+            "negative": 560,
+            "unknown": 175,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 175
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 554
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 7726,
+            "positive": 1,
+            "negative": 7725,
+            "unknown": 2533,
+            "unknown_positive": 4,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 2533
+            },
+            "roc_auc": 0.8840129449838188,
+            "average_precision": 0.0006108735491753207,
+            "review_capacity": 78,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 78,
+            "fn": 1,
+            "tn": 7647
+          },
+          "Yen": {
+            "total": 903,
+            "known": 658,
+            "positive": 0,
+            "negative": 658,
+            "unknown": 245,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 245
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 651
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1119,
+            "positive": 0,
+            "negative": 1119,
+            "unknown": 437,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 437
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 12,
+            "fn": 0,
+            "tn": 1107
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 4194,
+            "positive": 9,
+            "negative": 4185,
+            "unknown": 6304,
+            "unknown_positive": 14,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 6304
+            },
+            "roc_auc": 0.4574405947165804,
+            "average_precision": 0.0030790639922865515,
+            "review_capacity": 42,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 42,
+            "fn": 9,
+            "tn": 4143
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 25,
+            "positive": 0,
+            "negative": 25,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 24
+          },
+          "Cash": {
+            "total": 625,
+            "known": 599,
+            "positive": 0,
+            "negative": 599,
+            "unknown": 26,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 26
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 593
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2601,
+            "positive": 0,
+            "negative": 2601,
+            "unknown": 207,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 207
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 27,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 27,
+            "fn": 0,
+            "tn": 2574
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 13449,
+            "positive": 0,
+            "negative": 13449,
+            "unknown": 87,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 87
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 135,
+            "fn": 0,
+            "tn": 13314
+          },
+          "Wire": {
+            "total": 263,
+            "known": 262,
+            "positive": 0,
+            "negative": 262,
+            "unknown": 1,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "ZERO_PRIOR_WEEK_COUNT": 1
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 259
+          }
+        }
+      }
+    },
+    "counterparty_novelty": {
+      "total": 27758,
+      "known": 23235,
+      "positive": 15,
+      "negative": 23220,
+      "unknown": 4523,
+      "unknown_positive": 8,
+      "unknown_reasons": {
+        "NO_HISTORY": 4523
+      },
+      "roc_auc": 0.6888888888888889,
+      "average_precision": 0.00110711066844924,
+      "review_capacity": 233,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 233,
+      "fn": 15,
+      "tn": 22987,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "recall_all_positives": 0.0,
+        "precision": 0.0,
+        "tied_at_cutoff": 9816
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 10,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.5416703066305583,
+              0.7878923575571477
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.0002709417130545049,
+              0.0021511587055151153
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5469697491138108,
+            "average_precision": 0.002011488210194842,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.004807692307692308,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 207,
+            "fn": 13,
+            "tn": 20548
+          },
+          "candidate": {
+            "total": 20769,
+            "known": 20769,
+            "positive": 14,
+            "negative": 20755,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6846181642977596,
+            "average_precision": 0.0011430430618623792,
+            "review_capacity": 208,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 208,
+            "fn": 14,
+            "tn": 20547
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 23235,
+            "known": 23235,
+            "positive": 15,
+            "negative": 23220,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6558742463393626,
+            "average_precision": 0.001039436789316011,
+            "review_capacity": 233,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 233,
+            "fn": 15,
+            "tn": 22987
+          },
+          "candidate": {
+            "total": 23235,
+            "known": 23235,
+            "positive": 15,
+            "negative": 23220,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6888888888888889,
+            "average_precision": 0.00110711066844924,
+            "review_capacity": 233,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 233,
+            "fn": 15,
+            "tn": 22987
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 546,
+            "positive": 0,
+            "negative": 546,
+            "unknown": 117,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 117
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 540
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1293,
+            "positive": 2,
+            "negative": 1291,
+            "unknown": 79,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 79
+            },
+            "roc_auc": 0.9244771494965144,
+            "average_precision": 0.01015228426395939,
+            "review_capacity": 13,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 13,
+            "fn": 2,
+            "tn": 1278
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 518,
+            "positive": 1,
+            "negative": 517,
+            "unknown": 83,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 83
+            },
+            "roc_auc": 0.8007736943907157,
+            "average_precision": 0.004830917874396135,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 6,
+            "fn": 1,
+            "tn": 511
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 682,
+            "positive": 0,
+            "negative": 682,
+            "unknown": 111,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 675
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 5144,
+            "positive": 7,
+            "negative": 5137,
+            "unknown": 1055,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "NO_HISTORY": 1055
+            },
+            "roc_auc": 0.6363914458132873,
+            "average_precision": 0.001960042510961782,
+            "review_capacity": 52,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 52,
+            "fn": 7,
+            "tn": 5085
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 681,
+            "positive": 0,
+            "negative": 681,
+            "unknown": 114,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 114
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 674
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 753,
+            "positive": 0,
+            "negative": 753,
+            "unknown": 154,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 154
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 745
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 716,
+            "positive": 2,
+            "negative": 714,
+            "unknown": 112,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 112
+            },
+            "roc_auc": 0.5357142857142857,
+            "average_precision": 0.003025312539806744,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 8,
+            "fn": 2,
+            "tn": 706
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 559,
+            "positive": 0,
+            "negative": 559,
+            "unknown": 111,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 553
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 530,
+            "positive": 0,
+            "negative": 530,
+            "unknown": 111,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_HISTORY": 111
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 6,
+            "fn": 0,
+            "tn": 524
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 688,
+            "positive": 0,
+            "negative": 688,
+            "unknown": 148,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 148
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 681
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 620,
+            "positive": 0,
+            "negative": 620,
+            "unknown": 115,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 115
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 613
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 8508,
+            "positive": 2,
+            "negative": 8506,
+            "unknown": 1751,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "NO_HISTORY": 1751
+            },
+            "roc_auc": 0.780507876792852,
+            "average_precision": 0.0005353319057815846,
+            "review_capacity": 86,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 86,
+            "fn": 2,
+            "tn": 8420
+          },
+          "Yen": {
+            "total": 903,
+            "known": 737,
+            "positive": 0,
+            "negative": 737,
+            "unknown": 166,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 166
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 729
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1260,
+            "positive": 1,
+            "negative": 1259,
+            "unknown": 296,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 296
+            },
+            "roc_auc": 0.7799841143764893,
+            "average_precision": 0.0018018018018018018,
+            "review_capacity": 13,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 13,
+            "fn": 1,
+            "tn": 1246
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 6197,
+            "positive": 15,
+            "negative": 6182,
+            "unknown": 4301,
+            "unknown_positive": 8,
+            "unknown_reasons": {
+              "NO_HISTORY": 4301
+            },
+            "roc_auc": 0.5862665803946943,
+            "average_precision": 0.002951337286216414,
+            "review_capacity": 62,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 62,
+            "fn": 15,
+            "tn": 6120
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Cash": {
+            "total": 625,
+            "known": 606,
+            "positive": 0,
+            "negative": 606,
+            "unknown": 19,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 19
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 599
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2668,
+            "positive": 0,
+            "negative": 2668,
+            "unknown": 140,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 140
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 27,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 27,
+            "fn": 0,
+            "tn": 2641
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 13476,
+            "positive": 0,
+            "negative": 13476,
+            "unknown": 60,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 60
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 135,
+            "fn": 0,
+            "tn": 13341
+          },
+          "Wire": {
+            "total": 263,
+            "known": 262,
+            "positive": 0,
+            "negative": 262,
+            "unknown": 1,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_HISTORY": 1
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 259
+          }
+        }
+      }
+    },
+    "incoming_recency": {
+      "total": 27758,
+      "known": 1185,
+      "positive": 5,
+      "negative": 1180,
+      "unknown": 26573,
+      "unknown_positive": 18,
+      "unknown_reasons": {
+        "NO_PRIOR_24H_INCOMING": 26120,
+        "TARGET_SELF_TRANSFER": 453
+      },
+      "roc_auc": 0.4540677966101695,
+      "average_precision": 0.004609345001536991,
+      "review_capacity": 12,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 12,
+      "fn": 5,
+      "tn": 1168,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 1,
+        "fp": 277,
+        "recall_all_positives": 0.043478260869565216,
+        "precision": 0.0035971223021582736,
+        "tied_at_cutoff": 2
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 2,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 177,
+            "percentile_95": [
+              0.23740392826643894,
+              0.5220078057241977
+            ]
+          },
+          "average_precision": {
+            "valid": 177,
+            "percentile_95": [
+              0.0010799136069114472,
+              0.013168621457392097
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.010752688172043012
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0967741935483871
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 922,
+            "known": 922,
+            "positive": 4,
+            "negative": 918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.4670479302832244,
+            "average_precision": 0.005785896253021173,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 10,
+            "fn": 4,
+            "tn": 908
+          },
+          "candidate": {
+            "total": 922,
+            "known": 922,
+            "positive": 4,
+            "negative": 918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.4812091503267974,
+            "average_precision": 0.0053562215250422245,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 10,
+            "fn": 4,
+            "tn": 908
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 1185,
+            "known": 1185,
+            "positive": 5,
+            "negative": 1180,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.8180508474576271,
+            "average_precision": 0.01227164813195052,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 12,
+            "fn": 5,
+            "tn": 1168
+          },
+          "candidate": {
+            "total": 1185,
+            "known": 1185,
+            "positive": 5,
+            "negative": 1180,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.4540677966101695,
+            "average_precision": 0.004609345001536991,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 12,
+            "fn": 5,
+            "tn": 1168
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 637,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 635,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 46,
+            "positive": 0,
+            "negative": 46,
+            "unknown": 1326,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 1323,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 45
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 33,
+            "positive": 0,
+            "negative": 33,
+            "unknown": 568,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 565,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 32
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 36,
+            "positive": 0,
+            "negative": 36,
+            "unknown": 757,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 748,
+              "TARGET_SELF_TRANSFER": 9
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 35
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 259,
+            "positive": 4,
+            "negative": 255,
+            "unknown": 5940,
+            "unknown_positive": 5,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 137,
+              "NO_PRIOR_24H_INCOMING": 5803
+            },
+            "roc_auc": 0.48627450980392156,
+            "average_precision": 0.01931303657484409,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 3,
+            "fn": 4,
+            "tn": 252
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 38,
+            "positive": 0,
+            "negative": 38,
+            "unknown": 757,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 752,
+              "TARGET_SELF_TRANSFER": 5
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 37
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 52,
+            "positive": 0,
+            "negative": 52,
+            "unknown": 855,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 841,
+              "TARGET_SELF_TRANSFER": 14
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 51
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 22,
+            "positive": 0,
+            "negative": 22,
+            "unknown": 806,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 790,
+              "TARGET_SELF_TRANSFER": 16
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 21
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 644,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 640,
+              "TARGET_SELF_TRANSFER": 4
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 14,
+            "positive": 0,
+            "negative": 14,
+            "unknown": 627,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 624,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 13
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 32,
+            "positive": 0,
+            "negative": 32,
+            "unknown": 804,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 798,
+              "TARGET_SELF_TRANSFER": 6
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 31
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 32,
+            "positive": 0,
+            "negative": 32,
+            "unknown": 703,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 690,
+              "TARGET_SELF_TRANSFER": 13
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 31
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 471,
+            "positive": 1,
+            "negative": 470,
+            "unknown": 9788,
+            "unknown_positive": 4,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 9614,
+              "TARGET_SELF_TRANSFER": 174
+            },
+            "roc_auc": 0.33617021276595743,
+            "average_precision": 0.003194888178913738,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 5,
+            "fn": 1,
+            "tn": 465
+          },
+          "Yen": {
+            "total": 903,
+            "known": 45,
+            "positive": 0,
+            "negative": 45,
+            "unknown": 858,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 841,
+              "TARGET_SELF_TRANSFER": 17
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 44
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 53,
+            "positive": 0,
+            "negative": 53,
+            "unknown": 1503,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 1456,
+              "TARGET_SELF_TRANSFER": 47
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 52
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 505,
+            "positive": 5,
+            "negative": 500,
+            "unknown": 9993,
+            "unknown_positive": 18,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 9724,
+              "TARGET_SELF_TRANSFER": 269
+            },
+            "roc_auc": 0.4848,
+            "average_precision": 0.011546452219619883,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 6,
+            "fn": 5,
+            "tn": 494
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 7,
+            "positive": 0,
+            "negative": 7,
+            "unknown": 21,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 19,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 6
+          },
+          "Cash": {
+            "total": 625,
+            "known": 82,
+            "positive": 0,
+            "negative": 82,
+            "unknown": 543,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 536,
+              "TARGET_SELF_TRANSFER": 7
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 81
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 319,
+            "positive": 0,
+            "negative": 319,
+            "unknown": 2489,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 2448,
+              "TARGET_SELF_TRANSFER": 41
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 315
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 235,
+            "positive": 0,
+            "negative": 235,
+            "unknown": 13301,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 13169,
+              "TARGET_SELF_TRANSFER": 132
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 232
+          },
+          "Wire": {
+            "total": 263,
+            "known": 37,
+            "positive": 0,
+            "negative": 37,
+            "unknown": 226,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_PRIOR_24H_INCOMING": 224,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 36
+          }
+        }
+      }
+    },
+    "inflow_amount_match": {
+      "total": 27758,
+      "known": 1117,
+      "positive": 4,
+      "negative": 1113,
+      "unknown": 26641,
+      "unknown_positive": 19,
+      "unknown_reasons": {
+        "NO_POSITIVE_SAME_CURRENCY_INFLOW": 26188,
+        "TARGET_SELF_TRANSFER": 453
+      },
+      "roc_auc": 0.5397574123989218,
+      "average_precision": 0.004725699819899774,
+      "review_capacity": 12,
+      "precision_at_capacity": 0.0,
+      "recall_at_capacity": 0.0,
+      "tp": 0,
+      "fp": 12,
+      "fn": 4,
+      "tn": 1101,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 0,
+        "fp": 278,
+        "recall_all_positives": 0.0,
+        "precision": 0.0,
+        "tied_at_cutoff": 1
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 2,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 177,
+            "percentile_95": [
+              0.2523629489603025,
+              0.6490047659097281
+            ]
+          },
+          "average_precision": {
+            "valid": 177,
+            "percentile_95": [
+              0.001176470588235294,
+              0.013354139785934301
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 922,
+            "known": 922,
+            "positive": 4,
+            "negative": 918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.4670479302832244,
+            "average_precision": 0.005785896253021173,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 10,
+            "fn": 4,
+            "tn": 908
+          },
+          "candidate": {
+            "total": 922,
+            "known": 922,
+            "positive": 4,
+            "negative": 918,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5495642701525054,
+            "average_precision": 0.0058659541243815585,
+            "review_capacity": 10,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 10,
+            "fn": 4,
+            "tn": 908
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 1117,
+            "known": 1117,
+            "positive": 4,
+            "negative": 1113,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.793351302785265,
+            "average_precision": 0.009083215073435123,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 12,
+            "fn": 4,
+            "tn": 1101
+          },
+          "candidate": {
+            "total": 1117,
+            "known": 1117,
+            "positive": 4,
+            "negative": 1113,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5397574123989218,
+            "average_precision": 0.004725699819899774,
+            "review_capacity": 12,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 12,
+            "fn": 4,
+            "tn": 1101
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 637,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 635,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 45,
+            "positive": 0,
+            "negative": 45,
+            "unknown": 1327,
+            "unknown_positive": 3,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 1324,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 44
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 33,
+            "positive": 0,
+            "negative": 33,
+            "unknown": 568,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 565,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 32
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 36,
+            "positive": 0,
+            "negative": 36,
+            "unknown": 757,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 748,
+              "TARGET_SELF_TRANSFER": 9
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 35
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 245,
+            "positive": 4,
+            "negative": 241,
+            "unknown": 5954,
+            "unknown_positive": 5,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 137,
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 5817
+            },
+            "roc_auc": 0.5020746887966805,
+            "average_precision": 0.019642354903925456,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 3,
+            "fn": 4,
+            "tn": 238
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 34,
+            "positive": 0,
+            "negative": 34,
+            "unknown": 761,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 756,
+              "TARGET_SELF_TRANSFER": 5
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 33
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 51,
+            "positive": 0,
+            "negative": 51,
+            "unknown": 856,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 842,
+              "TARGET_SELF_TRANSFER": 14
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 50
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 22,
+            "positive": 0,
+            "negative": 22,
+            "unknown": 806,
+            "unknown_positive": 2,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 790,
+              "TARGET_SELF_TRANSFER": 16
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 21
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 644,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 640,
+              "TARGET_SELF_TRANSFER": 4
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 14,
+            "positive": 0,
+            "negative": 14,
+            "unknown": 627,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 624,
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 13
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 30,
+            "positive": 0,
+            "negative": 30,
+            "unknown": 806,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 800,
+              "TARGET_SELF_TRANSFER": 6
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 29
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 31,
+            "positive": 0,
+            "negative": 31,
+            "unknown": 704,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 691,
+              "TARGET_SELF_TRANSFER": 13
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 30
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 438,
+            "positive": 0,
+            "negative": 438,
+            "unknown": 9821,
+            "unknown_positive": 5,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 9647,
+              "TARGET_SELF_TRANSFER": 174
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 5,
+            "fn": 0,
+            "tn": 433
+          },
+          "Yen": {
+            "total": 903,
+            "known": 39,
+            "positive": 0,
+            "negative": 39,
+            "unknown": 864,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 847,
+              "TARGET_SELF_TRANSFER": 17
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 38
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 47,
+            "positive": 0,
+            "negative": 47,
+            "unknown": 1509,
+            "unknown_positive": 1,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 1462,
+              "TARGET_SELF_TRANSFER": 47
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 46
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 446,
+            "positive": 4,
+            "negative": 442,
+            "unknown": 10052,
+            "unknown_positive": 19,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 9783,
+              "TARGET_SELF_TRANSFER": 269
+            },
+            "roc_auc": 0.5673076923076923,
+            "average_precision": 0.012593083387201033,
+            "review_capacity": 5,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 5,
+            "fn": 4,
+            "tn": 437
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 6,
+            "positive": 0,
+            "negative": 6,
+            "unknown": 22,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 20,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 5
+          },
+          "Cash": {
+            "total": 625,
+            "known": 80,
+            "positive": 0,
+            "negative": 80,
+            "unknown": 545,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 538,
+              "TARGET_SELF_TRANSFER": 7
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 79
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 314,
+            "positive": 0,
+            "negative": 314,
+            "unknown": 2494,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 2453,
+              "TARGET_SELF_TRANSFER": 41
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 4,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 4,
+            "fn": 0,
+            "tn": 310
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 234,
+            "positive": 0,
+            "negative": 234,
+            "unknown": 13302,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 13170,
+              "TARGET_SELF_TRANSFER": 132
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 231
+          },
+          "Wire": {
+            "total": 263,
+            "known": 37,
+            "positive": 0,
+            "negative": 37,
+            "unknown": 226,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "NO_POSITIVE_SAME_CURRENCY_INFLOW": 224,
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 36
+          }
+        }
+      }
+    },
+    "reciprocal_24h": {
+      "total": 27758,
+      "known": 27305,
+      "positive": 23,
+      "negative": 27282,
+      "unknown": 453,
+      "unknown_positive": 0,
+      "unknown_reasons": {
+        "TARGET_SELF_TRANSFER": 453
+      },
+      "roc_auc": 0.5413339899216875,
+      "average_precision": 0.0022305440571489853,
+      "review_capacity": 274,
+      "precision_at_capacity": 0.0072992700729927005,
+      "recall_at_capacity": 0.08695652173913043,
+      "tp": 2,
+      "fp": 272,
+      "fn": 21,
+      "tn": 27010,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 2,
+        "fp": 276,
+        "recall_all_positives": 0.08695652173913043,
+        "precision": 0.007194244604316547,
+        "tied_at_cutoff": 27186
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 18,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.49764846403643015,
+              0.5900041699013571
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.00047327799621377605,
+              0.007428776244590026
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.017985611510791366
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.18518518518518517
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 20537,
+            "known": 20537,
+            "positive": 14,
+            "negative": 20523,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.54775130341568,
+            "average_precision": 0.0021823940252771764,
+            "review_capacity": 206,
+            "precision_at_capacity": 0.0048543689320388345,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 205,
+            "fn": 13,
+            "tn": 20318
+          },
+          "candidate": {
+            "total": 20537,
+            "known": 20537,
+            "positive": 14,
+            "negative": 20523,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5695039015460006,
+            "average_precision": 0.0041116481037923635,
+            "review_capacity": 206,
+            "precision_at_capacity": 0.009708737864077669,
+            "recall_at_capacity": 0.14285714285714285,
+            "tp": 2,
+            "fp": 204,
+            "fn": 12,
+            "tn": 20319
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 27305,
+            "known": 27305,
+            "positive": 23,
+            "negative": 27282,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.696078478244933,
+            "average_precision": 0.0015718090390769723,
+            "review_capacity": 274,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 274,
+            "fn": 23,
+            "tn": 27008
+          },
+          "candidate": {
+            "total": 27305,
+            "known": 27305,
+            "positive": 23,
+            "negative": 27282,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5413339899216875,
+            "average_precision": 0.0022305440571489853,
+            "review_capacity": 274,
+            "precision_at_capacity": 0.0072992700729927005,
+            "recall_at_capacity": 0.08695652173913043,
+            "tp": 2,
+            "fp": 272,
+            "fn": 21,
+            "tn": 27010
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 661,
+            "positive": 0,
+            "negative": 661,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 654
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1369,
+            "positive": 3,
+            "negative": 1366,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.4978038067349927,
+            "average_precision": 0.002191380569758948,
+            "review_capacity": 14,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 14,
+            "fn": 3,
+            "tn": 1352
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 598,
+            "positive": 1,
+            "negative": 597,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.49413735343383586,
+            "average_precision": 0.0016722408026755853,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 6,
+            "fn": 1,
+            "tn": 591
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 784,
+            "positive": 0,
+            "negative": 784,
+            "unknown": 9,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 9
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 776
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 6062,
+            "positive": 9,
+            "negative": 6053,
+            "unknown": 137,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 137
+            },
+            "roc_auc": 0.6089634157534373,
+            "average_precision": 0.017027750284101324,
+            "review_capacity": 61,
+            "precision_at_capacity": 0.03278688524590164,
+            "recall_at_capacity": 0.2222222222222222,
+            "tp": 2,
+            "fp": 59,
+            "fn": 7,
+            "tn": 5994
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 790,
+            "positive": 0,
+            "negative": 790,
+            "unknown": 5,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 5
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 782
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 893,
+            "positive": 0,
+            "negative": 893,
+            "unknown": 14,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 14
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 884
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 812,
+            "positive": 2,
+            "negative": 810,
+            "unknown": 16,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 16
+            },
+            "roc_auc": 0.49876543209876545,
+            "average_precision": 0.0024630541871921183,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 9,
+            "fn": 2,
+            "tn": 801
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 666,
+            "positive": 1,
+            "negative": 665,
+            "unknown": 4,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 4
+            },
+            "roc_auc": 0.49624060150375937,
+            "average_precision": 0.0015015015015015015,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 658
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 638,
+            "positive": 1,
+            "negative": 637,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.5,
+            "average_precision": 0.001567398119122257,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 630
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 830,
+            "positive": 0,
+            "negative": 830,
+            "unknown": 6,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 6
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 821
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 722,
+            "positive": 0,
+            "negative": 722,
+            "unknown": 13,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 13
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 714
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 10085,
+            "positive": 5,
+            "negative": 10080,
+            "unknown": 174,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 174
+            },
+            "roc_auc": 0.49811507936507937,
+            "average_precision": 0.0004957858205255329,
+            "review_capacity": 101,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 101,
+            "fn": 5,
+            "tn": 9979
+          },
+          "Yen": {
+            "total": 903,
+            "known": 886,
+            "positive": 0,
+            "negative": 886,
+            "unknown": 17,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 17
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 877
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1509,
+            "positive": 1,
+            "negative": 1508,
+            "unknown": 47,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 47
+            },
+            "roc_auc": 0.4990053050397878,
+            "average_precision": 0.0006626905235255136,
+            "review_capacity": 16,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 16,
+            "fn": 1,
+            "tn": 1492
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 10229,
+            "positive": 23,
+            "negative": 10206,
+            "unknown": 269,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 269
+            },
+            "roc_auc": 0.5377953292607077,
+            "average_precision": 0.0035268259582171084,
+            "review_capacity": 103,
+            "precision_at_capacity": 0.009708737864077669,
+            "recall_at_capacity": 0.043478260869565216,
+            "tp": 1,
+            "fp": 102,
+            "fn": 22,
+            "tn": 10104
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Cash": {
+            "total": 625,
+            "known": 618,
+            "positive": 0,
+            "negative": 618,
+            "unknown": 7,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 7
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 611
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2767,
+            "positive": 0,
+            "negative": 2767,
+            "unknown": 41,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 41
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 28,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 28,
+            "fn": 0,
+            "tn": 2739
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 13404,
+            "positive": 0,
+            "negative": 13404,
+            "unknown": 132,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 132
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 135,
+            "fn": 0,
+            "tn": 13269
+          },
+          "Wire": {
+            "total": 263,
+            "known": 261,
+            "positive": 0,
+            "negative": 261,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 258
+          }
+        }
+      }
+    },
+    "fan_in_24h": {
+      "total": 27758,
+      "known": 27305,
+      "positive": 23,
+      "negative": 27282,
+      "unknown": 453,
+      "unknown_positive": 0,
+      "unknown_reasons": {
+        "TARGET_SELF_TRANSFER": 453
+      },
+      "roc_auc": 0.5882816509053589,
+      "average_precision": 0.002361319665406958,
+      "review_capacity": 274,
+      "precision_at_capacity": 0.0072992700729927005,
+      "recall_at_capacity": 0.08695652173913043,
+      "tp": 2,
+      "fp": 272,
+      "fn": 21,
+      "tn": 27010,
+      "fixed_budget": {
+        "budget": 278,
+        "reviewed": 278,
+        "tp": 2,
+        "fp": 276,
+        "recall_all_positives": 0.08695652173913043,
+        "precision": 0.007194244604316547,
+        "tied_at_cutoff": 1034
+      },
+      "uncertainty": {
+        "status": "CONDITIONAL_OBSERVED_COMPONENT_BOOTSTRAP",
+        "positive_components": 18,
+        "components": 11333,
+        "intervals": {
+          "roc_auc": {
+            "valid": 200,
+            "percentile_95": [
+              0.47773166845751974,
+              0.6806916952742678
+            ]
+          },
+          "average_precision": {
+            "valid": 200,
+            "percentile_95": [
+              0.00040627116241619235,
+              0.00935017497378345
+            ]
+          },
+          "precision_fixed_budget": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.021505376344086023
+            ]
+          },
+          "recall_all_positives": {
+            "valid": 200,
+            "percentile_95": [
+              0.0,
+              0.1935483870967742
+            ]
+          }
+        }
+      },
+      "matched_baselines": {
+        "amount": {
+          "baseline": {
+            "total": 20537,
+            "known": 20537,
+            "positive": 14,
+            "negative": 20523,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.54775130341568,
+            "average_precision": 0.0021823940252771764,
+            "review_capacity": 206,
+            "precision_at_capacity": 0.0048543689320388345,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 205,
+            "fn": 13,
+            "tn": 20318
+          },
+          "candidate": {
+            "total": 20537,
+            "known": 20537,
+            "positive": 14,
+            "negative": 20523,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.6212193984449502,
+            "average_precision": 0.002021908939718369,
+            "review_capacity": 206,
+            "precision_at_capacity": 0.0048543689320388345,
+            "recall_at_capacity": 0.07142857142857142,
+            "tp": 1,
+            "fp": 205,
+            "fn": 13,
+            "tn": 20318
+          }
+        },
+        "velocity": {
+          "baseline": {
+            "total": 27305,
+            "known": 27305,
+            "positive": 23,
+            "negative": 27282,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.696078478244933,
+            "average_precision": 0.0015718090390769723,
+            "review_capacity": 274,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 274,
+            "fn": 23,
+            "tn": 27008
+          },
+          "candidate": {
+            "total": 27305,
+            "known": 27305,
+            "positive": 23,
+            "negative": 27282,
+            "unknown": 0,
+            "unknown_positive": 0,
+            "unknown_reasons": {},
+            "roc_auc": 0.5882816509053589,
+            "average_precision": 0.002361319665406958,
+            "review_capacity": 274,
+            "precision_at_capacity": 0.0072992700729927005,
+            "recall_at_capacity": 0.08695652173913043,
+            "tp": 2,
+            "fp": 272,
+            "fn": 21,
+            "tn": 27010
+          }
+        }
+      },
+      "subgroups": {
+        "currency": {
+          "Australian Dollar": {
+            "total": 663,
+            "known": 661,
+            "positive": 0,
+            "negative": 661,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 654
+          },
+          "Bitcoin": {
+            "total": 1372,
+            "known": 1369,
+            "positive": 3,
+            "negative": 1366,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.48316251830161056,
+            "average_precision": 0.002191380569758948,
+            "review_capacity": 14,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 14,
+            "fn": 3,
+            "tn": 1352
+          },
+          "Brazil Real": {
+            "total": 601,
+            "known": 598,
+            "positive": 1,
+            "negative": 597,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.4723618090452261,
+            "average_precision": 0.0016722408026755853,
+            "review_capacity": 6,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 6,
+            "fn": 1,
+            "tn": 591
+          },
+          "Canadian Dollar": {
+            "total": 793,
+            "known": 784,
+            "positive": 0,
+            "negative": 784,
+            "unknown": 9,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 9
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 776
+          },
+          "Euro": {
+            "total": 6199,
+            "known": 6062,
+            "positive": 9,
+            "negative": 6053,
+            "unknown": 137,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 137
+            },
+            "roc_auc": 0.7026818657415056,
+            "average_precision": 0.011528370997193168,
+            "review_capacity": 61,
+            "precision_at_capacity": 0.01639344262295082,
+            "recall_at_capacity": 0.1111111111111111,
+            "tp": 1,
+            "fp": 60,
+            "fn": 8,
+            "tn": 5993
+          },
+          "Mexican Peso": {
+            "total": 795,
+            "known": 790,
+            "positive": 0,
+            "negative": 790,
+            "unknown": 5,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 5
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 782
+          },
+          "Ruble": {
+            "total": 907,
+            "known": 893,
+            "positive": 0,
+            "negative": 893,
+            "unknown": 14,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 14
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 884
+          },
+          "Rupee": {
+            "total": 828,
+            "known": 812,
+            "positive": 2,
+            "negative": 810,
+            "unknown": 16,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 16
+            },
+            "roc_auc": 0.48641975308641977,
+            "average_precision": 0.0024630541871921183,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 9,
+            "fn": 2,
+            "tn": 801
+          },
+          "Saudi Riyal": {
+            "total": 670,
+            "known": 666,
+            "positive": 1,
+            "negative": 665,
+            "unknown": 4,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 4
+            },
+            "roc_auc": 0.48045112781954885,
+            "average_precision": 0.0015015015015015015,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 658
+          },
+          "Shekel": {
+            "total": 641,
+            "known": 638,
+            "positive": 1,
+            "negative": 637,
+            "unknown": 3,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 3
+            },
+            "roc_auc": 0.489010989010989,
+            "average_precision": 0.001567398119122257,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 7,
+            "fn": 1,
+            "tn": 630
+          },
+          "Swiss Franc": {
+            "total": 836,
+            "known": 830,
+            "positive": 0,
+            "negative": 830,
+            "unknown": 6,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 6
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 821
+          },
+          "UK Pound": {
+            "total": 735,
+            "known": 722,
+            "positive": 0,
+            "negative": 722,
+            "unknown": 13,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 13
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 8,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 8,
+            "fn": 0,
+            "tn": 714
+          },
+          "US Dollar": {
+            "total": 10259,
+            "known": 10085,
+            "positive": 5,
+            "negative": 10080,
+            "unknown": 174,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 174
+            },
+            "roc_auc": 0.5806150793650794,
+            "average_precision": 0.00367531718101059,
+            "review_capacity": 101,
+            "precision_at_capacity": 0.009900990099009901,
+            "recall_at_capacity": 0.2,
+            "tp": 1,
+            "fp": 100,
+            "fn": 4,
+            "tn": 9980
+          },
+          "Yen": {
+            "total": 903,
+            "known": 886,
+            "positive": 0,
+            "negative": 886,
+            "unknown": 17,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 17
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 9,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 9,
+            "fn": 0,
+            "tn": 877
+          },
+          "Yuan": {
+            "total": 1556,
+            "known": 1509,
+            "positive": 1,
+            "negative": 1508,
+            "unknown": 47,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 47
+            },
+            "roc_auc": 0.4824270557029178,
+            "average_precision": 0.0006626905235255136,
+            "review_capacity": 16,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": 0.0,
+            "tp": 0,
+            "fp": 16,
+            "fn": 1,
+            "tn": 1492
+          }
+        },
+        "format": {
+          "ACH": {
+            "total": 10498,
+            "known": 10229,
+            "positive": 23,
+            "negative": 10206,
+            "unknown": 269,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 269
+            },
+            "roc_auc": 0.5852354539955185,
+            "average_precision": 0.005027420881903804,
+            "review_capacity": 103,
+            "precision_at_capacity": 0.019417475728155338,
+            "recall_at_capacity": 0.08695652173913043,
+            "tp": 2,
+            "fp": 101,
+            "fn": 21,
+            "tn": 10105
+          },
+          "Bitcoin": {
+            "total": 28,
+            "known": 26,
+            "positive": 0,
+            "negative": 26,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 1,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 1,
+            "fn": 0,
+            "tn": 25
+          },
+          "Cash": {
+            "total": 625,
+            "known": 618,
+            "positive": 0,
+            "negative": 618,
+            "unknown": 7,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 7
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 7,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 7,
+            "fn": 0,
+            "tn": 611
+          },
+          "Cheque": {
+            "total": 2808,
+            "known": 2767,
+            "positive": 0,
+            "negative": 2767,
+            "unknown": 41,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 41
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 28,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 28,
+            "fn": 0,
+            "tn": 2739
+          },
+          "Credit Card": {
+            "total": 13536,
+            "known": 13404,
+            "positive": 0,
+            "negative": 13404,
+            "unknown": 132,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 132
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 135,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 135,
+            "fn": 0,
+            "tn": 13269
+          },
+          "Wire": {
+            "total": 263,
+            "known": 261,
+            "positive": 0,
+            "negative": 261,
+            "unknown": 2,
+            "unknown_positive": 0,
+            "unknown_reasons": {
+              "TARGET_SELF_TRANSFER": 2
+            },
+            "roc_auc": null,
+            "average_precision": null,
+            "review_capacity": 3,
+            "precision_at_capacity": 0.0,
+            "recall_at_capacity": null,
+            "tp": 0,
+            "fp": 3,
+            "fn": 0,
+            "tn": 258
+          }
+        }
+      }
+    }
+  },
+  "evaluation_seconds": 35.159358666001935,
+  "peak_rss_bytes": 295714816,
+  "limitations": "Account adaptations; partial graph; synthetic labels; 90d history left-censored; no composite or fitted threshold."
+}

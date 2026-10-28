@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "method": "Direct AutoModelForSequenceClassification raw logits versus cached CrossEncoder scores; CPU float32, same pinned snapshot, two pairs, tolerance 1e-4",
+  "query_id": "dev-record_updates-1",
+  "checks": [
+    {
+      "chunk_id": "bis-core-2024:pdf-page-35:chunk-1",
+      "cached": 4.1325602531433105,
+      "direct": 4.132551670074463,
+      "absolute_difference": 8.58306884765625e-06
+    },
+    {
+      "chunk_id": "bis-aml-2020:pdf-page-15:chunk-3",
+      "cached": 0.4086454212665558,
+      "direct": 0.4086453914642334,
+      "absolute_difference": 2.9802322387695312e-08
+    }
+  ]
+}
