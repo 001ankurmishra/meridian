@@ -12,7 +12,7 @@ from typing import Any, Final
 
 import httpx
 
-from meridian.copilot.budget import INPUT_LIMIT, OUTPUT_LIMIT, BudgetLedger
+from meridian.copilot.budget import INPUT_LIMIT, OUTPUT_LIMIT, BudgetError, BudgetLedger
 from meridian.copilot.drafts import PROMPT_VERSION, SYSTEM_PROMPT, Draft
 from meridian.copilot.explanations import (
     EXPLANATION_PROMPT,
@@ -63,6 +63,13 @@ class OpenAIPilot:
             or os.environ.get("MERIDIAN_SYNTHETIC_PILOT_ENABLED") != APPROVED_PILOT_ID
         ):
             raise PilotError("LIVE_PILOT_NOT_APPROVED")
+        if self.mock_transport is None and self.ledger.pilot_id != APPROVED_PILOT_ID:
+            raise PilotError("PILOT_ACCOUNTING_ID_MISMATCH")
+        if self.mock_transport is None:
+            try:
+                self.ledger.snapshot()
+            except BudgetError:
+                raise PilotError("ACCOUNTING_STATE_INVALID") from None
         try:
             fixture_id = identify_payload(package_json)
             if (

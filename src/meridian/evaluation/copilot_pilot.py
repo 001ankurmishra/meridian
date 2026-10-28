@@ -21,6 +21,8 @@ from meridian.copilot.explanations import (
 from meridian.copilot.openai_pilot import MODEL, OpenAIPilot, PilotError
 from meridian.copilot.synthetic import FIXTURE_SHA256, fixtures, synthetic_package
 
+MOCK_PILOT_ID = "v5b-mock-review-v1"
+
 
 def proposed_output(item: dict[str, str]) -> str:
     package = synthetic_package(item["id"])
@@ -52,7 +54,7 @@ def proposed_output(item: dict[str, str]) -> str:
 
 
 async def run_mock_suite(ledger_path: Path) -> dict[str, Any]:
-    ledger = BudgetLedger(ledger_path)
+    ledger = BudgetLedger(ledger_path, pilot_id=MOCK_PILOT_ID)
     if ledger.snapshot()["requests"]:
         raise ValueError("USE_NEW_BENCHMARK_LEDGER")
     records = []

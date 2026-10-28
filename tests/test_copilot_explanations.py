@@ -3,9 +3,14 @@ import json
 
 import pytest
 
+from meridian.copilot.budget import BudgetError, BudgetLedger
 from meridian.copilot.explanations import assess_explanation
 from meridian.copilot.synthetic import fixtures, identify_payload, synthetic_package
-from meridian.evaluation.copilot_pilot import proposed_output, run_mock_suite
+from meridian.evaluation.copilot_pilot import (
+    MOCK_PILOT_ID,
+    proposed_output,
+    run_mock_suite,
+)
 
 pytestmark = pytest.mark.offline_guard_unit
 
@@ -79,6 +84,7 @@ def test_synthetic_identity_and_registry_hash(tmp_path, monkeypatch):
 
 def test_complete_mock_suite_separates_mechanics_from_real_model_metrics(tmp_path):
     path = tmp_path / "ledger.json"
+    BudgetLedger(path, pilot_id=MOCK_PILOT_ID).initialize()
     result = asyncio.run(run_mock_suite(path))
     assert result["expectations_met"] == len(result["records"]) == 13
     assert result["live_requests"] == 0 and result["model_executed"] is None
@@ -86,3 +92,11 @@ def test_complete_mock_suite_separates_mechanics_from_real_model_metrics(tmp_pat
     assert all(row["semantic_claim_support"] is None for row in result["records"])
     with pytest.raises(ValueError, match="NEW_BENCHMARK_LEDGER"):
         asyncio.run(run_mock_suite(path))
+
+
+def test_mock_runner_fails_closed_without_initialized_budget(tmp_path):
+    path = tmp_path / "missing-ledger.json"
+    with pytest.raises(BudgetError, match="LEDGER_MISSING_OR_UNINITIALIZED"):
+        asyncio.run(run_mock_suite(path))
+    assert not path.exists()
+    assert not path.with_suffix(".json.lock").exists()

@@ -13,6 +13,9 @@ INPUT_LIMIT = 8000
 OUTPUT_LIMIT = 2000
 # USD per million tokens = micro-USD per token; uncached standard rates.
 RATE_VERSION = "openai-gpt-5.4-mini-2026-10-27:0.75:4.50"
+PILOT_ID_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
+)
 
 
 def micro_cost(input_tokens: int, output_tokens: int) -> int:
@@ -35,7 +38,12 @@ class BudgetLedger:
     """
 
     def __init__(
-        self, path: Path, max_requests: int = 100, max_micro_usd: int = 5_000_000
+        self,
+        path: Path,
+        *,
+        pilot_id: str,
+        max_requests: int = 100,
+        max_micro_usd: int = 5_000_000,
     ) -> None:
         if (
             type(max_requests) is not int
@@ -44,36 +52,88 @@ class BudgetLedger:
             or not 0 < max_micro_usd <= 5_000_000
         ):
             raise BudgetError("INVALID_LIMITS")
+        if (
+            not isinstance(pilot_id, str)
+            or not 1 <= len(pilot_id) <= 128
+            or not pilot_id.isascii()
+            or any(c not in PILOT_ID_CHARS for c in pilot_id)
+        ):
+            raise BudgetError("INVALID_PILOT_ID")
         self.max_requests = max_requests
         self.max_micro_usd = max_micro_usd
         self.path = path
+        self.pilot_id = pilot_id
         self.limits = {
             "max_requests": max_requests,
             "max_micro_usd": max_micro_usd,
             "rate_version": RATE_VERSION,
+            "pilot_id": pilot_id,
         }
 
+    @property
+    def initialization_record_path(self) -> Path:
+        return self.path.with_suffix(self.path.suffix + ".init.json")
+
     @contextmanager
-    def _locked(self) -> Iterator[dict[str, Any]]:
+    def _locked(self, *, initialize: bool = False) -> Iterator[dict[str, Any]]:
         # Lock a stable separate inode; ledger is atomically replaced under it.
         lock_path = self.path.with_suffix(self.path.suffix + ".lock")
-        with lock_path.open("a+") as lock:
-            os.chmod(lock_path, 0o600)
-            fcntl.flock(lock, fcntl.LOCK_EX)
-            try:
-                if self.path.exists():
-                    data = json.loads(self.path.read_text())
-                    if data["limits"] != self.limits:
-                        raise BudgetError("LEDGER_CONFIGURATION_MISMATCH")
-                else:
-                    data = {"limits": self.limits, "halted": False, "requests": {}}
-                yield data
-            except BudgetError:
-                raise
-            except Exception:
-                raise BudgetError("LEDGER_UNAVAILABLE") from None
-            finally:
-                fcntl.flock(lock, fcntl.LOCK_UN)
+        record_path = self.initialization_record_path
+        try:
+            lock_preexisted = lock_path.exists()
+            ledger_preexisted = self.path.exists()
+            record_preexisted = record_path.exists()
+            if record_preexisted and (not ledger_preexisted or not lock_preexisted):
+                raise BudgetError("LEDGER_ACCOUNTING_STATE_LOST")
+            if not initialize:
+                if not record_preexisted:
+                    if ledger_preexisted or lock_preexisted:
+                        raise BudgetError("LEDGER_INITIALIZATION_RECORD_MISSING")
+                    raise BudgetError("LEDGER_MISSING_OR_UNINITIALIZED")
+                if not ledger_preexisted or not lock_preexisted:
+                    raise BudgetError("LEDGER_ACCOUNTING_STATE_LOST")
+            elif not record_preexisted and (ledger_preexisted or lock_preexisted):
+                # Partial state without its initialization record is ambiguous;
+                # never adopt it or reset it as a new pilot.
+                raise BudgetError("LEDGER_INITIALIZATION_STATE_INCOMPLETE")
+            with lock_path.open("a+") as lock:
+                os.chmod(lock_path, 0o600)
+                fcntl.flock(lock, fcntl.LOCK_EX)
+                try:
+                    record_exists = record_path.exists()
+                    ledger_exists = self.path.exists()
+                    if record_exists:
+                        if not ledger_exists or not lock_preexisted:
+                            raise BudgetError("LEDGER_ACCOUNTING_STATE_LOST")
+                        record = json.loads(record_path.read_text())
+                        if record != {
+                            "format_version": 1,
+                            "pilot_id": self.pilot_id,
+                            "limits": self.limits,
+                        }:
+                            raise BudgetError("LEDGER_INITIALIZATION_RECORD_MISMATCH")
+                        data = json.loads(self.path.read_text())
+                        if data["limits"] != self.limits:
+                            raise BudgetError("LEDGER_CONFIGURATION_MISMATCH")
+                    elif initialize and not ledger_exists and not lock_preexisted:
+                        data = {
+                            "limits": self.limits,
+                            "halted": False,
+                            "requests": {},
+                        }
+                    else:
+                        raise BudgetError("LEDGER_MISSING_OR_UNINITIALIZED")
+                    yield data
+                except BudgetError:
+                    raise
+                except Exception:
+                    raise BudgetError("LEDGER_UNAVAILABLE") from None
+                finally:
+                    fcntl.flock(lock, fcntl.LOCK_UN)
+        except BudgetError:
+            raise
+        except Exception:
+            raise BudgetError("LEDGER_UNAVAILABLE") from None
 
     def _save(self, data: dict[str, Any]) -> None:
         name: str | None = None
@@ -113,6 +173,29 @@ class BudgetLedger:
             }
             self._save(data)
             return request_id
+
+    def initialize(self) -> None:
+        """Create a pilot-bound initialization record and budget exactly once.
+
+        Existing complete state is left untouched. Any partial state requires
+        reconciliation and cannot be adopted or reset by calling this method.
+        """
+        with self._locked(initialize=True) as data:
+            if not self.initialization_record_path.exists():
+                record = {
+                    "format_version": 1,
+                    "pilot_id": self.pilot_id,
+                    "limits": self.limits,
+                }
+                with self.initialization_record_path.open("x") as stream:
+                    os.chmod(self.initialization_record_path, 0o600)
+                    json.dump(record, stream, sort_keys=True)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                with _directory(self.path.parent):
+                    pass
+            if not self.path.exists():
+                self._save(data)
 
     def reconcile(
         self, request_id: str, usage: object, outcome: str, elapsed_seconds: float

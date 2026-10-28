@@ -1,0 +1,27 @@
+{
+  "status": "PENDING_INDEPENDENT_REVIEW",
+  "fixture_sha256": "fef685e128774c7c6eb0c4d11731101f18a1cca94fcd9bbf3e90bb53d7c487bd",
+  "provider_run_id": null,
+  "reviewer_id": null,
+  "reviewer_independence_record": null,
+  "reviewed_at": null,
+  "candidate_sha256": null,
+  "claim_reviews": [],
+  "allowed_verdicts": [
+    "SUPPORTED",
+    "CONTRADICTED",
+    "INSUFFICIENT",
+    "WRONG_APPLICABILITY"
+  ],
+  "required_claim_fields": [
+    "claim_index",
+    "verdict",
+    "source_ids",
+    "rationale",
+    "numeric_subject_unit_check",
+    "uncertainty_omission_check",
+    "contradiction_check"
+  ],
+  "appropriate_abstention": null,
+  "overall_release_approval": false
+}

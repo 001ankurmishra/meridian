@@ -14,6 +14,10 @@ from meridian.copilot.synthetic import synthetic_package
 pytestmark = pytest.mark.offline_guard_unit
 
 
+def budget_ledger(path, **kwargs):
+    return BudgetLedger(path, pilot_id="test-pilot", **kwargs)
+
+
 def response(raw, **changes):
     data = {
         "model": MODEL,
@@ -54,10 +58,66 @@ def test_disabled_gate_precedes_key_read_and_transport(tmp_path, monkeypatch):
         return original_get(name, *args)
 
     monkeypatch.setattr("meridian.copilot.openai_pilot.os.environ.get", forbidden)
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
     with pytest.raises(PilotError, match="LIVE_PILOT_NOT_APPROVED"):
         call(OpenAIPilot(ledger))
     assert not ledger.path.exists()
+
+
+def test_live_provider_requires_ledger_bound_to_approved_pilot(tmp_path, monkeypatch):
+    monkeypatch.setattr("meridian.copilot.openai_pilot.APPROVED_PILOT_ID", "approved-1")
+    monkeypatch.setenv("MERIDIAN_SYNTHETIC_PILOT_ENABLED", "approved-1")
+    original_get = os.environ.get
+
+    def no_key_read(name, *args):
+        if name == "OPENAI_API_KEY":
+            raise AssertionError("A mismatched ledger must fail before key access")
+        return original_get(name, *args)
+
+    monkeypatch.setattr("meridian.copilot.openai_pilot.os.environ.get", no_key_read)
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
+    with pytest.raises(PilotError, match="PILOT_ACCOUNTING_ID_MISMATCH"):
+        call(OpenAIPilot(ledger))
+    assert ledger.snapshot()["requests"] == {}
+
+
+def test_persisted_accounting_binding_is_checked_before_key_access(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr("meridian.copilot.openai_pilot.APPROVED_PILOT_ID", "approved-1")
+    monkeypatch.setenv("MERIDIAN_SYNTHETIC_PILOT_ENABLED", "approved-1")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    key_reads = []
+    provider_transports = []
+    original_get = os.environ.get
+
+    def tracked_get(name, *args):
+        if name == "OPENAI_API_KEY":
+            key_reads.append(name)
+        return original_get(name, *args)
+
+    def tracked_transport(*args, **kwargs):
+        provider_transports.append((args, kwargs))
+        raise AssertionError("provider transport must not be constructed")
+
+    monkeypatch.setattr("meridian.copilot.openai_pilot.os.environ.get", tracked_get)
+    monkeypatch.setattr(
+        "meridian.copilot.openai_pilot.httpx.AsyncHTTPTransport", tracked_transport
+    )
+
+    ledger = BudgetLedger(tmp_path / "ledger.json", pilot_id="approved-1")
+    ledger.initialize()
+    record = json.loads(ledger.initialization_record_path.read_text())
+    record["pilot_id"] = "different-pilot"
+    ledger.initialization_record_path.write_text(json.dumps(record))
+
+    with pytest.raises(PilotError, match="^ACCOUNTING_STATE_INVALID$"):
+        call(OpenAIPilot(ledger))
+
+    assert key_reads == []
+    assert provider_transports == []
+    assert json.loads(ledger.path.read_text())["requests"] == {}
 
 
 def test_mock_wire_contract_and_baseline_validation(tmp_path):
@@ -71,7 +131,8 @@ def test_mock_wire_contract_and_baseline_validation(tmp_path):
         )
         return response(raw)
 
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     adapter = OpenAIPilot(ledger, mock_transport=httpx.MockTransport(handler))
     result = asyncio.run(generate_draft(synthetic_package("supported"), adapter))
     assert result.status == "DRAFT"
@@ -93,7 +154,7 @@ def test_mock_wire_contract_and_baseline_validation(tmp_path):
 def test_no_real_payload_or_arbitrary_prompt_can_reach_transport(tmp_path):
     calls = []
     adapter = OpenAIPilot(
-        BudgetLedger(tmp_path / "ledger.json"),
+        budget_ledger(tmp_path / "ledger.json"),
         mock_transport=httpx.MockTransport(lambda r: calls.append(r)),
     )
     p = synthetic_package("supported")
@@ -143,7 +204,8 @@ def test_errors_are_redacted_without_retries(tmp_path, bad):
         calls.append(request)
         return bad
 
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     adapter = OpenAIPilot(ledger, mock_transport=httpx.MockTransport(handler))
     with pytest.raises(PilotError, match="^PROVIDER_FAILURE$"):
         call(adapter)
@@ -159,7 +221,8 @@ def test_timeout_and_cancellation_retain_reservation(tmp_path):
         finally:
             cancelled.append(True)
 
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     adapter = OpenAIPilot(
         ledger, mock_transport=httpx.MockTransport(slow), timeout_seconds=0.01
     )
@@ -172,18 +235,20 @@ def test_timeout_and_cancellation_retain_reservation(tmp_path):
 
 def test_input_estimate_rejected_before_reservation(tmp_path, monkeypatch):
     monkeypatch.setattr("meridian.copilot.openai_pilot.INPUT_LIMIT", 10)
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     with pytest.raises(PilotError, match="INPUT_LIMIT"):
         call(
             OpenAIPilot(
                 ledger, mock_transport=httpx.MockTransport(lambda r: response("{}"))
             )
         )
-    assert not ledger.path.exists()
+    assert ledger.snapshot()["requests"] == {}
 
 
 def test_unknown_usage_keeps_full_cost_even_on_success(tmp_path):
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     adapter = OpenAIPilot(
         ledger, mock_transport=httpx.MockTransport(lambda r: response("{}", usage=None))
     )
@@ -196,7 +261,8 @@ def test_unknown_usage_keeps_full_cost_even_on_success(tmp_path):
 
 def test_budget_refusal_prevents_transport(tmp_path):
     calls = []
-    ledger = BudgetLedger(tmp_path / "ledger.json", max_micro_usd=1)
+    ledger = budget_ledger(tmp_path / "ledger.json", max_micro_usd=1)
+    ledger.initialize()
     adapter = OpenAIPilot(
         ledger,
         mock_transport=httpx.MockTransport(lambda request: calls.append(request)),
@@ -207,7 +273,8 @@ def test_budget_refusal_prevents_transport(tmp_path):
 
 
 def test_outer_cancellation_is_propagated_and_charged_conservatively(tmp_path):
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
 
     async def scenario():
         started = asyncio.Event()
@@ -235,7 +302,8 @@ def test_outer_cancellation_is_propagated_and_charged_conservatively(tmp_path):
 
 
 def test_actual_over_limit_usage_rejects_output_and_halts(tmp_path):
-    ledger = BudgetLedger(tmp_path / "ledger.json")
+    ledger = budget_ledger(tmp_path / "ledger.json")
+    ledger.initialize()
     adapter = OpenAIPilot(
         ledger,
         mock_transport=httpx.MockTransport(

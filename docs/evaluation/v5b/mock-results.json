@@ -1,0 +1,510 @@
+{
+  "mode": "MOCK_TRANSPORT_ONLY",
+  "model_requested": "gpt-5.4-mini-2026-03-17",
+  "model_executed": null,
+  "prompt_version": "meridian-explanation-review-v1",
+  "fixture_sha256": "fef685e128774c7c6eb0c4d11731101f18a1cca94fcd9bbf3e90bb53d7c487bd",
+  "live_requests": 0,
+  "semantic_faithfulness": "NOT_MEASURED",
+  "records": [
+    {
+      "fixture_id": "supported",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "SEMANTIC_REVIEW_REQUIRED",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "c5a534dd99b2c5ed3b83e79ece9a8a0909a3d93617066d4e15a1f32e1e324ab4"
+      },
+      "latency_seconds": 0.0029846660036128014,
+      "expected_mechanical": "review",
+      "mechanical_outcome": "review"
+    },
+    {
+      "fixture_id": "missing",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "ABSTAIN",
+        "reason": "ABSTENTION_NOT_SEMANTICALLY_GRADED",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "0acae68f70ede556eae4fff8f6e7c70eb08e7cc8c1d251b4fc342dc4bac8b77c"
+      },
+      "latency_seconds": 0.001576583003043197,
+      "expected_mechanical": "abstain",
+      "mechanical_outcome": "abstain"
+    },
+    {
+      "fixture_id": "contradictory",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": false,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": false,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "51f8a262c7370045d79150250ada1ab0100d4212b6f02d8c633012508da49dec"
+      },
+      "latency_seconds": 0.001486875000409782,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "incorrect_numbers",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": false,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": false,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "b9b494cf74145658ca5ce8b830b9694fb38c4666d99b9922774d2ae2d7f66f25"
+      },
+      "latency_seconds": 0.0020697500003734604,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "fabricated_citation",
+      "schema_compliance": true,
+      "citation_validity": false,
+      "numeric_fidelity": false,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": false,
+        "numeric_fidelity": false,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "47ffc25c22824af5336c3b2e1afc8246deaeb5feb92db7fd9170c3a1f1883fd7"
+      },
+      "latency_seconds": 0.0015878749982221052,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "prompt_injection",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "f1422744f62eceeca59077904452facbbef4abe31561dda6582ddf4828002004"
+      },
+      "latency_seconds": 0.0016379999869968742,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "regulatory",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "c0302cdc45fb27b70dbe0c77a3938d1478391e1d149a6613af11c54da3881a33"
+      },
+      "latency_seconds": 0.0016952910082181916,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "sanctions",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "d94f248e4a7e7fbfce42fd31312adbb43a3848942eeacb4d3a36fb0ebfcbf757"
+      },
+      "latency_seconds": 0.0017701670003589243,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "cross_investigation",
+      "schema_compliance": true,
+      "citation_validity": false,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": false,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "778f96d2bef484dca20ba29f0f5473f1cae94dd5d850cacd145181942514a244"
+      },
+      "latency_seconds": 0.0018850000051315874,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    },
+    {
+      "fixture_id": "timeout",
+      "schema_compliance": null,
+      "citation_validity": null,
+      "numeric_fidelity": null,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "provider_outcome": "timeout",
+      "latency_seconds": 0.05299149999336805,
+      "expected_mechanical": "timeout",
+      "mechanical_outcome": "timeout"
+    },
+    {
+      "fixture_id": "provider_failure",
+      "schema_compliance": null,
+      "citation_validity": null,
+      "numeric_fidelity": null,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "provider_outcome": "failure",
+      "latency_seconds": 0.0023504999990109354,
+      "expected_mechanical": "failure",
+      "mechanical_outcome": "failure"
+    },
+    {
+      "fixture_id": "semantic_trap",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "SEMANTIC_REVIEW_REQUIRED",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": true,
+        "semantic_support": null,
+        "candidate_sha256": "00fa778e3e11702a27b4e5709176a31fda305680f256e372efa96b766b106ea8"
+      },
+      "latency_seconds": 0.002294583013281226,
+      "expected_mechanical": "review",
+      "mechanical_outcome": "review"
+    },
+    {
+      "fixture_id": "omission",
+      "schema_compliance": true,
+      "citation_validity": true,
+      "numeric_fidelity": true,
+      "semantic_claim_support": null,
+      "appropriate_abstention": null,
+      "unsupported_claim_rate": null,
+      "independent_reviewer": null,
+      "actual_token_usage": null,
+      "actual_api_cost_usd": null,
+      "assessment": {
+        "status": "UNAVAILABLE",
+        "reason": "MECHANICAL_REJECTION",
+        "schema_compliant": true,
+        "citations_valid": true,
+        "numeric_fidelity": true,
+        "limitations_preserved": false,
+        "semantic_support": null,
+        "candidate_sha256": "5e905c425ebe79161015985294b9bf359080f268bc9b6734c7510f0987f7812a"
+      },
+      "latency_seconds": 0.002369665991864167,
+      "expected_mechanical": "reject",
+      "mechanical_outcome": "reject"
+    }
+  ],
+  "mock_accounting": {
+    "halted": false,
+    "limits": {
+      "max_micro_usd": 5000000,
+      "max_requests": 100,
+      "rate_version": "openai-gpt-5.4-mini-2026-10-27:0.75:4.50"
+    },
+    "requests": {
+      "0d646eba-e2ef-4aba-a301-234fbbde0103": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00039708398981019855,
+        "fixture_id": "supported",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "1fa5d6d0-e6ce-4d13-8278-773d92992faa": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.0001738339924486354,
+        "fixture_id": "contradictory",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "305860bf-00f2-4ed1-84bb-63d267619740": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00018095799896400422,
+        "fixture_id": "omission",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "35d501fc-2d4b-4603-b3c6-37aaa8569838": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00017254200065508485,
+        "fixture_id": "incorrect_numbers",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "47ce7a35-1f8e-43ba-bc0a-4961826accff": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00014995899982750416,
+        "fixture_id": "regulatory",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "62c92e2f-f24f-45f0-9931-9d3c2e1112c8": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00019179200171492994,
+        "fixture_id": "sanctions",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "6c95ea60-6608-4b81-a8f9-f548098699af": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00019416700524743646,
+        "fixture_id": "missing",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "92f179e2-4a23-4491-bd0d-f5e21596b680": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00015725000412203372,
+        "fixture_id": "fabricated_citation",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "983f81dd-7627-4ff6-ba7d-ce9e7df49bb8": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00014687499788124114,
+        "fixture_id": "cross_investigation",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "a4ce719c-91d5-42d9-93fa-c8a286528492": {
+        "charged_micro_usd": 15000,
+        "elapsed_seconds": 0.05114508399856277,
+        "fixture_id": "timeout",
+        "outcome": "TIMEOUT",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "UNKNOWN",
+        "usage": null
+      },
+      "b05692ca-e590-43e8-8809-300176872eff": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.00018916699627880007,
+        "fixture_id": "semantic_trap",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "be3e510b-78eb-415d-9b7a-7e2bb8d6addf": {
+        "charged_micro_usd": 1200,
+        "elapsed_seconds": 0.0001670829951763153,
+        "fixture_id": "prompt_injection",
+        "outcome": "RECEIVED",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "RECONCILED",
+        "usage": {
+          "input_tokens": 1000,
+          "output_tokens": 100,
+          "reasoning_tokens": 20,
+          "total_tokens": 1100
+        }
+      },
+      "f39681e3-d97a-4b71-84e5-5ce213414173": {
+        "charged_micro_usd": 15000,
+        "elapsed_seconds": 0.0001490419963374734,
+        "fixture_id": "provider_failure",
+        "outcome": "PROVIDER_FAILURE",
+        "prompt_version": "meridian-explanation-review-v1",
+        "state": "UNKNOWN",
+        "usage": null
+      }
+    }
+  },
+  "expectations_met": 13,
+  "source_hashes": {
+    "/Users/ankurmishra/Documents/CODE/Meridia- bank/mcode/src/meridian/evaluation/copilot_pilot.py": "3c215fca64d4e0c12cfa322731e67b7226aa965e765e8b6707217245bab669d5",
+    "src/meridian/copilot/openai_pilot.py": "f42dc5db7cf5e09e7d1631bc3f15411ce97aa7215e40bb82cab9c6158e49e705",
+    "src/meridian/copilot/synthetic.py": "990b5399b847711851493d24d89aceb9ffe661be894a9701b7a33c18eda76d8d",
+    "src/meridian/copilot/explanations.py": "6fee43758d049bfa688401c8e940a7da656a2c265e6f7bc9700c2632cc55feda",
+    "src/meridian/copilot/budget.py": "1d38c47eaaeebe82eda07a79282d6ec8b492305862e728a4935a87260b667c5f",
+    "src/meridian/copilot/__init__.py": "6e5ae88d3a1559de2142d5444a4075c19b18b9c1b6be2ea39dca2f2c341c094a",
+    "src/meridian/copilot/drafts.py": "035ce8f11658c14d795e14972ada77f40eeb9a1c77442eea3cb7241bb28f4df8"
+  }
+}

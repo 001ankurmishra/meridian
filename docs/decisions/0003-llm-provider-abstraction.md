@@ -45,3 +45,32 @@ Before acceptance, obtain explicit provider, privacy/retention, budget and API-u
 approval. Then implement the selected adapter and billing/transport controls,
 review benchmark labels, and measure synthetic outputs before runtime exposure.
 No change to ADR-0005, human decisions, BGE-small or Stage4 signal adoption.
+
+## Stage 5B readiness amendment (2026-10-27) — still Proposed
+
+An isolated disabled Responses REST adapter now exists for the proposed
+`gpt-5.4-mini-2026-03-17` snapshot, tested only with httpx.MockTransport. It accepts
+only byte-identical hash-pinned synthetic fixtures and fixed prompt/schema pairs.
+No live provider is selected/accepted by this implementation. Activation requires
+an explicit maintainer decision and reviewed approval record; an API key or
+environment flag alone cannot enable the current code.
+
+Prepared controls: one-host persistent locked budget ledger, at most100 attempts,
+estimated$5 ceiling,8k input estimate/2k output cap, full preflight reservation,
+usage reconciliation including reasoning, conservative unknown-usage accounting,
+timeout/cancellation, no retries/tools/redirects and store=false. Exact spending
+cannot be guaranteed. Experimental paraphrases remain unavailable pending
+independent semantic review; citation validity does not certify claim support.
+
+Recovery boundary: a separate mode-0600 initialization record binds the ledger
+configuration to the pilot ID. Ledger operations and the live adapter require that
+record and matching ID; losing the ledger and lock while the record remains stops
+the pilot instead of silently resetting accounting. The record is local and is not
+a cryptographic or independent anchor. Loss or alteration of all local accounting
+state cannot be distinguished from first initialization; preserve a durable
+independent copy and reconcile provider billing before recovery. Therefore the
+estimated $5 budget is not an unconditional hard spending guarantee.
+
+The exact proposed provider/privacy/budget/mode decision, limitations and activation
+steps are in [Stage5B approval](../evaluation/v5b/APPROVAL.md). Accepting this ADR,
+activating calls or changing report/runtime behavior requires separate approval.
