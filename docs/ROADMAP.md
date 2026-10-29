@@ -128,8 +128,25 @@ Scope (Features F11–F14):
 ### Phase 2 status update (recorded 2026-10-20)
 
 - **Sanctions/Watchlist Screening (Task 24):** Task 24 is complete. Implemented: `screening_results` schema migration (`e82f1b4a9c3d`), `SanctionsAgent` dispatch with static tool calls, pinned watchlist constants (`meridian_synthetic_watchlist` `v1`), orchestrator integration with two-stage persistence, authoring of evidence and candidate findings, audit-trail integration (`get_case_audit_trail`), and deterministic 7-state report rendering (`WatchlistScreeningSection`).
-- **Next Priority (RAG Evaluation):** The documented next priority is RAG evaluation (evaluating policy retrieval accuracy via a labeled query set against the policy corpus, calibrating `confidence_threshold` per `docs/EVALUATION.md` §4). Implementation of RAG evaluation has not yet begun.
+- **Next Priority (RAG Evaluation):** The documented next priority is RAG evaluation (evaluating policy retrieval accuracy via a labeled query set against the policy corpus, calibrating `confidence_threshold` per `docs/EVALUATION.md` §4). The evaluation protocol has since been frozen and a HELDOUT measurement recorded (see the 2026-10-29 status update below); independent final validation remains outstanding.
 - **2026-10-24 (RAG Evaluation Protocol Freeze Preparation):** Protocol and labeled fixture added as PROPOSED / NOT FROZEN (`docs/EVALUATION.md` §4, `src/meridian/fixtures/policy_retrieval_eval_set.py`); measurement, threshold calibration, and retrieval changes have not begun; threshold behavior (inability to trigger `PolicyEvidenceInsufficient` on a non-empty corpus under current RRF minimum) is documented as derived from code, not measured.
+
+### RAG evaluation status update (recorded 2026-10-29)
+
+**Protocol and measurement.**
+`policy_retrieval_eval_v1` was [frozen on 2026-10-25](evaluation/policy_retrieval_eval_v1.freeze.json) with maintainer approval. The single permitted HELDOUT measurement was completed under the locked protocol. The gate configuration reports abstention on 5/5 assessed SHOULD_ABSTAIN negatives and retention of 8/8 assessed SHOULD_RETRIEVE positives ([result](evaluation/policy_retrieval_eval_v1.heldout.json), [receipt](evaluation/policy_retrieval_eval_v1.heldout-receipt.json)). These results do not constitute independent final validation. Labels are maintainer-approved with AI assistance; they are not independently authored. Human comparison remains NOT PERFORMED.
+
+**Threshold decision.**
+[ADR-0009](decisions/0009-policy-absolute-relevance-gate.md) was accepted on 2026-10-26. It specifies a prototype query-level maximum-cosine gate of 0.620313, selected from the labeled DEV split only. The original RRF threshold (0.01) and ranking are unchanged. The Stage 3 report separately identifies a development-set research candidate threshold; that candidate is not the same as the accepted ADR-0009 gate and is not independently validated, generally calibrated, or production-approved. Neither threshold is independently validated, calibrated, or production-approved.
+
+**Independent validation.**
+Stage 3 remains [PARTIAL](evaluation/v3/REPORT.md): the experimental comparison is complete but independent final validation is blocked. The [independent-review package](evaluation/v4/independent-rag-review.md) exists, but reviewer-authored queries, labels, and approvals have not been provided. AI-authored labels and maintainer approval do not constitute independent subject-matter validation.
+
+**Stage 5B.**
+Offline pilot readiness is documented ([Stage 5A](evaluation/v5/REPORT.md), [Stage 5B](evaluation/v5b/APPROVAL.md)). `APPROVED_PILOT_ID=None`. ADR-0003 remains Proposed. No real-provider calls or independent semantic reviews have been recorded. The live pilot is NOT APPROVED.
+
+**Mandatory caveats.**
+Development-set results are optimistic and are not independent validation. Evaluation labels have the provenance recorded in their artifacts (maintainer-approved, AI-assisted); they are not independently authored. Synthetic evaluation results do not establish real-world AML effectiveness. Human comparison remains NOT PERFORMED.
 
 ---
 
