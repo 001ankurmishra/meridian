@@ -227,6 +227,8 @@ In the MVP, recommendations are authored deterministically by the F2 authoring s
 | `embedding` vector(384) | pgvector column, dimension 384 (BAAI/bge-small-en-v1.5) per ADR-0004 |
 | `created_at` timestamptz | |
 
+*Policy provenance, canonical SHA-256 framing, and read-only database verifier contract: see [SOURCE_APPROVAL_REGISTRY.md](file:///Users/ankurmishra/Documents/CODE/Meridia- bank/mcode/docs/SOURCE_APPROVAL_REGISTRY.md).*
+
 ### 4.16 `risk_signals`
 **Status:** Implemented (F10). Currently writes `amount_deviation`, `transaction_velocity`, `beneficiary_age`, `graph_cycle_length`, and `graph_outbound_chain_depth`. Provenance is limited to `investigation_run_id` + `customer_id` + `transaction_id` + `created_at` — there is no `created_by` or `agent_runs` linkage for this MVP.
 

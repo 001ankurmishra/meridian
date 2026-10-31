@@ -9,14 +9,21 @@ import hashlib
 import json
 import re
 import time
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Literal, Protocol
+from typing import Any, Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import Engine, text
+from sqlalchemy import Connection, Engine, text
 
 from meridian.agents.report.report_assembly import InvestigationReport, assemble_report
+from meridian.copilot.policy_verification import (
+    PolicyChunkRecord,
+    VerifiedPolicyChunk,
+    load_policy_chunks_from_db,
+    verify_policy_chunk,
+)
 from meridian.identity.access import (
     VIEW_REPORT_ROLES,
     enforce_case_visibility,
@@ -62,23 +69,32 @@ class EvidencePackage:
     passages: tuple[Passage, ...]
     limitations: tuple[str, ...]
     package_hash: str
+    policy_provenance: dict[str, Any] | None = None
 
     def payload(self) -> str:
-        return json.dumps(
-            {
-                "case_id": self.case_id,
-                "run_id": self.run_id,
-                "run_status": self.run_status,
-                "package_hash": self.package_hash,
-                "limitations": self.limitations,
-                "passages": [vars(p) for p in self.passages],
-            },
-            sort_keys=True,
-        )
+        data: dict[str, Any] = {
+            "case_id": self.case_id,
+            "run_id": self.run_id,
+            "run_status": self.run_status,
+            "package_hash": self.package_hash,
+            "limitations": self.limitations,
+            "passages": [vars(p) for p in self.passages],
+        }
+        if self.policy_provenance is not None:
+            data["policy_provenance"] = self.policy_provenance
+        return json.dumps(data, sort_keys=True)
 
 
 def package_report(
-    report: InvestigationReport, case_id: UUID, run_id: UUID
+    report: InvestigationReport,
+    case_id: UUID,
+    run_id: UUID,
+    *,
+    conn: Connection | None = None,
+    policy_chunks: (
+        Sequence[PolicyChunkRecord] | Mapping[UUID, PolicyChunkRecord] | None
+    ) = None,
+    registry: dict[str, Any] | None = None,
 ) -> EvidencePackage:
     """Internal pure projection; callers must load/authorize persisted reports first."""
     if report.case_id != case_id or report.investigation_run_id != run_id:
@@ -95,6 +111,20 @@ def package_report(
     passages: list[Passage] = []
     omitted = False
 
+    # 1. Resolve available policy chunk records from DB or explicit parameter
+    policy_ev_records = [
+        e for e in evidence.values() if e.reference_table == "document_chunks"
+    ]
+    chunk_records: dict[UUID, PolicyChunkRecord] = {}
+    if policy_chunks is not None:
+        if isinstance(policy_chunks, Mapping):
+            chunk_records = dict(policy_chunks)
+        else:
+            chunk_records = {c.chunk_id: c for c in policy_chunks}
+    elif conn is not None and policy_ev_records:
+        chunk_ids = [e.reference_id for e in policy_ev_records]
+        chunk_records = load_policy_chunks_from_db(conn, chunk_ids)
+
     def add(
         pid: str,
         kind: Kind,
@@ -107,6 +137,8 @@ def package_report(
         if not content:
             return
         # Omit whole passages, never truncate into a misleading partial claim.
+        # Policy references in findings are generated summaries/interpretations;
+        # policy evidence is exposed solely via verified whole chunk passages.
         if (
             len(content) > 2000
             or _FORBIDDEN.search(content)
@@ -149,6 +181,72 @@ def package_report(
                 (str(f.finding_id),),
                 f.confidence,
             )
+
+    # 2. Process and verify policy evidence chunks
+    verified_policy_chunks: list[VerifiedPolicyChunk] = []
+    for ev in sorted(policy_ev_records, key=lambda e: str(e.evidence_id)):
+        chunk_rec = chunk_records.get(ev.reference_id)
+        if chunk_rec is None:
+            # Policy chunk record unavailable: fail closed and omit
+            omitted = True
+            continue
+
+        outcome = verify_policy_chunk(chunk_rec, registry=registry)
+        if not outcome.is_valid:
+            # Unregistered, tampered, or mismatched: fail closed and omit
+            omitted = True
+            continue
+
+        assert outcome.chunk_hash is not None
+        assert outcome.doc_hash is not None
+        assert outcome.registry_version is not None
+        assert outcome.registry_hash is not None
+
+        # Verify size and safety controls on verified policy text
+        if (
+            len(chunk_rec.chunk_text) > 2000
+            or _FORBIDDEN.search(chunk_rec.chunk_text)
+        ):
+            omitted = True
+            continue
+
+        citing_findings = tuple(
+            sorted(
+                str(f.finding_id)
+                for f in report.findings
+                if ev.evidence_id in f.evidence_ids
+            )
+        )
+
+        passages.append(
+            Passage(
+                passage_id=f"policy:{ev.evidence_id}",
+                kind="observed_fact",
+                text=chunk_rec.chunk_text,
+                evidence_ids=(str(ev.evidence_id),),
+                finding_ids=citing_findings,
+                confidence="RECORDED",
+            )
+        )
+
+        verified_policy_chunks.append(
+            VerifiedPolicyChunk(
+                chunk_id=chunk_rec.chunk_id,
+                evidence_id=ev.evidence_id,
+                chunk_index=chunk_rec.chunk_index,
+                chunk_text=chunk_rec.chunk_text,
+                chunk_hash=outcome.chunk_hash,
+                title=chunk_rec.title,
+                document_type=chunk_rec.document_type,
+                version=chunk_rec.version,
+                source_url_or_ref=chunk_rec.source_url_or_ref,
+                is_synthetic=chunk_rec.is_synthetic,
+                doc_hash=outcome.doc_hash,
+                registry_version=outcome.registry_version,
+                registry_hash=outcome.registry_hash,
+            )
+        )
+
     for rec in sorted(report.recommendations, key=lambda r: str(r.recommendation_id)):
         if (
             rec.investigation_run_id != run_id
@@ -180,18 +278,54 @@ def package_report(
     )
     if len(passages) > 100:
         raise ValueError("PACKAGE_TOO_LARGE")
-    body = json.dumps(
-        [
-            str(case_id),
-            str(run_id),
-            report.evidence_completeness_status,
-            [vars(p) for p in passages],
-            limitations,
-        ],
-        sort_keys=True,
-    )
+
+    # Cryptographic binding of policy provenance into package_hash
+    policy_provenance_data: dict[str, Any] | None = None
+    if verified_policy_chunks:
+        sorted_vchunks = sorted(
+            verified_policy_chunks,
+            key=lambda c: (
+                c.title,
+                c.document_type,
+                c.version,
+                "" if c.source_url_or_ref is None else c.source_url_or_ref,
+                c.chunk_index,
+                str(c.chunk_id),
+            ),
+        )
+        policy_provenance_data = {
+            "chunks": [
+                {
+                    "chunk_hash": c.chunk_hash,
+                    "chunk_id": str(c.chunk_id),
+                    "chunk_index": c.chunk_index,
+                    "doc_hash": c.doc_hash,
+                    "document_title": c.title,
+                    "document_type": c.document_type,
+                    "document_version": c.version,
+                    "evidence_id": str(c.evidence_id),
+                    "source_url_or_ref": c.source_url_or_ref,
+                }
+                for c in sorted_vchunks
+            ],
+            "registry_hash": sorted_vchunks[0].registry_hash,
+            "registry_version": sorted_vchunks[0].registry_version,
+        }
+
+    body_elements: list[Any] = [
+        str(case_id),
+        str(run_id),
+        report.evidence_completeness_status,
+        [vars(p) for p in passages],
+        limitations,
+    ]
+    if policy_provenance_data is not None:
+        body_elements.append(policy_provenance_data)
+
+    body = json.dumps(body_elements, sort_keys=True)
     if len(body.encode()) > 64000:
         raise ValueError("PACKAGE_TOO_LARGE")
+
     return EvidencePackage(
         str(case_id),
         str(run_id),
@@ -199,6 +333,7 @@ def package_report(
         tuple(passages),
         limitations,
         hashlib.sha256(body.encode()).hexdigest(),
+        policy_provenance=policy_provenance_data,
     )
 
 
@@ -238,7 +373,9 @@ def _load_package(
             ).first()
             if allowed is None:
                 raise ValueError("UNAVAILABLE")
-            return package_report(assemble_report(conn, run_id), case_id, run_id)
+            return package_report(
+                assemble_report(conn, run_id), case_id, run_id, conn=conn
+            )
 
 
 class StrictModel(BaseModel):
