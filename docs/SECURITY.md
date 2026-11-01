@@ -66,7 +66,7 @@ RBAC roles (`docs/DATABASE_SCHEMA.md` §4.18):
 
 Enforced server-side on every case-mutating endpoint; the UI hiding a control is not a substitute for server-side enforcement.
 
-**Implementation status:** Task 20 (ADR-0007) implemented a DEMO grade authentication model using opaque bearer tokens (server-side SHA-256 hash storage in `api_tokens`). The acting user is derived from the validated token on all protected case routes (`POST /cases`, `POST /cases/{id}/investigate`, `GET /cases/{id}/report`, `POST /cases/{id}/decision`, `GET /cases/{id}/audit-trail`). Case visibility rules (e.g., 404 Not Found for unassigned analysts) are enforced server-side.
+**Implementation status:** Task 20 (ADR-0007) implemented a DEMO grade authentication model using opaque bearer tokens (server-side SHA-256 hash storage in `api_tokens`). The acting user is derived from the validated token on all protected case routes (`POST /cases`, `POST /cases/{id}/investigate`, `GET /cases/{id}/report`, `POST /cases/{id}/decision`, `GET /cases/{id}/audit-trail`, and `GET /cases/{case_id}/investigations/{run_id}/copilot-draft`). Case visibility rules (e.g., 404 Not Found for unassigned analysts) are enforced server-side.
 
 **Explicit Limitations:** This is not production IAM. There is no automated rate limiting, no account lockout, no refresh token rotation, and no TLS applied locally. The `/health` endpoint remains unauthenticated and uses only the application database role.
 

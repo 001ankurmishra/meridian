@@ -1,1 +1,4 @@
-"""Offline evidence-grounded draft boundary; no runtime route or live adapter."""
+"""Offline evidence-grounded draft boundary.
+
+Authenticated offline route, no live adapter.
+"""

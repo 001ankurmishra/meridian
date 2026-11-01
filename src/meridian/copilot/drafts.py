@@ -203,10 +203,7 @@ def package_report(
         assert outcome.registry_hash is not None
 
         # Verify size and safety controls on verified policy text
-        if (
-            len(chunk_rec.chunk_text) > 2000
-            or _FORBIDDEN.search(chunk_rec.chunk_text)
-        ):
+        if len(chunk_rec.chunk_text) > 2000 or _FORBIDDEN.search(chunk_rec.chunk_text):
             omitted = True
             continue
 
@@ -343,7 +340,8 @@ def _load_package(
     """Authenticated internal entry point. No caller-supplied identity/role.
 
     Uses existing token/RBAC checks and a read-only repeatable-read report snapshot.
-    No API route exposes this offline foundation.
+    Exposed through the authenticated route:
+    GET /cases/{case_id}/investigations/{run_id}/copilot-draft.
     """
     user = verify_token(engine, bearer_token)
     if user is None:
