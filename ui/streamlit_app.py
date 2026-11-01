@@ -75,8 +75,10 @@ with st.form("case_create_form"):
     txn_id = st.text_input(
         "Transaction ID (UUID; needed for transaction evidence)",
         value=str(uuid.uuid5(uuid.NAMESPACE_OID, "rahul_to_tech_sol_tx")),
-        help=("Leaving this empty skips transaction analysis and produces "
-              "an incomplete investigation."),
+        help=(
+            "Leaving this empty skips transaction analysis and produces "
+            "an incomplete investigation."
+        ),
     )
 
     submitted = st.form_submit_button("Create Case")
@@ -141,17 +143,11 @@ if st.button("Investigate"):
                 if investigation_status == "COMPLETE":
                     st.success("Investigation complete. Human review is required.")
                 elif investigation_status == "INCOMPLETE_INSUFFICIENT_EVIDENCE":
-                    st.warning(
-                        "Investigation incomplete. Review missing evidence."
-                    )
+                    st.warning("Investigation incomplete. Review missing evidence.")
                 elif investigation_status == "FAILED":
-                    st.error(
-                        "Investigation failed. Check the audit trail."
-                    )
+                    st.error("Investigation failed. Check the audit trail.")
                 else:
-                    st.warning(
-                        "Completion is not confirmed. Check the audit trail."
-                    )
+                    st.warning("Completion is not confirmed. Check the audit trail.")
             else:
                 show_request_failure("Investigation", resp)
         except requests.RequestException:
@@ -181,9 +177,7 @@ if st.button("Fetch Report"):
             st.write(f"**Confidence**: {report.get('confidence_text')}")
 
             if comp_status != "COMPLETE":
-                st.warning(
-                    "This report does not establish a complete investigation."
-                )
+                st.warning("This report does not establish a complete investigation.")
             st.subheader("Watchlist Screening")
             screening = report.get("watchlist_screening")
             if not isinstance(screening, dict) or not screening.get("rendered_text"):
@@ -247,6 +241,163 @@ if st.button("Fetch Report"):
                 p_tbl = p.get("reference_table")
                 p_id = p.get("reference_id")
                 st.write(f"- {p_type} | {p_tbl} | {p_id}")
+
+            with st.expander(
+                "Copilot Investigation Draft — Supplementary, Non-Authoritative",
+                expanded=False,
+            ):
+                st.warning(
+                    "NON-AUTHORITATIVE SUPPLEMENTARY DRAFT: This draft is generated "
+                    "by an offline deterministic model for review assistance only. "
+                    "It does NOT replace the authoritative investigation report or "
+                    "human analyst judgment."
+                )
+
+                run_id = report.get("investigation_run_id")
+                if (
+                    comp_status
+                    not in (
+                        "COMPLETE",
+                        "INCOMPLETE_INSUFFICIENT_EVIDENCE",
+                    )
+                    or not run_id
+                ):
+                    st.info(
+                        "Copilot draft is unavailable because the investigation run "
+                        "is not in a completed or evaluated terminal state."
+                    )
+                else:
+                    try:
+                        d_resp = requests.get(
+                            f"{API_BASE}/cases/{case_id_input}/investigations/{run_id}/copilot-draft",
+                            headers=headers,
+                            timeout=REQUEST_TIMEOUT,
+                        )
+                        if d_resp.status_code == 200:
+                            draft_data = d_resp.json()
+                            d_status = draft_data.get("status")
+                            reason = draft_data.get("reason", "")
+
+                            st.write(f"**Draft Status**: {d_status}")
+                            if d_status == "DRAFT":
+                                m_id = draft_data.get("model_identifier")
+                                p_ver = draft_data.get("prompt_version")
+                                p_hash = draft_data.get("package_hash")
+                                st.caption(
+                                    f"Model: `{m_id}` | "
+                                    f"Prompt Version: `{p_ver}` | "
+                                    f"Package Hash: `{p_hash}`"
+                                )
+                                draft_body = draft_data.get("draft") or {}
+
+                                st.markdown("### Draft Summary Claims")
+                                summary_claims = draft_body.get("summary", [])
+                                if not summary_claims:
+                                    st.write("No summary claims provided.")
+                                else:
+                                    for sc in summary_claims:
+                                        with st.container(border=True):
+                                            claim_txt = sc.get("text") or sc.get(
+                                                "claim_text", ""
+                                            )
+                                            st.markdown(f"**Claim**: {claim_txt}")
+                                            claim_k = sc.get("kind") or sc.get(
+                                                "claim_type", ""
+                                            )
+                                            ev_ids = sc.get("evidence_ids") or sc.get(
+                                                "evidence_references", []
+                                            )
+                                            ev_str = ", ".join(ev_ids) or "None"
+                                            pid = sc.get("passage_id", "")
+                                            st.caption(
+                                                f"Kind: {claim_k} | "
+                                                f"Passage: {pid} | "
+                                                f"Evidence IDs: {ev_str}"
+                                            )
+
+                                st.markdown("### Draft Explanations")
+                                explanation_claims = draft_body.get("explanations", [])
+                                if not explanation_claims:
+                                    st.write("No explanation claims provided.")
+                                else:
+                                    for ec in explanation_claims:
+                                        with st.container(border=True):
+                                            exp_txt = ec.get("text") or ec.get(
+                                                "claim_text", ""
+                                            )
+                                            st.markdown(f"**Explanation**: {exp_txt}")
+                                            exp_k = ec.get("kind") or ec.get(
+                                                "claim_type", ""
+                                            )
+                                            ev_ids = ec.get("evidence_ids") or ec.get(
+                                                "evidence_references", []
+                                            )
+                                            ev_str = ", ".join(ev_ids) or "None"
+                                            pid = ec.get("passage_id", "")
+                                            st.caption(
+                                                f"Kind: {exp_k} | "
+                                                f"Passage: {pid} | "
+                                                f"Evidence IDs: {ev_str}"
+                                            )
+
+                                uncertainty = draft_body.get("uncertainty")
+                                if uncertainty:
+                                    st.markdown(
+                                        "**Uncertainty / Limitations Analysis**: "
+                                        f"{uncertainty}"
+                                    )
+
+                                prov = draft_data.get("policy_provenance")
+                                if prov:
+                                    with st.container(border=True):
+                                        st.markdown("**Policy Provenance**")
+                                        reg_v = prov.get("registry_version")
+                                        reg_h = prov.get("registry_hash")
+                                        st.caption(
+                                            f"Registry Version: `{reg_v}` | "
+                                            f"Registry Hash: `{reg_h}`"
+                                        )
+                                        chunks = prov.get("chunks", [])
+                                        if chunks:
+                                            st.markdown("**Referenced Policy Chunks:**")
+                                            for chk in chunks:
+                                                title = chk.get(
+                                                    "document_title"
+                                                ) or chk.get("title", "")
+                                                cid = chk.get("chunk_id")
+                                                st.write(f"- `{cid}` ({title})")
+
+                                limitations = draft_data.get("limitations", [])
+                                if limitations:
+                                    st.markdown("**Identified Limitations:**")
+                                    for lim in limitations:
+                                        st.write(f"- {lim}")
+
+                            elif d_status == "ABSTAIN":
+                                st.info(
+                                    f"Copilot Abstained: {reason} — "
+                                    "No substantive claims were generated."
+                                )
+                                st.caption(
+                                    f"Package Hash: `{draft_data.get('package_hash')}`"
+                                )
+                                limitations = draft_data.get("limitations", [])
+                                if limitations:
+                                    st.markdown("**Limitations:**")
+                                    for lim in limitations:
+                                        st.write(f"- {lim}")
+
+                            elif d_status == "UNAVAILABLE":
+                                st.warning(f"Copilot draft unavailable: {reason}")
+                            else:
+                                st.warning(
+                                    f"Unexpected copilot draft status: {d_status}"
+                                )
+
+                        else:
+                            show_request_failure("Copilot draft retrieval", d_resp)
+                    except requests.RequestException:
+                        show_connection_failure()
 
         elif resp.status_code == 422:
             st.error(
