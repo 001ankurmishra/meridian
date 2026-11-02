@@ -6,6 +6,9 @@ on:
   push:
     branches: [ "main", "feature/**", "task-0.2-migrations" ]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -142,3 +145,21 @@ jobs:
 
           # Verify that the meridian_loader role was created by the init script
           docker compose exec -T db psql -U meridian_user -d meridian_db -c "SELECT 1 FROM pg_roles WHERE rolname = 'meridian_loader';" | grep 1
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks (Secret Scan)
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_ENABLE_COMMENTS: "false"
