@@ -46,7 +46,7 @@ Key rule: **LLM output is never trusted as an authorization signal.** An agent r
 | **SQL injection** | All SQL is parameterized; no agent or user input is ever interpolated into a raw SQL string. Agent "SQL tools" expose a constrained query builder / fixed parameterized query set, not free-text SQL execution (`docs/DEVELOPMENT_RULES.md` §3). |
 | **Data leakage / PII exposure** | Redaction applied before any data is included in logs (`audit_events.input_summary`/`output_summary`), LLM prompts include only the minimum fields needed for the task, and full account numbers/DOBs are masked in any output surface not specifically designed to show them to an authorized human. |
 | **Insecure logging** | No secrets, credentials, or unredacted PII in logs; structured logging with redaction applied at the logging boundary, not left to each call site's discretion. |
-| **Secrets exposure** | No secrets in source control; environment-variable-based config with a documented `.env.example`; secrets scanning in CI (Phase 3). |
+| **Secrets exposure** | No secrets in source control; environment-variable-based config with a documented `.env.example`; automated Gitleaks secret scanning in CI and local verification. |
 | **Model manipulation** | Model/provider selection is abstracted (`docs/ARCHITECTURE.md` §6); output from the model is validated against expected schema before being used downstream (e.g., a "finding" object must match a defined structure — reject and flag if it doesn't). |
 | **Untrusted external content** | Any externally sourced content (documents, alert payloads) is validated and provenance-tagged before entering the evidence pipeline. |
 | **Hallucinated evidence / fabricated citations** | Evidence records must reference real rows in the database (application validation of source pointers and same-run finding/evidence links, rechecked at report assembly); a citation with no resolvable source record is a hard validation failure, not a warning. |
@@ -66,7 +66,7 @@ RBAC roles (`docs/DATABASE_SCHEMA.md` §4.18):
 
 Enforced server-side on every case-mutating endpoint; the UI hiding a control is not a substitute for server-side enforcement.
 
-**Implementation status:** Task 20 (ADR-0007) implemented a DEMO grade authentication model using opaque bearer tokens (server-side SHA-256 hash storage in `api_tokens`). The acting user is derived from the validated token on all protected case routes (`POST /cases`, `POST /cases/{id}/investigate`, `GET /cases/{id}/report`, `POST /cases/{id}/decision`, `GET /cases/{id}/audit-trail`). Case visibility rules (e.g., 404 Not Found for unassigned analysts) are enforced server-side.
+**Implementation status:** Task 20 (ADR-0007) implemented a DEMO grade authentication model using opaque bearer tokens (server-side SHA-256 hash storage in `api_tokens`). The acting user is derived from the validated token on all protected case routes (`POST /cases`, `POST /cases/{id}/investigate`, `GET /cases/{id}/report`, `POST /cases/{id}/decision`, `GET /cases/{id}/audit-trail`, and `GET /cases/{case_id}/investigations/{run_id}/copilot-draft`). Case visibility rules (e.g., 404 Not Found for unassigned analysts) are enforced server-side.
 
 **Explicit Limitations:** This is not production IAM. There is no automated rate limiting, no account lockout, no refresh token rotation, and no TLS applied locally. The `/health` endpoint remains unauthenticated and uses only the application database role.
 
@@ -119,11 +119,60 @@ Testing requirement: `docs/TESTING.md` requires adversarial test cases with inje
 
 ---
 
-## 6. Security Review Checklist (apply before merging security-relevant changes)
+## 6. Secret Scanning Controls (Phase 3)
+
+Automated secret scanning prevents credentials, API keys, private keys, and tokens from entering the repository history.
+
+- **Tooling & Pinning:** Gitleaks CLI for local scanning and the official GitHub Action pinned to an immutable commit SHA (`gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e` # v3.0.0) with an immutably pinned checkout action (`actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803` # v6.1.0) and explicit least-privilege token permissions (`permissions: contents: read`) in `.github/workflows/ci.yml`. Automated PR comments are explicitly disabled (`GITLEAKS_ENABLE_COMMENTS: "false"`), eliminating any need for write permissions.
+- **Scanner Version Parity:** Scanner version `8.30.1` is explicitly pinned in CI via `GITLEAKS_VERSION: "8.30.1"`, matching the local developer baseline. Developers can verify local CLI parity using:
+  ```bash
+  gitleaks version
+  ```
+- **CI Integration:** Dedicated `secret-scan` job running across full commit history (`fetch-depth: 0`) on every pull request and push.
+- **Recommended Local Commands:**
+  - **Pre-commit / staged check (canonical developer workflow):**
+    ```bash
+    gitleaks git --pre-commit --staged --verbose --redact
+    ```
+  - **Unstaged working tree check (tracked files):**
+    ```bash
+    gitleaks git --pre-commit --verbose --redact .
+    ```
+  - **Full repository history scan:**
+    ```bash
+    gitleaks git --verbose --redact .
+    ```
+  - **Single commit scan (current HEAD):**
+    ```bash
+    gitleaks git --log-opts="-1 HEAD" --verbose --redact .
+    ```
+  - **Targeted directory scan (filesystem):**
+    ```bash
+    gitleaks dir --redact src/    # or tests/, docs/
+    ```
+- **Distinction Between Scanning Modes:**
+  - *Staged scan (`gitleaks git --pre-commit --staged`):* Git-aware; inspects only files and modifications staged in the Git index for the next commit. Bypasses untracked files and `.gitignore` entries. Recommended before every commit.
+  - *Historical scan (`gitleaks git`):* Git-aware; traverses all committed blobs across the repository's commit history graph. Used in CI (`fetch-depth: 0`) and repository audits. Does not inspect uncommitted working tree changes.
+  - *Directory scan (`gitleaks dir`):* Filesystem-aware, non-Git; recursively walks raw disk files. Does not read `.gitignore` or Git tracking state. Running against root (`.`) will traverse local caches, virtual environments (`.venv/`), and scratch files; filesystem scanning must therefore target specific project subdirectories (`src/`, `tests/`, `docs/`).
+- **False-Positive Handling & Allowlist Policy:**
+  - Broad directory, file, or rule exclusions (such as blanket ignores for `tests/`, `docs/`, or fixtures) are strictly prohibited.
+  - Base configuration resides in `.gitleaks.toml` (`[extend] useDefault = true`).
+  - Known benign matches are audited individually and recorded by exact fingerprint in `.gitleaksignore` using `<commit-sha>:<file-path>:<rule-id>:<line-number>` (for git history) and `<file-path>:<rule-id>:<line-number>` (for directory scans).
+  - Audited exceptions: deterministic SHA-256 test/identity integrity digests (`docs/evaluation/v*/verification.json`, `docs/verification/phase-b-image.json`) and public Hugging Face model commit revisions (`docs/evaluation/v3/*.json`).
+  - Unexplained findings must never be baselined without maintainer investigation.
+- **Canary Validation:** Verified using controlled synthetic secrets in untracked files to guarantee positive detection (exit code 1) and redaction without leaking tokens into logs or git history.
+- **Scanning Scope & Limitations:**
+  - Historical scanning inspects commits present in the active git graph (`fetch-depth: 0`); it cannot prove that secrets were never committed in rewritten history, force-pushed commits, or unpushed transient states outside this repository.
+  - Directory scanning (`gitleaks dir .`) is unconstrained by `.gitignore`; developers must use Git-aware commands or targeted paths to avoid false positives from local runtime caches and virtual environments.
+
+---
+
+## 7. Security Review Checklist (apply before merging security-relevant changes)
 
 - [ ] New/changed tool has an explicit, minimal permission scope
 - [ ] All SQL is parameterized
 - [ ] No secrets or unredacted PII introduced into logs
+- [ ] No secrets detected by Gitleaks (`gitleaks git --pre-commit --staged --verbose --redact`)
 - [ ] RBAC checks present on any new case-mutating endpoint
 - [ ] Retrieved/external content is not used as an instruction source
 - [ ] Output validated against expected schema before persistence
@@ -131,7 +180,7 @@ Testing requirement: `docs/TESTING.md` requires adversarial test cases with inje
 
 ---
 
-## 7. Related Documents
+## 8. Related Documents
 
 `docs/AI_SAFETY_AND_GUARDRAILS.md` (behavioral/evidence constraints), `docs/OBSERVABILITY_AND_AUDIT.md` (logging detail), `docs/TESTING.md` §"Security Testing", `docs/DATABASE_SCHEMA.md` (redaction-relevant columns).
 

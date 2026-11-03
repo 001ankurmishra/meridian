@@ -1,0 +1,8 @@
+# Project Meridian — Gitleaks Configuration
+# Phase 3 Security Hardening: Automated Secret Scanning
+#
+# Extends Gitleaks default ruleset.
+# All historic false positives are narrowly tracked with exact fingerprints in .gitleaksignore.
+
+[extend]
+useDefault = true

@@ -17,7 +17,12 @@ tokenizer = AutoTokenizer.from_pretrained(
 )
 
 
-def chunk_document(text: str) -> List[str]:
+def chunk_document_tokens(text: str) -> List[List[int]]:
+    """Token-level chunking implementation for policy documents.
+
+    Exposes the raw token sequences produced by paragraph splitting,
+    token segmentation, and overlap for testing and provenance verification.
+    """
     raw_blocks = re.split(r"\n\s*\n", text)
 
     tokenized_blocks = []
@@ -31,7 +36,7 @@ def chunk_document(text: str) -> List[str]:
             tokenized_blocks.append(tokens[idx : idx + TARGET_MAX])
             idx += TARGET_MAX
 
-    chunks = []
+    chunks: List[List[int]] = []
     current_tokens: List[int] = []
 
     for block_tokens in tokenized_blocks:
@@ -39,7 +44,7 @@ def chunk_document(text: str) -> List[str]:
             # Cannot safely add without exceeding target max.
             # Must emit what we have.
             if current_tokens:
-                chunks.append(cast(str, tokenizer.decode(current_tokens)))
+                chunks.append(list(current_tokens))
                 overlap_size = min(OVERLAP_MAX, int(0.2 * len(current_tokens)))
                 current_tokens = (
                     current_tokens[-overlap_size:] if overlap_size > 0 else []
@@ -51,13 +56,18 @@ def chunk_document(text: str) -> List[str]:
         current_tokens.extend(block_tokens)
 
         if len(current_tokens) >= TARGET_MIN:
-            chunks.append(cast(str, tokenizer.decode(current_tokens)))
+            chunks.append(list(current_tokens))
             overlap_size = min(OVERLAP_MAX, int(0.2 * len(current_tokens)))
             current_tokens = current_tokens[-overlap_size:] if overlap_size > 0 else []
 
     if current_tokens and len(current_tokens) > OVERLAP_MAX:
-        chunks.append(cast(str, tokenizer.decode(current_tokens)))
+        chunks.append(list(current_tokens))
     elif current_tokens and not chunks:
-        chunks.append(cast(str, tokenizer.decode(current_tokens)))
+        chunks.append(list(current_tokens))
 
     return chunks
+
+
+def chunk_document(text: str) -> List[str]:
+    token_chunks = chunk_document_tokens(text)
+    return [cast(str, tokenizer.decode(toks)) for toks in token_chunks]

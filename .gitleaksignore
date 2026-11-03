@@ -1,0 +1,53 @@
+# Project Meridian — Gitleaks Ignore List
+# Format:
+#   Git history:        <commit-sha>:<file-path>:<rule-id>:<line-number>
+#   Working directory:  <file-path>:<rule-id>:<line-number>
+#
+# Each entry is an individually investigated and verified false positive:
+# deterministic SHA-256 integrity digests in verification receipts, or public
+# Hugging Face model commit SHAs in tokenizer revision metadata.
+# Broad directory/path wildcards or rule-level suppressions are prohibited.
+
+# docs/evaluation/v5/verification.json (SHA-256 integrity digests of test files)
+8438d830bd0fdf99a170bf0f2acf9f598442dff3:docs/evaluation/v5/verification.json:generic-api-key:20
+8438d830bd0fdf99a170bf0f2acf9f598442dff3:docs/evaluation/v5/verification.json:generic-api-key:21
+
+# docs/evaluation/v4/final/verification.json (SHA-256 integrity digests of identity source files)
+1c4504cc0a7b5d0bf8dfca0343b8ac18cce0ecbe:docs/evaluation/v4/final/verification.json:generic-api-key:24
+1c4504cc0a7b5d0bf8dfca0343b8ac18cce0ecbe:docs/evaluation/v4/final/verification.json:generic-api-key:26
+1c4504cc0a7b5d0bf8dfca0343b8ac18cce0ecbe:docs/evaluation/v4/final/verification.json:generic-api-key:28
+
+# docs/evaluation/v3/*.json (Public Hugging Face model commit SHAs for BAAI/bge models)
+6374949bc4c1ae6fca4e00d61833c511cf83042f:docs/evaluation/v3/reranker.started.json:generic-api-key:5
+f4fa4a0b5ee59a57cede0bd86279fcf82d755be0:docs/evaluation/v3/base.started.json:generic-api-key:5
+f4fa4a0b5ee59a57cede0bd86279fcf82d755be0:docs/evaluation/v3/small.started.json:generic-api-key:5
+1405ba230a7e20c59c3de255c3c2574136c0d38d:docs/evaluation/v3/models.json:generic-api-key:7
+1405ba230a7e20c59c3de255c3c2574136c0d38d:docs/evaluation/v3/models.json:generic-api-key:36
+1405ba230a7e20c59c3de255c3c2574136c0d38d:docs/evaluation/v3/models.json:generic-api-key:65
+f4fa4a0b5ee59a57cede0bd86279fcf82d755be0:docs/evaluation/v3/base.json:generic-api-key:7
+f4fa4a0b5ee59a57cede0bd86279fcf82d755be0:docs/evaluation/v3/small.json:generic-api-key:7
+6374949bc4c1ae6fca4e00d61833c511cf83042f:docs/evaluation/v3/reranker.json:generic-api-key:7
+
+# docs/verification/phase-b-image.json (SHA-256 integrity digests of identity source files)
+e837ab358b21df6adc0b9e4bd4b0d09c733d893c:docs/verification/phase-b-image.json:generic-api-key:71
+e837ab358b21df6adc0b9e4bd4b0d09c733d893c:docs/verification/phase-b-image.json:generic-api-key:72
+e837ab358b21df6adc0b9e4bd4b0d09c733d893c:docs/verification/phase-b-image.json:generic-api-key:74
+
+# Working directory fingerprints (for gitleaks dir on tracked files)
+docs/evaluation/v5/verification.json:generic-api-key:20
+docs/evaluation/v5/verification.json:generic-api-key:21
+docs/evaluation/v4/final/verification.json:generic-api-key:24
+docs/evaluation/v4/final/verification.json:generic-api-key:26
+docs/evaluation/v4/final/verification.json:generic-api-key:28
+docs/evaluation/v3/reranker.started.json:generic-api-key:5
+docs/evaluation/v3/base.started.json:generic-api-key:5
+docs/evaluation/v3/small.started.json:generic-api-key:5
+docs/evaluation/v3/models.json:generic-api-key:7
+docs/evaluation/v3/models.json:generic-api-key:36
+docs/evaluation/v3/models.json:generic-api-key:65
+docs/evaluation/v3/base.json:generic-api-key:7
+docs/evaluation/v3/small.json:generic-api-key:7
+docs/evaluation/v3/reranker.json:generic-api-key:7
+docs/verification/phase-b-image.json:generic-api-key:71
+docs/verification/phase-b-image.json:generic-api-key:72
+docs/verification/phase-b-image.json:generic-api-key:74

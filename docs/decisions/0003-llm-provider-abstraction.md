@@ -74,3 +74,14 @@ estimated $5 budget is not an unconditional hard spending guarantee.
 The exact proposed provider/privacy/budget/mode decision, limitations and activation
 steps are in [Stage5B approval](../evaluation/v5b/APPROVAL.md). Accepting this ADR,
 activating calls or changing report/runtime behavior requires separate approval.
+
+## Stage 6 authenticated offline draft route amendment (2026-10-31) — still Proposed
+
+Status remains **Proposed**. An authenticated read-only FastAPI route
+(`GET /cases/{case_id}/investigations/{run_id}/copilot-draft`) exposes the offline
+deterministic `MockProvider` draft functionality. This supersedes the earlier
+no-route statement only for this specific offline endpoint.
+
+No live provider is accepted or activated by this route. Live inference remains
+unapproved and requires separate maintainer approval of this ADR, per-call audit
+logging, provider credentials, and budget ledger initialization.
