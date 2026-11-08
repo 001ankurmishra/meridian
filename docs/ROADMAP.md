@@ -168,6 +168,48 @@ Scope (Features F15–F17):
 
 **Dependencies:** Phase 2 complete.
 
+### Phase 3 technical closure — prototype-grade (recorded 2026-11-07)
+
+Phases 0–3 are closed as PROTOTYPE-GRADE with honest documented limitations. Phase 4 is NOT STARTED and NOT REQUIRED.
+
+**What is implemented:**
+- Secret scanning in CI: automated Gitleaks scanning workflow added (commit `2533946`).
+- Dependency scanning in CI: `pip-audit` automated dependency vulnerability checks.
+- RBAC and token authentication at demo grade: ADR-0007 accepted at demo-grade scope (opaque bearer tokens, server-side SHA-256 storage, dynamic role resolution from `users.role`, case visibility enforcement, client-supplied actor rejection, and privileged maintenance CLI token provisioning).
+- Deployment automation: containerized local Docker deployment (`meridian-prototype:local`) running non-root (`uid=10001`), with least-privilege role separation (API runtime receives only `APP_DATABASE_URL`; maintenance and loader credentials restricted to maintenance container), and offline inference runtime.
+- Evaluation harness: synthetic benchmark runner (`meridian.evaluation.run`) covering financial, transaction, graph, entity resolution, and sanctions baselines, plus locked policy retrieval measurement under the frozen `policy_retrieval_eval_v1` protocol.
+- Supplementary copilot draft: authenticated read-only endpoint (`GET /cases/{case_id}/investigations/{run_id}/copilot-draft`) providing evidence-scoped extractive claims and policy registry provenance via an offline deterministic `MockProvider` (`APPROVED_PILOT_ID=None`), displayed in Streamlit with explicit non-authoritative labeling.
+
+**What is explicitly N/A or deferred:**
+- OpenTelemetry tracing across agent chains and monitoring dashboards: DEFERRED (prototype relies on structured JSON logging and append-only PostgreSQL `audit_events`).
+- Model monitoring: N/A (no live or calibrated production ML model exists).
+- LLM retry/backoff: N/A (no live LLM calls exist in the system).
+- Live LLM integration: DEFERRED (ADR-0003 remains Proposed; only the offline `MockProvider` path exists).
+- React investigation workspace: DEFERRED (Streamlit remains the demonstration interface).
+- Adverse media analysis (F12): DEFERRED (design TBD; curated corpus unavailable).
+- Composite risk score calibration: DEFERRED (gated on ADR-0005 G1 external labeled dataset; prototype scoring only).
+- Production hardening items: production IAM/IdP, assignment administration UI, auth throttling, advanced threat-model matrix, logging-redaction boundary, OS/base-image scanning, and image slimming are OUT OF SCOPE and DEFERRED.
+- Human-comparison evaluation is explicitly NOT PERFORMED. Synthetic evaluation does not measure real-world AML effectiveness.
+
+**Observed verification evidence (2026-11-07 at commit 7c667fb):**
+- CI at HEAD (origin/main `7c667fb8dfb8720f1ee02d0023660bd0d0305bc4`, run 41581272542):
+  - `secret-scan`: success
+  - `test`: success
+  - `verify-docker-init`: success
+- Local suite (single full run against guarded disposable test database `meridian_test` on `127.0.0.1:55432` with canonical marker `meridian.disposable_test_db = 'on'`):
+  - `ruff check .`: All checks passed.
+  - `mypy src/`: Success: no issues found in 124 source files.
+  - `alembic upgrade head`: Migrations applied cleanly.
+  - `DATABASE_URL="postgresql+psycopg://meridian_user:meridian_pass@127.0.0.1:55432/meridian_test" APP_DATABASE_URL="postgresql+psycopg://meridian_app:meridian_app_pass@127.0.0.1:55432/meridian_test" LOADER_DATABASE_URL="postgresql+psycopg://meridian_loader:meridian_loader_pass@127.0.0.1:55432/meridian_test" HF_HUB_OFFLINE=1 uv run --frozen --no-sync pytest -q tests/`: 1159 passed, 5 warnings in 76.35s (2026-11-07, commit `7c667fb`).
+  - `pip-audit`: No known vulnerabilities found.
+- Fresh-clone Docker demonstration (isolated Compose project `meridian-final-verify` at origin/main HEAD `7c667fb`):
+  - Build, migration, seed loading (`meridian.loader.main`: 4 documents, 10 chunks, synthetic watchlist v1), and container startup (`app`, `ui`, `db`) healthy.
+  - Verified `/health` returned HTTP 200 `{"status":"ok","database":"connected"}`.
+  - Verified demo runner (`python -m meridian.evaluation.demo`): worked example created, investigated (`COMPLETE`), evidence/report links validated (5 findings, 13 evidence items, 4 recommendations, 5 policy citations, screening state `NO_CANDIDATE_MATCH`), `APPROVE` decision recorded (`CLOSED_APPROVED`), audit trail reconstructed, unauthenticated call rejected (401), actor spoofing rejected (422).
+  - Verified copilot draft endpoint: unauthenticated request rejected (401), authenticated request returned extractive draft (`MockProvider`, `deterministic-mock-v1`, `meridian-extractive-draft-v1`) with evidence-scoped passages and policy provenance. The verified request path uses the offline deterministic `MockProvider`; no live LLM provider is configured or invoked by this endpoint.
+  - Streamlit UI verification: source-code inspection confirms the non-authoritative warning labels exist; automated UI helper/state tests passed; the Streamlit container started and passed its reported health check; no interactive browser automation or manual browser session was performed; the copilot API endpoint was exercised through the live demo runner.
+  - Verified non-root execution (`uid=10001(meridian)`), runtime container credentials isolation (`app` container has only `APP_DATABASE_URL`, no maintenance/loader credentials), token revocation verified (active tokens count: 0), and isolated project cleanly torn down (`docker compose down -v`).
+
 ---
 
 ## Phase 4 — Advanced Research (optional, exploratory)

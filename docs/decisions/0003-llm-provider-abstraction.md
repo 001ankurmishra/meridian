@@ -1,6 +1,6 @@
 # ADR-0003: LLM Provider Abstraction
 
-Status: Proposed — specific provider not yet locked in. Note (2026-10-05): as of main ba52a036 there is no LLM provider, LLM call or LLM dependency in the repository and the abstraction was not built; the provider decision is deferred until an LLM-assisted component is explicitly scoped, which requires an ADR update, prompt versioning and hallucination tests per docs/TESTING.md.
+Status: Proposed (deferred) — no live provider is implemented; only an offline MockProvider path exists. Note (2026-11-07 technical closure): Live LLM integration is deferred; no live provider is selected or implemented in the repository, and only the offline MockProvider path exists.
 Date: Initial documentation pass (project inception)
 
 ## Context
@@ -85,3 +85,7 @@ no-route statement only for this specific offline endpoint.
 No live provider is accepted or activated by this route. Live inference remains
 unapproved and requires separate maintainer approval of this ADR, per-call audit
 logging, provider credentials, and budget ledger initialization.
+
+## Closure status note (2026-11-07) — still Proposed (deferred)
+
+Status remains **Proposed (deferred)**. Live LLM integration is out of scope and deferred. No live provider is implemented or accepted in the codebase; only the offline `MockProvider` path exists for supplementary extractive drafts.

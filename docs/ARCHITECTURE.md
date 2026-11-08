@@ -120,7 +120,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Outputs:** Retrieved chunks with source document ID, version, and relevance/confidence score.
 - **Tools:** Hybrid retrieval (PostgreSQL FTS + pgvector cosine distance, fused via Reciprocal Rank Fusion) read-only. Ordering across lexical, vector, and fused RRF results is totally ordered by primary score, document title, version, chunk index, and chunk ID for fixed-database determinism. Logical ordering is stable across corpus reloads provided (title, version, chunk_index) is unique and scoring inputs remain equivalent. Embedding model: BAAI/bge-small-en-v1.5 (per ADR-0004).
 - **Permissions:** Read-only.
-- **Failure behavior:** If retrieval confidence is below the hardcoded threshold (`0.01`), returns no policy citation rather than a low-confidence guess (`docs/EVALUATION.md` defines the threshold methodology).
+- **Failure behavior:** If retrieval confidence is below the relevance threshold (ADR-0009 prototype cosine gate 0.620313 and RRF minimum 0.01), returns no policy citation rather than a low-confidence guess (`docs/EVALUATION.md` defines the threshold methodology).
 
 ### 4.5 ReportAgent
 - **Responsibility:** Synthesize findings from other agents into the structured Fact→Signal→Interpretation→Recommendation report; enforce the no-unsupported-conclusions rule.
@@ -129,6 +129,7 @@ Per `CLAUDE.md` §6, every agent is documented here with responsibility, inputs/
 - **Tools:** Read access to evidence/findings store; write access limited to draft report fields (not case disposition).
 - **Permissions:** No write access to case status, account status, or any downstream system.
 - **Failure behavior:** If evidence coverage for a candidate finding is insufficient, omit or explicitly flag that finding as unsupported rather than including it.
+- **Supplementary copilot draft:** An authenticated read-only copilot draft endpoint (`/cases/{case_id}/investigations/{run_id}/copilot-draft`) provides non-authoritative extractive claim and policy provenance assistance using an offline deterministic `MockProvider`; live LLM generation is unimplemented and deferred (ADR-0003 Proposed).
 
 ### 4.6 CaseAgent (case-note support, Phase 2)
 - **Responsibility:** Assist analysts with controlled case-note operations (e.g., drafting a note for analyst review before it's saved).
@@ -211,7 +212,7 @@ Each choice below is evaluated against the brief's suggested stack, not accepted
 | Python + FastAPI | **Adopted** | Mature async web framework, strong typing support, wide ecosystem for ML/AI integration | Yes | Django (heavier than needed), Flask (weaker async/typing story) |
 | PostgreSQL | **Adopted** | Single relational store for structured data, graph edges (via adjacency tables), and vectors (via pgvector) — avoids introducing a second database for the MVP | Yes | Separate graph DB (Neo4j) — deferred, see ADR-0002 |
 | pgvector | **Adopted** | Keeps vector search inside the existing PostgreSQL instance instead of adding a dedicated vector DB | Yes | Dedicated vector DB (Pinecone/Weaviate) — unjustified at this scale |
-| Redis | **Adopted, narrow scope** | Orchestration run-state caching and short-lived locks only; not a system of record | Yes (minimal) | In-process state (rejected — needed across worker restarts for long-running investigations) |
+| Redis | **Not adopted** | PostgreSQL row-level locks (`FOR UPDATE`) and transactional state satisfy run-state and locking needs without introducing Redis | No | External cache / lock service (unneeded at this scale) |
 | Kafka | **Rejected for MVP/Phase 2** | No demonstrated throughput/streaming requirement; alerts arrive at analyst-workbench scale, not real-time firehose scale, for this project | No | Direct DB-triggered/queue-based processing (simple background job) suffices |
 | LangGraph (or equivalent orchestration framework) | **Deferred — MVP uses a hand-written orchestrator** | A framework adds a layer of abstraction that isn't justified while the dispatch logic is a simple rule table (§5); revisit once dynamic multi-agent planning is actually needed (Phase 2) | No | Hand-rolled orchestrator (adopted for MVP) |
 | NetworkX | **Adopted** | Sufficient for in-process graph construction/analysis at this data scale; no need for a distributed graph engine | Yes | Neo4j (deferred, ADR-0002), igraph (comparable, NetworkX chosen for Python-native ergonomics) |
@@ -220,8 +221,8 @@ Each choice below is evaluated against the brief's suggested stack, not accepted
 | PyTorch | **Deferred to Phase 4** | Only justified for GNN/temporal-graph research work, which is explicitly a Phase 4 (Advanced Research) concern | No | — |
 | React/Next.js | **Deferred** (Streamlit remains the UI through Phase 3) | Needed for the multi-panel investigation workspace UX (`docs/DESIGN.md`); a Streamlit MVP is an acceptable interim per brief, but the target UX (graph view, evidence panels, review controls) benefits from a real frontend framework | No (documented option, not a scheduled item) | Streamlit-only (rejected long-term — insufficiently flexible for the target UX) |
 | Docker | **Adopted** | Standard local-dev/deployment reproducibility | Yes | — |
-| OpenTelemetry | **Adopted, introduced in Phase 3** | Structured tracing valuable for auditability of agent chains, but full observability stack (Prometheus/Grafana) is Phase 3 "Production Readiness" scope, not MVP | No (MVP uses structured logging only; OTel in Phase 3) | — |
-| LLM Provider | **Abstracted behind an interface (ADR-0003 required before locking in a specific provider)** | Avoid hard-coupling to one vendor's SDK; provider swap should not require rewriting agent logic | Yes (interface), provider choice per ADR | Direct SDK coupling — rejected |
+| OpenTelemetry | **Deferred** | Structured JSON logging and PostgreSQL append-only audit trail provide sufficient traceability for prototype scope; full OTel tracing is deferred | No (MVP/Phase 3 uses structured logging + DB audit trail) | — |
+| LLM Provider | **Deferred (offline MockProvider only)** | Live LLM integration is unimplemented and deferred (ADR-0003 Proposed); an offline deterministic MockProvider is used for supplementary extractive drafts | No (offline MockProvider only) | Direct SDK coupling — rejected |
 
 **Do not introduce Kafka, Kubernetes, Neo4j, multiple databases, or additional microservices without a new ADR justifying a demonstrated requirement.**
 

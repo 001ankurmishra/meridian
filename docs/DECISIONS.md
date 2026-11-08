@@ -47,11 +47,11 @@ What this makes easier, harder, or what it forecloses.
 |---|---|---|
 | [ADR-0001](decisions/0001-modular-monolith-vs-microservices.md) | Modular monolith vs. microservices | Accepted |
 | [ADR-0002](decisions/0002-postgresql-vs-separate-graph-database.md) | PostgreSQL (+pgvector, adjacency tables) vs. a separate graph database | Accepted |
-| [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed — provider not yet locked in |
+| [ADR-0003](decisions/0003-llm-provider-abstraction.md) | LLM provider abstraction | Proposed (deferred) — no live provider; offline MockProvider only |
 | [ADR-0004](decisions/0004-embedding-model-selection.md) | Embedding model selection | Accepted |
 | [ADR-0005](decisions/0005-risk-scoring-approach.md) | Risk-scoring approach (Phase 2) | Accepted |
 | [ADR-0006](decisions/0006-entity-resolution-approach.md) | Entity-resolution approach (Phase 2) | Accepted (D5 deferred) |
-| [ADR-0007](decisions/0007-authentication-model.md) | Authentication, authorization, and case visibility | Proposed |
+| [ADR-0007](decisions/0007-authentication-model.md) | Authentication, authorization, and case visibility | Accepted (demo-grade scope; assignment administration deferred) |
 | [ADR-0008](decisions/0008-sanctions-watchlist-screening.md) | Sanctions/Watchlist Screening Approach (F11) | Accepted |
 | [ADR-0009](decisions/0009-policy-absolute-relevance-gate.md) | Prototype absolute similarity gate for policy retrieval | Accepted |
 
