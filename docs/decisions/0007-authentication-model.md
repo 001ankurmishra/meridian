@@ -1,7 +1,7 @@
 # ADR-0007: Authentication, Authorization, and Case Visibility Model
 
-Status: Proposed
-Date: 2026-10-06
+Status: Accepted (demo-grade scope; assignment administration deferred)
+Date: 2026-11-07 (originally Proposed 2026-10-06)
 
 ## Context
 

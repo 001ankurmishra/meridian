@@ -32,7 +32,7 @@ The beneficiary-age signal is IMPLEMENTED and wired into dispatch, evidence, F10
 
 **Phase:** MVP · **Module:** `agents.graph`
 
-Builds a bounded-depth subgraph around the alerted customer/account from `graph_relationships`/`transactions`, runs basic NetworkX analysis. Cycle detection and outbound chain depth signals are IMPLEMENTED and wired. Depth 0 is suppressed (returns Unknown). They return factual depth/cycle indicators and are mapped to boolean anomalies without inherent risk levels. Phase 2 adds community detection and centrality scoring (`docs/ROADMAP.md`).
+Builds a bounded-depth subgraph around the alerted customer/account from `graph_relationships`/`transactions`, runs basic NetworkX analysis. Cycle detection and outbound chain depth signals are IMPLEMENTED and wired. Depth 0 is suppressed (returns Unknown). They return factual depth/cycle indicators and are mapped to boolean anomalies without inherent risk levels. Additional graph analytics (community detection, centrality) are deferred (`docs/ROADMAP.md`).
 
 ## F5. Policy Retrieval (RAG)
 
@@ -50,7 +50,7 @@ Every finding produced by any agent must be backed by one or more `evidence` rec
 
 **Phase:** MVP · **Module:** `agents.report`
 
-Synthesizes `findings`/`evidence`/`recommendations` into the structured report format defined in `docs/DESIGN.md` §6. Refuses to generate a report — or clearly marks it incomplete — when evidence sufficiency isn't met. Report language avoids accusatory framing (`docs/AI_SAFETY_AND_GUARDRAILS.md`).
+Synthesizes `findings`/`evidence`/`recommendations` into the structured report format defined in `docs/DESIGN.md` §6. Refuses to generate a report — or clearly marks it incomplete — when evidence sufficiency isn't met. Report language avoids accusatory framing (`docs/AI_SAFETY_AND_GUARDRAILS.md`). An authenticated supplementary copilot draft endpoint (`/cases/{id}/investigations/{run_id}/copilot-draft`) provides non-authoritative extractive claim and policy provenance assistance using an offline deterministic `MockProvider`; live LLM generation is unimplemented and deferred.
 
 ## F8. Human Review & Decision Workflow
 
@@ -108,19 +108,19 @@ Phase 2: documented methodology plus measured per-signal evaluation (PROTOTYPE).
 
 **Phase:** Phase 3 · **Module:** `identity`
 
-Full role-based access control across case visibility, approval authority, and admin functions (`docs/SECURITY.md` §"Authorization Model"). Task 20 pulled forward a DEMO grade authentication implementation (opaque bearer tokens), but production IAM remains a Phase 3 task.
+Full role-based access control across case visibility, approval authority, and admin functions (`docs/SECURITY.md` §"Authorization Model"). Implemented at DEMO grade (opaque bearer tokens, server-side SHA-256 hash storage, immediate role resolution, case visibility, and privileged maintenance CLI); production IAM, external IdP, and assignment administration are deferred.
 
 ## F16. Observability Stack (OpenTelemetry, dashboards)
 
 **Phase:** Phase 3 · **Module:** cross-cutting
 
-Structured tracing across agent chains, dashboards for reliability/latency (`docs/OBSERVABILITY_AND_AUDIT.md`).
+Structured tracing and OpenTelemetry are deferred. Implemented at prototype grade with structured JSON logging and an append-only database audit trail (`docs/OBSERVABILITY_AND_AUDIT.md`).
 
 ## F17. Evaluation Harness
 
 **Phase:** Phase 3 (framework), ongoing thereafter · **Module:** cross-cutting, `docs/EVALUATION.md`
 
-Automated measurement of ML, RAG, agent, system, and human-comparison metrics against the synthetic fixture set. Must produce real, reproducible numbers — never narrative-only claims.
+Automated measurement of ML, RAG, agent, and system metrics against synthetic fixtures and frozen protocols (`meridian.evaluation.run`). Human-comparison evaluation is explicitly NOT PERFORMED.
 
 ## F18. Advanced Research Features (temporal graphs, GNNs, red-teaming)
 
