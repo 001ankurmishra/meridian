@@ -28,6 +28,7 @@ def live_server_url(run_migrations: None) -> Generator[str, None, None]:
     port = get_free_port()
 
     from meridian.loader.main import main as loader_main
+
     loader_main()
 
     env = os.environ.copy()
@@ -95,6 +96,7 @@ def test_ui_smoke_happy_path(
     live_server_url: str, ui_smoke_engine: Engine, with_transaction: bool
 ) -> None:
     from meridian.identity.tokens import issue_token
+
     # seed a user and get token
     uid = uuid.uuid4()
     with ui_smoke_engine.begin() as conn:
@@ -103,7 +105,7 @@ def test_ui_smoke_happy_path(
                 "INSERT INTO users (user_id, email, role) "
                 "VALUES (:u, :e, 'senior_analyst')"
             ),
-            {"u": uid, "e": f"{uid}@test.com"}
+            {"u": uid, "e": f"{uid}@test.com"},
         )
     token = issue_token(ui_smoke_engine, uid, label="smoke_test")
     headers = {"Authorization": f"Bearer {token.plaintext_token}"}
@@ -130,8 +132,7 @@ def test_ui_smoke_happy_path(
         with ui_smoke_engine.begin() as conn:
             conn.execute(
                 text(
-                    "UPDATE cases SET assigned_analyst_id = :uid "
-                    "WHERE case_id = :cid"
+                    "UPDATE cases SET assigned_analyst_id = :uid WHERE case_id = :cid"
                 ),
                 {"uid": uid, "cid": case_id},
             )
@@ -150,7 +151,8 @@ def test_ui_smoke_happy_path(
         at.text_input(key="api_token_input").input(token.plaintext_token).run()
         at.text_input(key="active_case_id").input(str(case_id)).run()
 
-        # Fetch report to render the risk signals section
+        # Navigate to Report view and fetch report to render the risk signals section
+        at.radio(key="view").set_value("Report").run()
         for b in at.button:
             if b.label == "Fetch Report":
                 b.click().run()
@@ -164,6 +166,8 @@ def test_ui_smoke_happy_path(
                 for m in at.markdown
             )
 
+        # Navigate to Human Decision view to record decision
+        at.radio(key="view").set_value("Human Decision").run()
         at.selectbox(key="action").select("APPROVE").run()
 
         at.button(key="submit_decision_btn").click().run()
@@ -173,17 +177,22 @@ def test_ui_smoke_happy_path(
             assert not at.success
             assert any("HTTP 422" in message.value for message in at.error)
             with ui_smoke_engine.connect() as conn:
-                assert conn.execute(
-                    text("SELECT status FROM cases WHERE case_id=:cid"),
-                    {"cid": case_id},
-                ).scalar_one() == "OPEN"
+                assert (
+                    conn.execute(
+                        text("SELECT status FROM cases WHERE case_id=:cid"),
+                        {"cid": case_id},
+                    ).scalar_one()
+                    == "OPEN"
+                )
             # Form edits are submitted together, as in the browser.
             at.selectbox(key="action").select("ESCALATE")
             at.button(key="submit_decision_btn").click().run()
         success_msgs = [s.value for s in at.success]
         assert any("Decision submitted successfully" in m for m in success_msgs), (
-            [item.value for item in at.error], [item.value for item in at.info],
-            at.selectbox(key="action").value, at.text_input(key="active_case_id").value,
+            [item.value for item in at.error],
+            [item.value for item in at.info],
+            at.selectbox(key="action").value,
+            at.text_input(key="active_case_id").value,
         )
 
         with ui_smoke_engine.connect() as conn:
@@ -191,22 +200,29 @@ def test_ui_smoke_happy_path(
                 text("SELECT status FROM cases WHERE case_id = :cid"), {"cid": case_id}
             ).scalar()
             assert status == ("CLOSED_APPROVED" if with_transaction else "ESCALATED")
-            assert conn.execute(
-                text("SELECT investigation_run_id FROM audit_events "
-                     "WHERE case_id=:cid"), {"cid": case_id},
-            ).scalar_one() is not None
+            assert (
+                conn.execute(
+                    text(
+                        "SELECT investigation_run_id FROM audit_events "
+                        "WHERE case_id=:cid"
+                    ),
+                    {"cid": case_id},
+                ).scalar_one()
+                is not None
+            )
     finally:
         _cleanup_case_data(ui_smoke_engine, case_id, None, uid)
 
 
 def test_ui_smoke_auth_boundary(live_server_url: str, ui_smoke_engine: Engine) -> None:
     from meridian.identity.tokens import issue_token
+
     # analyst cannot approve
     uid = uuid.uuid4()
     with ui_smoke_engine.begin() as conn:
         conn.execute(
             text("INSERT INTO users (user_id, email, role) VALUES (:u, :e, 'analyst')"),
-            {"u": uid, "e": f"{uid}@test.com"}
+            {"u": uid, "e": f"{uid}@test.com"},
         )
     token = issue_token(ui_smoke_engine, uid, label="smoke_test_analyst")
     # we need a senior analyst to create
@@ -217,7 +233,7 @@ def test_ui_smoke_auth_boundary(live_server_url: str, ui_smoke_engine: Engine) -
                 "INSERT INTO users (user_id, email, role) "
                 "VALUES (:u, :e, 'senior_analyst')"
             ),
-            {"u": uid2, "e": f"{uid2}@test.com"}
+            {"u": uid2, "e": f"{uid2}@test.com"},
         )
     token2 = issue_token(ui_smoke_engine, uid2, label="smoke_test_senior")
 
@@ -250,6 +266,7 @@ def test_ui_smoke_auth_boundary(live_server_url: str, ui_smoke_engine: Engine) -
 
         at.text_input(key="api_token_input").input(token.plaintext_token).run()
         at.text_input(key="active_case_id").input(str(case_id)).run()
+        at.radio(key="view").set_value("Human Decision").run()
         at.selectbox(key="action").select("APPROVE").run()
         at.button(key="submit_decision_btn").click().run()
 

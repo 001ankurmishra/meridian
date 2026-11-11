@@ -1,5 +1,6 @@
 """Streamlit renders authoritative states and bounded request failures."""
 
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -17,14 +18,22 @@ STATES = [
 ]
 
 
-def app():
+def app() -> AppTest:
     at = AppTest.from_file("../ui/streamlit_app.py")
     at.session_state["api_token_input"] = "synthetic-test-token"
     at.session_state["active_case_id"] = "synthetic-case"
     return at.run()
 
 
-def click(at, label):
+def click(at: AppTest, label: str) -> None:
+    if label == "Fetch Report" and at.session_state.get("view") != "Report":
+        at.radio(key="view").set_value("Report").run()
+    elif label == "Investigate" and at.session_state.get("view") != "Investigation":
+        at.radio(key="view").set_value("Investigation").run()
+    elif label == "Create Case" and at.session_state.get("view") != "Case Intake":
+        at.radio(key="view").set_value("Case Intake").run()
+    elif label == "Fetch Audit Trail" and at.session_state.get("view") != "Audit Trail":
+        at.radio(key="view").set_value("Audit Trail").run()
     next(b for b in at.button if b.label == label).click().run()
     assert not at.exception
 
@@ -439,3 +448,218 @@ def test_copilot_draft_network_timeout_handled_gracefully():
         assert "network-canary-secret" not in visible
         assert "The API did not respond within the request limits" in visible
         assert not at.exception
+
+
+def test_report_persists_across_rerun_and_audit_navigation() -> None:
+    report_data = _report_payload(status="COMPLETE")
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    audit_data = {"investigation_runs": [], "audit_events": []}
+    audit_response = Mock(status_code=200)
+    audit_response.json.return_value = audit_data
+
+    def fake_get(url: str, *args: Any, **kwargs: Any) -> Mock:
+        if "/report" in url:
+            return response
+        elif "/copilot-draft" in url:
+            copilot_mock = Mock(status_code=200)
+            copilot_mock.json.return_value = {
+                "case_id": "synthetic-case",
+                "run_id": "11111111-1111-1111-1111-111111111111",
+                "status": "UNAVAILABLE",
+                "reason": "MOCK",
+                "authoritative": False,
+                "package_hash": "a" * 64,
+                "prompt_version": "v1.0",
+                "model_identifier": "deterministic-mock-v1",
+                "limitations": [],
+                "draft": None,
+                "policy_provenance": None,
+            }
+            return copilot_mock
+        elif "/audit-trail" in url:
+            return audit_response
+        raise ValueError(f"Unexpected GET URL: {url}")
+
+    with patch("requests.get", side_effect=fake_get):
+        at = app()
+        click(at, "Fetch Report")
+        assert any(
+            "Authoritative investigation report summary" in item.value
+            for item in at.markdown
+        )
+
+        # Navigate to Audit Trail and fetch audit
+        click(at, "Fetch Audit Trail")
+        assert at.session_state["view"] == "Audit Trail"
+
+        # Navigate back to Report view without clicking Fetch Report
+        at.radio(key="view").set_value("Report").run()
+        assert not at.exception
+        # Report is rendered from session_state immediately
+        assert any(
+            "Authoritative investigation report summary" in item.value
+            for item in at.markdown
+        )
+
+
+def test_no_candidate_match_has_no_success_styling() -> None:
+    report_data = _report_payload(status="COMPLETE")
+    report_data["watchlist_screening"] = {
+        "state": "NO_CANDIDATE_MATCH",
+        "rendered_text": (
+            "Exact-name match: NO CANDIDATE MATCH. This is not a clearance."
+        ),
+    }
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    with patch("requests.get", return_value=response):
+        at = app()
+        click(at, "Fetch Report")
+        assert not at.success
+        assert any("NO_CANDIDATE_MATCH" in item.value for item in at.markdown)
+        assert any(
+            "No candidate does not mean clearance." in item.value
+            for item in at.caption
+        )
+
+
+def test_prototype_notice_present_when_risk_signals_render() -> None:
+    report_data = _report_payload(status="COMPLETE")
+    report_data["risk_signals"] = [
+        {
+            "signal_type": "transaction_velocity",
+            "value": 4.5,
+            "methodology": "sql_deterministic",
+            "transaction_id": "tx-123",
+        }
+    ]
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    with patch("requests.get", return_value=response):
+        at = app()
+        click(at, "Fetch Report")
+        assert any(
+            "PROTOTYPE — not a validated risk score or AML determination" in item.value
+            for item in at.markdown
+        )
+
+
+def test_no_risk_score_widget_exists() -> None:
+    report_data = _report_payload(status="COMPLETE")
+    report_data["risk_signals"] = [
+        {
+            "signal_type": "transaction_velocity",
+            "value": 4.5,
+            "methodology": "sql_deterministic",
+        }
+    ]
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    with patch("requests.get", return_value=response):
+        at = app()
+        click(at, "Fetch Report")
+        all_text = " ".join(
+            item.value
+            for item in list(at.markdown)
+            + list(at.text)
+            + [m.label + str(m.value) for m in at.metric]
+        )
+        assert "Risk Score" not in all_text
+        assert "Composite Score" not in all_text
+
+
+def test_session_progress_reflects_only_performed_actions() -> None:
+    report_data = _report_payload(status="COMPLETE")
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    with patch("requests.get", return_value=response):
+        at = app()
+        initial_progress = " ".join(
+            m.value for m in at.markdown if "This session:" in m.value
+        )
+        assert "○ Case Created" in initial_progress
+        assert "○ Report Fetched" in initial_progress
+
+        click(at, "Fetch Report")
+        at.run()
+        updated_progress = " ".join(
+            m.value for m in at.markdown if "This session:" in m.value
+        )
+        assert "✓ Report Fetched" in updated_progress
+        assert "○ Case Created" in updated_progress
+        assert "○ Investigated" in updated_progress
+        assert "○ Decision Submitted" in updated_progress
+
+
+def test_unknown_status_renders_raw_without_guessing() -> None:
+    report_data = _report_payload(status="FUTURE_UNKNOWN_STATUS_CODE")
+    response = Mock(status_code=200)
+    response.json.return_value = report_data
+    with patch("requests.get", return_value=response):
+        at = app()
+        click(at, "Fetch Report")
+        assert any("FUTURE_UNKNOWN_STATUS_CODE" in item.value for item in at.markdown)
+
+
+def test_multi_case_session_isolation() -> None:
+    report_a = _report_payload(status="COMPLETE")
+    report_a["summary"] = "Case A Unique Summary"
+    report_b = _report_payload(status="INCOMPLETE_INSUFFICIENT_EVIDENCE")
+    report_b["summary"] = "Case B Different Summary"
+
+    def fake_get(url: str, *args: Any, **kwargs: Any) -> Mock:
+        if "/cases/case-a/report" in url:
+            resp = Mock(status_code=200)
+            resp.json.return_value = report_a
+            return resp
+        elif "/cases/case-b/report" in url:
+            resp = Mock(status_code=200)
+            resp.json.return_value = report_b
+            return resp
+        elif "/copilot-draft" in url:
+            copilot_mock = Mock(status_code=200)
+            copilot_mock.json.return_value = {
+                "case_id": "synthetic-case",
+                "run_id": "11111111-1111-1111-1111-111111111111",
+                "status": "UNAVAILABLE",
+                "reason": "MOCK",
+                "authoritative": False,
+                "package_hash": "a" * 64,
+                "prompt_version": "v1.0",
+                "model_identifier": "deterministic-mock-v1",
+                "limitations": [],
+                "draft": None,
+                "policy_provenance": None,
+            }
+            return copilot_mock
+        raise ValueError(f"Unexpected GET URL: {url}")
+
+    with patch("requests.get", side_effect=fake_get):
+        at = app()
+        # 1. Case A has a populated report in session state
+        at.text_input(key="active_case_id").set_value("case-a").run()
+        click(at, "Fetch Report")
+        assert any("Case A Unique Summary" in m.value for m in at.markdown)
+
+        # 2. Switching to Case B does not display Case A's report
+        at.text_input(key="active_case_id").set_value("case-b").run()
+        assert not any("Case A Unique Summary" in m.value for m in at.markdown)
+        assert any(
+            "No report loaded for this case" in item.value for item in at.info
+        )
+
+        # 3. Case B can hold a different report
+        click(at, "Fetch Report")
+        assert any("Case B Different Summary" in m.value for m in at.markdown)
+        assert not any("Case A Unique Summary" in m.value for m in at.markdown)
+
+        # 4. Returning to Case A restores its original report
+        at.text_input(key="active_case_id").set_value("case-a").run()
+        assert any("Case A Unique Summary" in m.value for m in at.markdown)
+        assert not any("Case B Different Summary" in m.value for m in at.markdown)
+
+        # 5. Neither case's cached data is overwritten or mixed
+        at.text_input(key="active_case_id").set_value("case-b").run()
+        assert any("Case B Different Summary" in m.value for m in at.markdown)
+        assert not any("Case A Unique Summary" in m.value for m in at.markdown)
